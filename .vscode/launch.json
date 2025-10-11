@@ -1,0 +1,49 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Flutter: Debug Active Device",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/main.dart",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "flutter pub get"
+        },
+        {
+            "name": "Flutter: Debug Chrome",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/main.dart",
+            "cwd": "${workspaceFolder}",
+            "deviceId": "chrome",
+            "preLaunchTask": "flutter pub get"
+        },
+        {
+            "name": "Flutter: Debug Windows",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/main.dart",
+            "cwd": "${workspaceFolder}",
+            "deviceId": "windows",
+            "preLaunchTask": "flutter pub get"
+        },
+        {
+            "name": "Flutter: Profile Mode",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/main.dart",
+            "cwd": "${workspaceFolder}",
+            "flutterMode": "profile",
+            "preLaunchTask": "flutter pub get"
+        },
+        {
+            "name": "Flutter: Release Mode",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/main.dart",
+            "cwd": "${workspaceFolder}",
+            "flutterMode": "release",
+            "preLaunchTask": "flutter pub get"
+        }
+    ]
+}

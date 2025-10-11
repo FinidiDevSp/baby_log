@@ -1,0 +1,14 @@
+{
+    "dart.flutterHotReloadOnSave": true,
+    "dart.flutterTrackWidgetCreation": true,
+    "dart.flutterShowEmulators": true,
+    "editor.formatOnSave": true,
+    "search.exclude": {
+        "**/.dart_tool": true,
+        "**/build": true
+    },
+    "files.watcherExclude": {
+        "**/.dart_tool/**": true,
+        "**/build/**": true
+    }
+}
