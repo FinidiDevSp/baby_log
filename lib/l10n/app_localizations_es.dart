@@ -182,6 +182,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dashboardTodayLabel => 'Hoy';
 
   @override
+  String get dashboardChangeDayTooltip => 'Cambiar día';
+
+  @override
+  String get dashboardImportTooltip => 'Importar datos';
+
+  @override
+  String get dashboardExportTooltip => 'Exportar datos';
+
+  @override
   String get dashboardPediatricQuestionsLabel => 'Preguntas al pediatra';
 
   @override

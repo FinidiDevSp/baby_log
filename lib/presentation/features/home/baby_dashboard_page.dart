@@ -135,6 +135,9 @@ class _BabyDashboardPageState extends ConsumerState<BabyDashboardPage> {
       bottomNavigationBar: NavigationBar(
         backgroundColor: AppColors.surface,
         indicatorColor: accentColor.withValues(alpha: 0.18),
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
           setState(() {
@@ -155,15 +158,48 @@ class _BabyDashboardPageState extends ConsumerState<BabyDashboardPage> {
   }
 }
 
-class _BabyHomeView extends ConsumerWidget {
+class _BabyHomeView extends ConsumerStatefulWidget {
   const _BabyHomeView({required this.accentColor});
 
   final Color accentColor;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_BabyHomeView> createState() => _BabyHomeViewState();
+}
+
+class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
+  late DateTime _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _selectedDate = DateTime(now.year, now.month, now.day);
+  }
+
+  Future<void> _openDayPicker() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: now.subtract(const Duration(days: 365)),
+      lastDate: now,
+    );
+
+    if (picked != null && !_isSameCalendarDay(picked, _selectedDate)) {
+      setState(() {
+        _selectedDate = DateTime(picked.year, picked.month, picked.day);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final feedings = ref.watch(feedingEntriesProvider);
+    final selectedFeedings = feedings
+        .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
+        .toList();
 
     Future<void> openBottleForm() async {
       await Navigator.of(context).push(
@@ -175,19 +211,26 @@ class _BabyHomeView extends ConsumerWidget {
 
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         children: [
           _ShortcutCarousel(onBottleTap: openBottleForm),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           _TimelineCard(
-            accentColor: accentColor,
-            feedings: feedings,
+            accentColor: widget.accentColor,
+            feedings: selectedFeedings,
+            selectedDate: _selectedDate,
+            onSelectDate: _openDayPicker,
+            onImport: () {},
+            onExport: () {},
           ),
-          const SizedBox(height: 24),
-          if (feedings.isEmpty)
+          const SizedBox(height: 16),
+          if (selectedFeedings.isEmpty)
             _EventsPlaceholder(description: l10n.homeEmptyDescription)
           else
-            _FeedingList(accentColor: accentColor, feedings: feedings),
+            _FeedingList(
+              accentColor: widget.accentColor,
+              feedings: selectedFeedings,
+            ),
         ],
       ),
     );
@@ -248,11 +291,11 @@ class _ShortcutCarousel extends StatelessWidget {
     ];
 
     return SizedBox(
-      height: 132,
+      height: 112,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: shortcuts.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final item = shortcuts[index];
           return _ShortcutButton(data: item);
@@ -279,14 +322,14 @@ class _ShortcutButton extends StatelessWidget {
         Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(32),
+            borderRadius: BorderRadius.circular(28),
             onTap: data.onTap,
             child: _ShortcutCircle(data: data),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         SizedBox(
-          width: 88,
+          width: 80,
           child: Column(
             children: [
               Text(
@@ -298,7 +341,7 @@ class _ShortcutButton extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 l10n.dashboardMinutesAgoZero,
                 textAlign: TextAlign.center,
@@ -322,14 +365,14 @@ class _ShortcutCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final circle = Ink(
-      width: 64,
-      height: 64,
+      width: 56,
+      height: 56,
       decoration: BoxDecoration(
         color: data.color,
         shape: BoxShape.circle,
       ),
       child: Center(
-        child: Icon(data.icon, size: 26, color: Colors.white),
+        child: Icon(data.icon, size: 22, color: Colors.white),
       ),
     );
 
@@ -351,20 +394,31 @@ class _TimelineCard extends StatelessWidget {
   const _TimelineCard({
     required this.feedings,
     required this.accentColor,
+    required this.selectedDate,
+    required this.onSelectDate,
+    this.onImport,
+    this.onExport,
   });
 
   final List<FeedingEntry> feedings;
   final Color accentColor;
+  final DateTime selectedDate;
+  final VoidCallback onSelectDate;
+  final VoidCallback? onImport;
+  final VoidCallback? onExport;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     final localeName = l10n.localeName;
+    final now = DateTime.now();
+    final isToday = _isSameDay(now, selectedDate);
     final dateLabel = DateFormat(
       'EEE, d MMM',
       localeName,
-    ).format(DateTime.now());
+    ).format(selectedDate);
+    final headerText = isToday ? '${l10n.dashboardTodayLabel}, $dateLabel' : dateLabel;
     final feedingsByHour = _groupFeedings(feedings);
     final tiles = List<_TimelineTileData>.generate(12, (index) {
       final hour = index * 2;
@@ -378,23 +432,75 @@ class _TimelineCard extends StatelessWidget {
     });
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${l10n.dashboardTodayLabel}, $dateLabel',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Tooltip(
+                  message: l10n.dashboardChangeDayTooltip,
+                  child: TextButton(
+                    onPressed: onSelectDate,
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      backgroundColor: AppColors.surfaceVariant,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          LucideIcons.calendar,
+                          size: 18,
+                          color: Colors.white.withValues(alpha: 0.75),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            headerText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          LucideIcons.chevronDown,
+                          size: 16,
+                          color: Colors.white.withValues(alpha: 0.6),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              _TimelineActionButton(
+                icon: LucideIcons.import,
+                tooltip: l10n.dashboardImportTooltip,
+                onPressed: onImport,
+              ),
+              const SizedBox(width: 4),
+              _TimelineActionButton(
+                icon: LucideIcons.export,
+                tooltip: l10n.dashboardExportTooltip,
+                onPressed: onExport,
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           ClipRRect(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(12),
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.surfaceVariant,
@@ -403,7 +509,7 @@ class _TimelineCard extends StatelessWidget {
               child: Column(
                 children: [
                   SizedBox(
-                    height: 64,
+                    height: 60,
                     child: Row(
                       children: [
                         for (var i = 0; i < tiles.length; i++)
@@ -445,6 +551,38 @@ class _TimelineCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TimelineActionButton extends StatelessWidget {
+  const _TimelineActionButton({
+    required this.icon,
+    required this.tooltip,
+    this.onPressed,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: onPressed ?? () {},
+      tooltip: tooltip,
+      style: IconButton.styleFrom(
+        padding: const EdgeInsets.all(8),
+        backgroundColor: AppColors.surfaceVariant,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      icon: Icon(
+        icon,
+        size: 18,
+        color: Colors.white.withValues(alpha: 0.8),
       ),
     );
   }
@@ -493,22 +631,27 @@ class _TimelineTile extends StatelessWidget {
           ),
         ),
       ),
-      alignment: Alignment.center,
       child: Stack(
-        alignment: Alignment.center,
         children: [
           if (data.icon != null)
-            Icon(
-              data.icon,
-              size: 20,
-              color: Colors.white.withValues(alpha: 0.75),
+            Positioned(
+              top: 6,
+              left: 0,
+              right: 0,
+              child: Icon(
+                data.icon,
+                size: 18,
+                color: Colors.white.withValues(alpha: 0.75),
+              ),
             ),
           if (data.hasFeeding)
-            Align(
-              alignment: Alignment.bottomCenter,
+            Positioned(
+              bottom: 6,
+              left: 0,
+              right: 0,
               child: Container(
-                width: 26,
-                height: 26,
+                width: 24,
+                height: 24,
                 decoration: BoxDecoration(
                   color: accentColor.withValues(alpha: 0.18),
                   shape: BoxShape.circle,
@@ -525,7 +668,7 @@ class _TimelineTile extends StatelessWidget {
                         )
                       : Icon(
                           LucideIcons.milk,
-                          size: 16,
+                          size: 14,
                           color: accentColor,
                         ),
                 ),
@@ -535,6 +678,10 @@ class _TimelineTile extends StatelessWidget {
       ),
     );
   }
+}
+
+bool _isSameCalendarDay(DateTime a, DateTime b) {
+  return a.year == b.year && a.month == b.month && a.day == b.day;
 }
 
 Map<int, List<FeedingEntry>> _groupFeedings(List<FeedingEntry> feedings) {
@@ -585,20 +732,20 @@ class _EventsPlaceholder extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 36),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
       decoration: BoxDecoration(
         color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             LucideIcons.rockingChair,
-            size: 48,
+            size: 44,
             color: Colors.white.withValues(alpha: 0.3),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
             description,
             textAlign: TextAlign.center,
@@ -610,7 +757,7 @@ class _EventsPlaceholder extends StatelessWidget {
   }
 }
 
-class _FeedingList extends StatelessWidget {
+class _FeedingList extends StatefulWidget {
   const _FeedingList({
     required this.feedings,
     required this.accentColor,
@@ -620,86 +767,211 @@ class _FeedingList extends StatelessWidget {
   final Color accentColor;
 
   @override
+  State<_FeedingList> createState() => _FeedingListState();
+}
+
+class _FeedingListState extends State<_FeedingList>
+    with SingleTickerProviderStateMixin {
+  bool _isExpanded = true;
+
+  void _toggleExpanded() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final dateFormat = DateFormat.Hm(l10n.localeName);
+    final totalMl = widget.feedings.fold<int>(0, (sum, entry) => sum + entry.amountMl);
+    final summaryItems = [
+      _SummaryData(
+        icon: LucideIcons.milk,
+        label: l10n.dashboardBottleLabel,
+        value: '${widget.feedings.length} · $totalMl ${l10n.bottleLogAmountUnit}',
+      ),
+      _SummaryData(
+        icon: LucideIcons.toilet,
+        label: l10n.dashboardDiaperLabel,
+        value: '0',
+      ),
+      _SummaryData(
+        icon: LucideIcons.triangleAlert,
+        label: l10n.dashboardVomitLabel,
+        value: '0',
+      ),
+    ];
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l10n.bottleLogListTitle,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ListView.separated(
-            itemCount: feedings.length,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            separatorBuilder: (_, __) => Divider(
-              height: 20,
-              thickness: 1,
-              color: Colors.white.withValues(alpha: 0.06),
-            ),
-            itemBuilder: (context, index) {
-              final entry = feedings[index];
-              final timeLabel = dateFormat.format(entry.timestamp);
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          InkWell(
+            onTap: _toggleExpanded,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
                 children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.18),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      LucideIcons.milk,
-                      size: 20,
-                      color: accentColor,
+                  Expanded(
+                    child: Text(
+                      l10n.bottleLogListTitle,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          timeLabel,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${entry.amountMl} ${l10n.bottleLogAmountUnit}',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                        if ((entry.notes ?? '').isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            entry.notes!,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.white70,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+                  Icon(
+                    _isExpanded ? LucideIcons.chevronUp : LucideIcons.chevronDown,
+                    size: 18,
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                 ],
-              );
-            },
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: summaryItems
+                .map(
+                  (item) => _SummaryBadge(data: item),
+                )
+                .toList(),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: _isExpanded
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: ListView.separated(
+                      itemCount: widget.feedings.length,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      separatorBuilder: (_, __) => Divider(
+                        height: 16,
+                        thickness: 1,
+                        color: Colors.white.withValues(alpha: 0.06),
+                      ),
+                      itemBuilder: (context, index) {
+                        final entry = widget.feedings[index];
+                        final timeLabel = dateFormat.format(entry.timestamp);
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: widget.accentColor.withValues(alpha: 0.18),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                LucideIcons.milk,
+                                size: 18,
+                                color: widget.accentColor,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    timeLabel,
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${entry.amountMl} ${l10n.bottleLogAmountUnit}',
+                                    style: theme.textTheme.bodyMedium,
+                                  ),
+                                  if ((entry.notes ?? '').isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      entry.notes!,
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryData {
+  const _SummaryData({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+}
+
+class _SummaryBadge extends StatelessWidget {
+  const _SummaryBadge({required this.data});
+
+  final _SummaryData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(data.icon, size: 16, color: Colors.white.withValues(alpha: 0.8)),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                data.label,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                data.value,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.white70,
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -428,6 +428,24 @@ abstract class AppLocalizations {
   /// **'Hoy'**
   String get dashboardTodayLabel;
 
+  /// No description provided for @dashboardChangeDayTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar día'**
+  String get dashboardChangeDayTooltip;
+
+  /// No description provided for @dashboardImportTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Importar datos'**
+  String get dashboardImportTooltip;
+
+  /// No description provided for @dashboardExportTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Exportar datos'**
+  String get dashboardExportTooltip;
+
   /// No description provided for @dashboardPediatricQuestionsLabel.
   ///
   /// In es, this message translates to:
