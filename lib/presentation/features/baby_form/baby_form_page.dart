@@ -440,12 +440,14 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
       },
     );
 
-    if (selected != null) {
-      setState(() {
-        _accentColor = selected;
-      });
-      _themeController.updateAccent(selected);
+    if (!mounted || selected == null) {
+      return;
     }
+
+    setState(() {
+      _accentColor = selected;
+    });
+    _themeController.updateAccent(selected);
   }
 
   Widget _buildSaveButton(bool isEditing) {
@@ -692,15 +694,6 @@ class _GenderOption extends StatelessWidget {
             decoration: BoxDecoration(
               color: selected ? accentColor : AppColors.surfaceVariant,
               borderRadius: BorderRadius.circular(24),
-              boxShadow: selected
-                  ? [
-                      BoxShadow(
-                        color: accentColor.withValues(alpha: 0.35),
-                        blurRadius: 24,
-                        offset: const Offset(0, 12),
-                      ),
-                    ]
-                  : const [],
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -751,13 +744,6 @@ class _PhotoSelector extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: accentColor, width: 4),
             color: AppColors.surfaceVariant,
-            boxShadow: [
-              BoxShadow(
-                color: accentColor.withValues(alpha: 0.35),
-                blurRadius: 28,
-                offset: const Offset(0, 16),
-              ),
-            ],
           ),
           alignment: Alignment.center,
           child: AnimatedSwitcher(
