@@ -93,9 +93,6 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
 
   @override
   void dispose() {
-    if (!_hasPersistedAccent) {
-      _themeController.updateAccent(_initialAccentColor);
-    }
     _nameController.dispose();
     _weightController.dispose();
     _heightController.dispose();
@@ -106,12 +103,21 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
   Widget build(BuildContext context) {
     final isEditing = widget.existingBaby != null;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(isEditing ? l10n.formEditTitle : l10n.formCreateTitle),
-      ),
-      body: SafeArea(
-        child: Form(
+    return PopScope(
+      onPopInvoked: (didPop) {
+        if (!didPop || _hasPersistedAccent) {
+          return;
+        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _themeController.updateAccent(_initialAccentColor);
+        });
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(isEditing ? l10n.formEditTitle : l10n.formCreateTitle),
+        ),
+        body: SafeArea(
+          child: Form(
           key: _formKey,
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -364,7 +370,8 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
             ),
             const SizedBox(width: 8),
             const Icon(LucideIcons.chevronRight, size: 18),
-          ],
+            ],
+          ),
         ),
       ),
     );
