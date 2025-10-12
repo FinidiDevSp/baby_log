@@ -281,32 +281,7 @@ class _ShortcutButton extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(32),
             onTap: data.onTap,
-            child: data.heroTag == null
-                ? Ink(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: data.color,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Icon(data.icon, size: 26, color: Colors.white),
-                    ),
-                  )
-                : Hero(
-                    tag: data.heroTag!,
-                    child: Ink(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: data.color,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Icon(data.icon, size: 26, color: Colors.white),
-                      ),
-                    ),
-                  ),
+            child: _ShortcutCircle(data: data),
           ),
         ),
         const SizedBox(height: 8),
@@ -335,6 +310,39 @@ class _ShortcutButton extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ShortcutCircle extends StatelessWidget {
+  const _ShortcutCircle({required this.data});
+
+  final _ShortcutData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final circle = Ink(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        color: data.color,
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Icon(data.icon, size: 26, color: Colors.white),
+      ),
+    );
+
+    if (data.heroTag == null) {
+      return circle;
+    }
+
+    return Hero(
+      tag: data.heroTag!,
+      child: Material(
+        color: Colors.transparent,
+        child: circle,
+      ),
     );
   }
 }
