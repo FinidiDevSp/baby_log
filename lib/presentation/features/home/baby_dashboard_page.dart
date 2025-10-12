@@ -492,7 +492,7 @@ class _TimelineCard extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               _TimelineActionButton(
-                icon: LucideIcons.export,
+                icon: LucideIcons.upload,
                 tooltip: l10n.dashboardExportTooltip,
                 onPressed: onExport,
               ),
@@ -553,6 +553,10 @@ class _TimelineCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 }
 
