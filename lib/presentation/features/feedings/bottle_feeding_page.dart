@@ -1,4 +1,6 @@
+import 'package:baby_log/core/providers.dart';
 import 'package:baby_log/core/theme/app_colors.dart';
+import 'package:baby_log/domain/entities/feeding_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,7 +8,6 @@ import 'package:intl/intl.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
 
 import '../../../l10n/app_localizations.dart';
-import '../home/state/feeding_entries_provider.dart';
 
 class BottleFeedingPage extends ConsumerStatefulWidget {
   const BottleFeedingPage({super.key});
@@ -88,7 +89,7 @@ class _BottleFeedingPageState extends ConsumerState<BottleFeedingPage> {
     setState(() {});
   }
 
-  void _save(BuildContext context) {
+  Future<void> _save(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
     final amount = _amount;
     if (amount <= 0) {
@@ -98,17 +99,25 @@ class _BottleFeedingPageState extends ConsumerState<BottleFeedingPage> {
       return;
     }
 
-    ref.read(feedingEntriesProvider.notifier).addFeeding(
-          FeedingEntry(
-            timestamp: _selectedDateTime,
-            amountMl: amount,
-            notes: _notesController.text.trim().isEmpty
-                ? null
-                : _notesController.text.trim(),
-          ),
-        );
-
-    Navigator.of(context).pop();
+    try {
+      await ref.read(feedingRepositoryProvider).addFeeding(
+            FeedingEntry(
+              timestamp: _selectedDateTime,
+              amountMl: amount,
+              notes: _notesController.text.trim().isEmpty
+                  ? null
+                  : _notesController.text.trim(),
+            ),
+          );
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pop();
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.formSaveError(error: '$error'))),
+      );
+    }
   }
 
   @override
