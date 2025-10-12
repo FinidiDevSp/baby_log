@@ -506,6 +506,84 @@ abstract class AppLocalizations {
   /// **'Sumar 5 ml'**
   String get bottleLogIncreaseTooltip;
 
+  /// No description provided for @homeLogListTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Últimos registros'**
+  String get homeLogListTitle;
+
+  /// No description provided for @stoolLogTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambio de pañal'**
+  String get stoolLogTitle;
+
+  /// No description provided for @stoolLogDateTimeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Día y hora'**
+  String get stoolLogDateTimeLabel;
+
+  /// No description provided for @stoolLogConsistencyLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Consistencia'**
+  String get stoolLogConsistencyLabel;
+
+  /// No description provided for @stoolLogConsistencyLiquidOption.
+  ///
+  /// In es, this message translates to:
+  /// **'Líquida'**
+  String get stoolLogConsistencyLiquidOption;
+
+  /// No description provided for @stoolLogConsistencySoftOption.
+  ///
+  /// In es, this message translates to:
+  /// **'Blanda'**
+  String get stoolLogConsistencySoftOption;
+
+  /// No description provided for @stoolLogConsistencyFirmOption.
+  ///
+  /// In es, this message translates to:
+  /// **'Firme'**
+  String get stoolLogConsistencyFirmOption;
+
+  /// No description provided for @stoolLogConsistencyLiquidDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Caca líquida'**
+  String get stoolLogConsistencyLiquidDescription;
+
+  /// No description provided for @stoolLogConsistencySoftDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Caca blanda'**
+  String get stoolLogConsistencySoftDescription;
+
+  /// No description provided for @stoolLogConsistencyFirmDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Caca firme'**
+  String get stoolLogConsistencyFirmDescription;
+
+  /// No description provided for @stoolLogNotesLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas'**
+  String get stoolLogNotesLabel;
+
+  /// No description provided for @stoolLogNotesHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade detalles que quieras recordar'**
+  String get stoolLogNotesHint;
+
+  /// No description provided for @stoolLogConsistencyValidation.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona una consistencia'**
+  String get stoolLogConsistencyValidation;
+
   /// No description provided for @bottleLogListTitle.
   ///
   /// In es, this message translates to:

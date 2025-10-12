@@ -92,5 +92,18 @@
   "bottleLogAmountValidation": "Introduce una cantidad válida",
   "bottleLogDecreaseTooltip": "Restar 5 ml",
   "bottleLogIncreaseTooltip": "Sumar 5 ml",
+  "homeLogListTitle": "Últimos registros",
+  "stoolLogTitle": "Cambio de pañal",
+  "stoolLogDateTimeLabel": "Día y hora",
+  "stoolLogConsistencyLabel": "Consistencia",
+  "stoolLogConsistencyLiquidOption": "Líquida",
+  "stoolLogConsistencySoftOption": "Blanda",
+  "stoolLogConsistencyFirmOption": "Firme",
+  "stoolLogConsistencyLiquidDescription": "Caca líquida",
+  "stoolLogConsistencySoftDescription": "Caca blanda",
+  "stoolLogConsistencyFirmDescription": "Caca firme",
+  "stoolLogNotesLabel": "Notas",
+  "stoolLogNotesHint": "Añade detalles que quieras recordar",
+  "stoolLogConsistencyValidation": "Selecciona una consistencia",
   "bottleLogListTitle": "Últimas tomas"
 }
