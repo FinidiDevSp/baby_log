@@ -209,16 +209,14 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
         .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
         .toList();
 
-    Future<void> openBottleForm() async {
-      await Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const BottleFeedingPage()));
+    void openBottleForm() {
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => const BottleFeedingPage()));
     }
 
-    Future<void> openStoolForm() async {
-      await Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const StoolLogPage()));
+    void openStoolForm() {
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => const StoolLogPage()));
     }
 
     final hasEntries =
