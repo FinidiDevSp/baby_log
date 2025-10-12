@@ -115,7 +115,7 @@ class _BottleFeedingPageState extends ConsumerState<BottleFeedingPage> {
       Navigator.of(context).pop();
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.formSaveError(error: '$error'))),
+        SnackBar(content: Text(l10n.formSaveError('$error'))),
       );
     }
   }
