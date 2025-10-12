@@ -183,4 +183,34 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dashboardPediatricQuestionsLabel => 'Preguntas al pediatra';
+
+  @override
+  String get bottleLogTitle => 'Toma de biberón';
+
+  @override
+  String get bottleLogDateTimeLabel => 'Día y hora';
+
+  @override
+  String get bottleLogAmountLabel => 'Cantidad';
+
+  @override
+  String get bottleLogAmountUnit => 'ml';
+
+  @override
+  String get bottleLogNotesLabel => 'Notas';
+
+  @override
+  String get bottleLogNotesHint => 'Añade detalles que quieras recordar';
+
+  @override
+  String get bottleLogAmountValidation => 'Introduce una cantidad válida';
+
+  @override
+  String get bottleLogDecreaseTooltip => 'Restar 5 ml';
+
+  @override
+  String get bottleLogIncreaseTooltip => 'Sumar 5 ml';
+
+  @override
+  String get bottleLogListTitle => 'Últimas tomas';
 }

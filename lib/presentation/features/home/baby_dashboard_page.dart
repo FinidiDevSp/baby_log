@@ -9,6 +9,9 @@ import 'package:baby_log/l10n/app_localizations.dart';
 import 'package:baby_log/presentation/features/baby_form/baby_form_page.dart';
 import 'package:baby_log/presentation/widgets/baby_avatar.dart';
 
+import 'state/feeding_entries_provider.dart';
+import '../feedings/bottle_feeding_page.dart';
+
 /// Dashboard shown once a baby profile exists.
 class BabyDashboardPage extends ConsumerStatefulWidget {
   const BabyDashboardPage({super.key, required this.baby});
@@ -38,7 +41,7 @@ class _BabyDashboardPageState extends ConsumerState<BabyDashboardPage> {
     final accentColor = Color(widget.baby.accentColorValue);
 
     final pages = <Widget>[
-      const _BabyHomeView(),
+      _BabyHomeView(accentColor: accentColor),
       const _PlaceholderView(
         icon: LucideIcons.chartBar,
         labelKey: 'dashboardNavStats',
@@ -152,22 +155,39 @@ class _BabyDashboardPageState extends ConsumerState<BabyDashboardPage> {
   }
 }
 
-class _BabyHomeView extends StatelessWidget {
-  const _BabyHomeView();
+class _BabyHomeView extends ConsumerWidget {
+  const _BabyHomeView({required this.accentColor});
+
+  final Color accentColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final feedings = ref.watch(feedingEntriesProvider);
+
+    Future<void> openBottleForm() async {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const BottleFeedingPage(),
+        ),
+      );
+    }
 
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
         children: [
-          _ShortcutCarousel(),
+          _ShortcutCarousel(onBottleTap: openBottleForm),
           const SizedBox(height: 24),
-          _TimelineCard(),
+          _TimelineCard(
+            accentColor: accentColor,
+            feedings: feedings,
+          ),
           const SizedBox(height: 24),
-          _EventsPlaceholder(description: l10n.homeEmptyDescription),
+          if (feedings.isEmpty)
+            _EventsPlaceholder(description: l10n.homeEmptyDescription)
+          else
+            _FeedingList(accentColor: accentColor, feedings: feedings),
         ],
       ),
     );
@@ -175,6 +195,10 @@ class _BabyHomeView extends StatelessWidget {
 }
 
 class _ShortcutCarousel extends StatelessWidget {
+  const _ShortcutCarousel({required this.onBottleTap});
+
+  final VoidCallback onBottleTap;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -183,6 +207,8 @@ class _ShortcutCarousel extends StatelessWidget {
         color: const Color(0xFFF06292),
         icon: LucideIcons.milk,
         label: l10n.dashboardBottleLabel,
+        onTap: onBottleTap,
+        heroTag: 'bottle_shortcut',
       ),
       _ShortcutData(
         color: const Color(0xFF4CAF50),
@@ -250,12 +276,38 @@ class _ShortcutButton extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(color: data.color, shape: BoxShape.circle),
-          alignment: Alignment.center,
-          child: Icon(data.icon, size: 26, color: Colors.white),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(32),
+            onTap: data.onTap,
+            child: data.heroTag == null
+                ? Ink(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: data.color,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Icon(data.icon, size: 26, color: Colors.white),
+                    ),
+                  )
+                : Hero(
+                    tag: data.heroTag!,
+                    child: Ink(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: data.color,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Icon(data.icon, size: 26, color: Colors.white),
+                      ),
+                    ),
+                  ),
+          ),
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -288,6 +340,14 @@ class _ShortcutButton extends StatelessWidget {
 }
 
 class _TimelineCard extends StatelessWidget {
+  const _TimelineCard({
+    required this.feedings,
+    required this.accentColor,
+  });
+
+  final List<FeedingEntry> feedings;
+  final Color accentColor;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -297,12 +357,15 @@ class _TimelineCard extends StatelessWidget {
       'EEE, d MMM',
       localeName,
     ).format(DateTime.now());
+    final feedingsByHour = _groupFeedings(feedings);
     final tiles = List<_TimelineTileData>.generate(12, (index) {
       final hour = index * 2;
       return _TimelineTileData(
         hour: hour,
         background: _backgroundForHour(hour),
         icon: _iconForHour(hour),
+        hasFeeding: feedingsByHour.containsKey(hour),
+        feedingsCount: feedingsByHour[hour]?.length ?? 0,
       );
     });
 
@@ -340,6 +403,7 @@ class _TimelineCard extends StatelessWidget {
                             child: _TimelineTile(
                               data: tiles[i],
                               isLast: i == tiles.length - 1,
+                              accentColor: accentColor,
                             ),
                           ),
                       ],
@@ -383,20 +447,29 @@ class _TimelineTileData {
     required this.hour,
     required this.background,
     this.icon,
+    this.hasFeeding = false,
+    this.feedingsCount = 0,
   });
 
   final int hour;
   final Color background;
   final IconData? icon;
+  final bool hasFeeding;
+  final int feedingsCount;
 
   String get label => hour.toString().padLeft(2, '0');
 }
 
 class _TimelineTile extends StatelessWidget {
-  const _TimelineTile({required this.data, required this.isLast});
+  const _TimelineTile({
+    required this.data,
+    required this.isLast,
+    required this.accentColor,
+  });
 
   final _TimelineTileData data;
   final bool isLast;
+  final Color accentColor;
 
   @override
   Widget build(BuildContext context) {
@@ -413,15 +486,56 @@ class _TimelineTile extends StatelessWidget {
         ),
       ),
       alignment: Alignment.center,
-      child: data.icon == null
-          ? const SizedBox.shrink()
-          : Icon(
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (data.icon != null)
+            Icon(
               data.icon,
               size: 20,
               color: Colors.white.withValues(alpha: 0.75),
             ),
+          if (data.hasFeeding)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                width: 26,
+                height: 26,
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.18),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: accentColor.withValues(alpha: 0.4)),
+                ),
+                child: Center(
+                  child: data.feedingsCount > 1
+                      ? Text(
+                          '${data.feedingsCount}',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: accentColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        )
+                      : Icon(
+                          LucideIcons.milk,
+                          size: 16,
+                          color: accentColor,
+                        ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
+}
+
+Map<int, List<FeedingEntry>> _groupFeedings(List<FeedingEntry> feedings) {
+  final map = <int, List<FeedingEntry>>{};
+  for (final entry in feedings) {
+    final tileHour = (entry.timestamp.hour ~/ 2) * 2;
+    map.putIfAbsent(tileHour, () => []).add(entry);
+  }
+  return map;
 }
 
 Color _backgroundForHour(int hour) {
@@ -488,6 +602,103 @@ class _EventsPlaceholder extends StatelessWidget {
   }
 }
 
+class _FeedingList extends StatelessWidget {
+  const _FeedingList({
+    required this.feedings,
+    required this.accentColor,
+  });
+
+  final List<FeedingEntry> feedings;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final dateFormat = DateFormat.Hm(l10n.localeName);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.bottleLogListTitle,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ListView.separated(
+            itemCount: feedings.length,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            separatorBuilder: (_, __) => Divider(
+              height: 20,
+              thickness: 1,
+              color: Colors.white.withValues(alpha: 0.06),
+            ),
+            itemBuilder: (context, index) {
+              final entry = feedings[index];
+              final timeLabel = dateFormat.format(entry.timestamp);
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: accentColor.withValues(alpha: 0.18),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      LucideIcons.milk,
+                      size: 20,
+                      color: accentColor,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          timeLabel,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${entry.amountMl} ${l10n.bottleLogAmountUnit}',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                        if ((entry.notes ?? '').isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            entry.notes!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _PlaceholderView extends StatelessWidget {
   const _PlaceholderView({required this.icon, required this.labelKey});
 
@@ -541,9 +752,13 @@ class _ShortcutData {
     required this.color,
     required this.icon,
     required this.label,
+    this.onTap,
+    this.heroTag,
   });
 
   final Color color;
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
+  final String? heroTag;
 }

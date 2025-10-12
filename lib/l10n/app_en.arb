@@ -79,5 +79,15 @@
   "dashboardSearchTooltip": "Search",
   "dashboardNotificationsTooltip": "Notifications",
   "dashboardTodayLabel": "Today",
-  "dashboardPediatricQuestionsLabel": "Ask the pediatrician"
+  "dashboardPediatricQuestionsLabel": "Ask the pediatrician",
+  "bottleLogTitle": "Bottle feeding",
+  "bottleLogDateTimeLabel": "Date & time",
+  "bottleLogAmountLabel": "Amount",
+  "bottleLogAmountUnit": "ml",
+  "bottleLogNotesLabel": "Notes",
+  "bottleLogNotesHint": "Add any details you want to remember",
+  "bottleLogAmountValidation": "Enter a valid amount",
+  "bottleLogDecreaseTooltip": "Decrease 5 ml",
+  "bottleLogIncreaseTooltip": "Increase 5 ml",
+  "bottleLogListTitle": "Latest feedings"
 }
