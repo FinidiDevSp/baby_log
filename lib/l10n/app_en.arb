@@ -92,5 +92,18 @@
   "bottleLogAmountValidation": "Enter a valid amount",
   "bottleLogDecreaseTooltip": "Decrease 5 ml",
   "bottleLogIncreaseTooltip": "Increase 5 ml",
+  "homeLogListTitle": "Latest logs",
+  "stoolLogTitle": "Diaper change",
+  "stoolLogDateTimeLabel": "Date & time",
+  "stoolLogConsistencyLabel": "Consistency",
+  "stoolLogConsistencyLiquidOption": "Liquid",
+  "stoolLogConsistencySoftOption": "Soft",
+  "stoolLogConsistencyFirmOption": "Firm",
+  "stoolLogConsistencyLiquidDescription": "Liquid stool",
+  "stoolLogConsistencySoftDescription": "Soft stool",
+  "stoolLogConsistencyFirmDescription": "Firm stool",
+  "stoolLogNotesLabel": "Notes",
+  "stoolLogNotesHint": "Add any detail you want to remember",
+  "stoolLogConsistencyValidation": "Select a consistency option",
   "bottleLogListTitle": "Latest feedings"
 }

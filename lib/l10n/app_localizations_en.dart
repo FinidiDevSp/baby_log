@@ -220,5 +220,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bottleLogIncreaseTooltip => 'Increase 5 ml';
 
   @override
+  String get homeLogListTitle => 'Latest logs';
+
+  @override
+  String get stoolLogTitle => 'Diaper change';
+
+  @override
+  String get stoolLogDateTimeLabel => 'Date & time';
+
+  @override
+  String get stoolLogConsistencyLabel => 'Consistency';
+
+  @override
+  String get stoolLogConsistencyLiquidOption => 'Liquid';
+
+  @override
+  String get stoolLogConsistencySoftOption => 'Soft';
+
+  @override
+  String get stoolLogConsistencyFirmOption => 'Firm';
+
+  @override
+  String get stoolLogConsistencyLiquidDescription => 'Liquid stool';
+
+  @override
+  String get stoolLogConsistencySoftDescription => 'Soft stool';
+
+  @override
+  String get stoolLogConsistencyFirmDescription => 'Firm stool';
+
+  @override
+  String get stoolLogNotesLabel => 'Notes';
+
+  @override
+  String get stoolLogNotesHint => 'Add any detail you want to remember';
+
+  @override
+  String get stoolLogConsistencyValidation => 'Select a consistency option';
+
+  @override
   String get bottleLogListTitle => 'Latest feedings';
 }
