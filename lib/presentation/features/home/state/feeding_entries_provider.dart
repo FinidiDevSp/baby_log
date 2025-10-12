@@ -18,8 +18,9 @@ class FeedingEntry {
   final String? notes;
 }
 
-class FeedingEntriesNotifier extends StateNotifier<List<FeedingEntry>> {
-  FeedingEntriesNotifier() : super(const []);
+class FeedingEntriesNotifier extends Notifier<List<FeedingEntry>> {
+  @override
+  List<FeedingEntry> build() => const [];
 
   void addFeeding(FeedingEntry entry) {
     final updated = [...state, entry]
@@ -31,6 +32,6 @@ class FeedingEntriesNotifier extends StateNotifier<List<FeedingEntry>> {
 /// In-memory provider that stores the bottle feeding entries created during the
 /// session. Persistence will be added in future iterations.
 final feedingEntriesProvider =
-    StateNotifierProvider<FeedingEntriesNotifier, List<FeedingEntry>>(
-  (ref) => FeedingEntriesNotifier(),
+    NotifierProvider<FeedingEntriesNotifier, List<FeedingEntry>>(
+  FeedingEntriesNotifier.new,
 );
