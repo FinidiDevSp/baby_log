@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/local/app_database.dart' as db;
 import '../data/repositories/baby_repository_impl.dart';
@@ -24,4 +25,8 @@ final babyStreamProvider = StreamProvider<BabyProfile?>((ref) {
 final babyFutureProvider = FutureProvider<BabyProfile?>((ref) async {
   final repository = ref.watch(babyRepositoryProvider);
   return repository.fetchBaby();
+});
+
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError('SharedPreferences no inicializado');
 });

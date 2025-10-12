@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
+import 'package:baby_log/l10n/app_localizations.dart';
 
 import '../../../domain/entities/baby_profile.dart';
 import '../baby_form/baby_form_page.dart';
@@ -12,12 +13,14 @@ class EmptyHomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Baby Log'),
+        title: Text(l10n.appTitle),
         actions: [
           IconButton(
-            tooltip: 'Editar bebé',
+            tooltip: l10n.homeEditBabyTooltip,
             icon: const Icon(LucideIcons.pencil),
             onPressed: () {
               Navigator.of(context).push(
@@ -29,9 +32,9 @@ class EmptyHomePage extends ConsumerWidget {
           ),
         ],
       ),
-      body: const Center(
+      body: Center(
         child: Text(
-          'Aquí aparecerán las métricas y registros de tu bebé.',
+          l10n.homeEmptyDescription,
           textAlign: TextAlign.center,
         ),
       ),

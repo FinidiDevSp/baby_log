@@ -1,0 +1,83 @@
+{
+  "@@locale": "en",
+  "appTitle": "Baby Log",
+  "homeEditBabyTooltip": "Edit baby",
+  "homeEmptyDescription": "Your baby's metrics and logs will appear here.",
+  "homeLoadError": "We couldn't load the baby's information.\n{error}",
+  "@homeLoadError": {
+    "description": "Error message when the home screen cannot load baby data",
+    "placeholders": {
+      "error": {
+        "example": "Database failure"
+      }
+    }
+  },
+  "formEditTitle": "Edit baby",
+  "formCreateTitle": "Add baby",
+  "formGenderBoy": "Boy",
+  "formGenderGirl": "Girl",
+  "formGenderBoySemantic": "Baby boy",
+  "formGenderGirlSemantic": "Baby girl",
+  "formNameLabel": "Baby name",
+  "formNameHint": "Type the name",
+  "formNameError": "The name is required",
+  "formBirthSection": "Birth",
+  "formBirthDateLabel": "Date",
+  "formBirthDatePlaceholder": "Choose the date",
+  "formBirthTimeLabel": "Time",
+  "formBirthTimePlaceholder": "Choose the time",
+  "formBirthDateHelp": "Birth date",
+  "formBirthTimeHelp": "Birth time",
+  "formMeasurementsSection": "Birth measurements",
+  "formWeightLabel": "Weight (kg)",
+  "formWeightHint": "e.g. 3.20",
+  "formHeightLabel": "Height (cm)",
+  "formHeightHint": "e.g. 50.5",
+  "formInterfaceColorTitle": "Interface color",
+  "formInterfaceColorSubtitle": "Tap to choose the accent color.",
+  "formColorPickerTitle": "Interface color",
+  "formColorPickerConfirm": "Confirm",
+  "formSheetCloseTooltip": "Close",
+  "formSaveButton": "Save",
+  "formPhotoSheetCamera": "Take photo",
+  "formPhotoSheetGallery": "Choose from gallery",
+  "formPhotoLoadError": "We couldn't load the image: {error}",
+  "@formPhotoLoadError": {
+    "description": "Error when the chosen image fails to load",
+    "placeholders": {
+      "error": {
+        "example": "Unsupported format"
+      }
+    }
+  },
+  "formBirthMissingError": "Complete the date and time of birth.",
+  "formUpdateSuccess": "Profile updated.",
+  "formCreateSuccess": "Profile saved.",
+  "formSaveError": "Save failed: {error}",
+  "@formSaveError": {
+    "description": "Error when saving the profile",
+    "placeholders": {
+      "error": {
+        "example": "Network error"
+      }
+    }
+  },
+  "dashboardBottleLabel": "Bottle",
+  "dashboardDiaperLabel": "Diaper",
+  "dashboardVomitLabel": "Vomit",
+  "dashboardBathLabel": "Bath",
+  "dashboardTemperatureLabel": "Temperature",
+  "dashboardFoodLabel": "Feeding",
+  "dashboardMedicalAgendaLabel": "Medical agenda",
+  "dashboardMinutesAgoZero": "0 mins",
+  "dashboardEventsEmptyTitle": "No information found",
+  "dashboardNavHome": "Home",
+  "dashboardNavStats": "Statistics",
+  "dashboardNavTimeline": "Timeline",
+  "dashboardNavDevelopment": "Development",
+  "dashboardNavAccount": "Account",
+  "dashboardSearchTooltip": "Search",
+  "dashboardNotificationsTooltip": "Notifications",
+  "dashboardTodayLabel": "Today",
+  "dashboardPediatricQuestionsLabel": "Ask the pediatrician"
+}

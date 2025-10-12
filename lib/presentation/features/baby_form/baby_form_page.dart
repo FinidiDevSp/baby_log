@@ -1,15 +1,33 @@
-import 'dart:io';
+﻿import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:baby_log/l10n/app_localizations.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 import '../../../core/providers.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_controller.dart';
 import '../../../core/utils/time_of_day_utils.dart';
 import '../../../domain/entities/baby_profile.dart';
 import '../../../domain/value_objects/baby_gender.dart';
+
+const _accentPalette = <Color>[
+  Color(0xFFFF8C32),
+  Color(0xFFFF6B6B),
+  Color(0xFFFFC542),
+  Color(0xFF2D81FF),
+  Color(0xFF4CAF50),
+  Color(0xFF1ABC9C),
+  Color(0xFF9C27B0),
+  Color(0xFFAF52DE),
+  Color(0xFFE53935),
+  Color(0xFFFF5E78),
+];
 
 class BabyFormPage extends ConsumerStatefulWidget {
   const BabyFormPage({super.key, required this.existingBaby});
@@ -25,18 +43,25 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
   late final TextEditingController _nameController;
   late final TextEditingController _weightController;
   late final TextEditingController _heightController;
+  late final ThemeController _themeController;
 
   BabyGender _selectedGender = BabyGender.girl;
   DateTime? _birthDate;
   TimeOfDay? _birthTime;
-  Color _accentColor = AppColors.primaryAccent;
+  final ImagePicker _imagePicker = ImagePicker();
+  Color _accentColor = _accentPalette.first;
+  late final Color _initialAccentColor;
   String? _photoPath;
   bool _isSaving = false;
+  bool _hasPersistedAccent = false;
+
+  AppLocalizations get l10n => AppLocalizations.of(context);
 
   @override
   void initState() {
     super.initState();
     final baby = widget.existingBaby;
+    _themeController = ref.read(themeControllerProvider.notifier);
     _nameController = TextEditingController(text: baby?.name ?? '');
     _weightController = TextEditingController(
       text: baby?.birthWeightKg != null
@@ -49,6 +74,8 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
           : '',
     );
 
+    _accentColor = ref.read(themeControllerProvider).colorScheme.primary;
+
     if (baby != null) {
       _selectedGender = baby.gender;
       _birthDate = baby.birthDate;
@@ -56,10 +83,19 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
       _accentColor = Color(baby.accentColorValue);
       _photoPath = baby.photoPath;
     }
+
+    _initialAccentColor = _accentColor;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _themeController.updateAccent(_accentColor);
+    });
   }
 
   @override
   void dispose() {
+    if (!_hasPersistedAccent) {
+      _themeController.updateAccent(_initialAccentColor);
+    }
     _nameController.dispose();
     _weightController.dispose();
     _heightController.dispose();
@@ -71,7 +107,9 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
     final isEditing = widget.existingBaby != null;
 
     return Scaffold(
-      appBar: AppBar(title: Text(isEditing ? 'Editar bebé' : 'Registrar bebé')),
+      appBar: AppBar(
+        title: Text(isEditing ? l10n.formEditTitle : l10n.formCreateTitle),
+      ),
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -100,50 +138,71 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
   }
 
   Widget _buildHeaderCard(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(28),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      child: Column(
+    return SizedBox(
+      height: 190,
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: _GenderOption(
-                  label: BabyGender.boy.label,
-                  icon: LucideIcons.mars,
-                  selected: _selectedGender == BabyGender.boy,
-                  onTap: () => setState(() {
-                    _selectedGender = BabyGender.boy;
-                  }),
-                ),
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 32,
+                    offset: Offset(0, 18),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              _PhotoSelector(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 72),
+                      child: _GenderOption(
+                        label: l10n.formGenderBoy,
+                        semanticLabel: l10n.formGenderBoySemantic,
+                        icon: LucideIcons.mars,
+                        selected: _selectedGender == BabyGender.boy,
+                        accentColor: _accentColor,
+                        onTap: () => setState(() {
+                          _selectedGender = BabyGender.boy;
+                        }),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 72),
+                      child: _GenderOption(
+                        label: l10n.formGenderGirl,
+                        semanticLabel: l10n.formGenderGirlSemantic,
+                        icon: LucideIcons.venus,
+                        selected: _selectedGender == BabyGender.girl,
+                        accentColor: _accentColor,
+                        onTap: () => setState(() {
+                          _selectedGender = BabyGender.girl;
+                        }),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: Align(
+              alignment: Alignment.center,
+              child: _PhotoSelector(
                 accentColor: _accentColor,
                 photoPath: _photoPath,
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('La selección de imagen llegará pronto.'),
-                    ),
-                  );
-                },
+                onTap: _onPhotoTap,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _GenderOption(
-                  label: BabyGender.girl.label,
-                  icon: LucideIcons.venus,
-                  selected: _selectedGender == BabyGender.girl,
-                  onTap: () => setState(() {
-                    _selectedGender = BabyGender.girl;
-                  }),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),
@@ -154,19 +213,22 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Nombre del bebé', style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          l10n.formNameLabel,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 12),
         TextFormField(
           controller: _nameController,
           textInputAction: TextInputAction.next,
           maxLength: 50,
-          decoration: const InputDecoration(
-            hintText: 'Escribe el nombre',
+          decoration: InputDecoration(
+            hintText: l10n.formNameHint,
             counterText: '',
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'El nombre es obligatorio';
+              return l10n.formNameError;
             }
             return null;
           },
@@ -179,22 +241,22 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
     final dateFormat = DateFormat('d MMM yyyy', 'es');
     final birthDateLabel = _birthDate != null
         ? dateFormat.format(_birthDate!)
-        : 'Selecciona la fecha';
+        : l10n.formBirthDatePlaceholder;
     final birthTimeLabel = _birthTime != null
         ? _birthTime!.format(context)
-        : 'Selecciona la hora';
+        : l10n.formBirthTimePlaceholder;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Nacimiento', style: Theme.of(context).textTheme.titleMedium),
+        Text(l10n.formBirthSection, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
               child: _SelectableTile(
                 icon: LucideIcons.calendarDays,
-                label: 'Fecha',
+                label: l10n.formBirthDateLabel,
                 value: birthDateLabel,
                 onTap: () => _selectDate(context),
               ),
@@ -203,7 +265,7 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
             Expanded(
               child: _SelectableTile(
                 icon: LucideIcons.clock8,
-                label: 'Hora',
+                label: l10n.formBirthTimeLabel,
                 value: birthTimeLabel,
                 onTap: () => _selectTime(context),
               ),
@@ -219,7 +281,7 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Medidas al nacer',
+          l10n.formMeasurementsSection,
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 12),
@@ -231,9 +293,9 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Peso (kg)',
-                  hintText: 'Ej. 3.20',
+                decoration: InputDecoration(
+                  labelText: l10n.formWeightLabel,
+                  hintText: l10n.formWeightHint,
                 ),
               ),
             ),
@@ -244,9 +306,9 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Altura (cm)',
-                  hintText: 'Ej. 50.5',
+                decoration: InputDecoration(
+                  labelText: l10n.formHeightLabel,
+                  hintText: l10n.formHeightHint,
                 ),
               ),
             ),
@@ -257,45 +319,133 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
   }
 
   Widget _buildInterfaceColor() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        children: [
-          const Icon(LucideIcons.palette),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Color de la interfaz',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Próximamente podrás elegir otros tonos.',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.white70),
-                ),
-              ],
+    return GestureDetector(
+      onTap: _showAccentColorPicker,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Row(
+          children: [
+            const Icon(LucideIcons.palette),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.formInterfaceColorTitle,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.formInterfaceColorSubtitle,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.white70),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: _accentColor,
-              shape: BoxShape.circle,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: _accentColor,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  width: 2,
+                ),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            const Icon(LucideIcons.chevronRight, size: 18),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _showAccentColorPicker() async {
+    Color tempSelection = _accentColor;
+
+    final selected = await showModalBottomSheet<Color>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l10n.formColorPickerTitle,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: l10n.formSheetCloseTooltip,
+                          icon: const Icon(LucideIcons.x),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: [
+                        for (final color in _accentPalette)
+                          _ColorSwatchOption(
+                            color: color,
+                            selected:
+                                tempSelection.toARGB32() == color.toARGB32(),
+                            onTap: () {
+                              setSheetState(() {
+                                tempSelection = color;
+                              });
+                            },
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () =>
+                            Navigator.of(context).pop(tempSelection),
+                        child: Text(l10n.formColorPickerConfirm),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (selected != null) {
+      setState(() {
+        _accentColor = selected;
+      });
+      _themeController.updateAccent(selected);
+    }
   }
 
   Widget _buildSaveButton(bool isEditing) {
@@ -307,8 +457,90 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
               width: 24,
               child: CircularProgressIndicator(strokeWidth: 2),
             )
-          : const Text('Guardar'),
+          : Text(l10n.formSaveButton),
     );
+  }
+
+  Future<void> _onPhotoTap() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(LucideIcons.camera),
+                title: Text(l10n.formPhotoSheetCamera),
+                onTap: () => Navigator.of(context).pop(ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(LucideIcons.image),
+                title: Text(l10n.formPhotoSheetGallery),
+                onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (source == null) {
+      return;
+    }
+
+    try {
+      final picked = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 2048,
+        maxHeight: 2048,
+        imageQuality: 90,
+      );
+
+      if (picked == null) {
+        return;
+      }
+
+      final savedPath = await _persistPhoto(picked);
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _photoPath = savedPath;
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.formPhotoLoadError(error.toString()))),
+      );
+    }
+  }
+
+  Future<String> _persistPhoto(XFile file) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final photosDir = Directory(p.join(directory.path, 'baby_photos'));
+
+    if (!await photosDir.exists()) {
+      await photosDir.create(recursive: true);
+    }
+
+    final extension = p.extension(file.path);
+    final fileName =
+        'baby_${DateTime.now().millisecondsSinceEpoch}${extension.isEmpty ? '.jpg' : extension}';
+    final destination = File(p.join(photosDir.path, fileName));
+
+    final bytes = await file.readAsBytes();
+    await destination.writeAsBytes(bytes, flush: true);
+
+    return destination.path;
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -319,7 +551,7 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
       initialDate: initialDate,
       firstDate: DateTime(now.year - 5),
       lastDate: now,
-      helpText: 'Fecha de nacimiento',
+      helpText: l10n.formBirthDateHelp,
     );
     if (picked != null) {
       setState(() {
@@ -333,7 +565,7 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
     final picked = await showTimePicker(
       context: context,
       initialTime: initialTime,
-      helpText: 'Hora de nacimiento',
+      helpText: l10n.formBirthTimeHelp,
     );
     if (picked != null) {
       setState(() {
@@ -357,9 +589,7 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
 
     if (_birthDate == null || _birthTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Completa la fecha y hora de nacimiento.'),
-        ),
+        SnackBar(content: Text(l10n.formBirthMissingError)),
       );
       return;
     }
@@ -388,9 +618,13 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
       if (!mounted) {
         return;
       }
+      _hasPersistedAccent = true;
+      _themeController.updateAccent(_accentColor);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(isEditing ? 'Perfil actualizado.' : 'Perfil guardado.'),
+          content: Text(
+            isEditing ? l10n.formUpdateSuccess : l10n.formCreateSuccess,
+          ),
         ),
       );
       if (isEditing && Navigator.of(context).canPop()) {
@@ -402,7 +636,9 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error al guardar: $error')));
+      ).showSnackBar(
+        SnackBar(content: Text(l10n.formSaveError(error.toString()))),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -416,44 +652,71 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
 class _GenderOption extends StatelessWidget {
   const _GenderOption({
     required this.label,
+    required this.semanticLabel,
     required this.icon,
     required this.selected,
+    required this.accentColor,
     required this.onTap,
   });
 
   final String label;
+  final String semanticLabel;
   final IconData icon;
   final bool selected;
+  final Color accentColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.primaryAccent : AppColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              color: selected ? Colors.black : Colors.white70,
-              size: 28,
+    final onAccent =
+        ThemeData.estimateBrightnessForColor(accentColor) == Brightness.dark
+        ? Colors.white
+        : Colors.black87;
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: semanticLabel,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedScale(
+          scale: selected ? 1.0 : 0.94,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOut,
+            width: 108,
+            height: 108,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: selected ? accentColor : AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: accentColor.withValues(alpha: 0.35),
+                        blurRadius: 24,
+                        offset: const Offset(0, 12),
+                      ),
+                    ]
+                  : const [],
             ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: selected ? Colors.black : Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: selected ? onAccent : Colors.white70, size: 30),
+                const SizedBox(height: 12),
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: selected ? onAccent : Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -473,20 +736,43 @@ class _PhotoSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = accentColor;
+    final hasPhoto = photoPath != null && photoPath!.isNotEmpty;
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: 96,
-        height: 96,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: borderColor, width: 4),
-          color: AppColors.surfaceVariant,
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 220),
+        scale: hasPhoto ? 1.0 : 0.97,
+        curve: Curves.easeOut,
+        child: Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: accentColor, width: 4),
+            color: AppColors.surfaceVariant,
+            boxShadow: [
+              BoxShadow(
+                color: accentColor.withValues(alpha: 0.35),
+                blurRadius: 28,
+                offset: const Offset(0, 16),
+              ),
+            ],
+          ),
+          alignment: Alignment.center,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 260),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(scale: animation, child: child),
+              );
+            },
+            child: _buildContent(),
+          ),
         ),
-        alignment: Alignment.center,
-        child: _buildContent(),
       ),
     );
   }
@@ -495,19 +781,75 @@ class _PhotoSelector extends StatelessWidget {
     final hasPhoto = photoPath != null && photoPath!.isNotEmpty;
 
     if (!hasPhoto) {
-      return const Icon(LucideIcons.imagePlus, size: 32);
+      return const Icon(
+        LucideIcons.imagePlus,
+        size: 36,
+        key: ValueKey('placeholder'),
+      );
     }
 
     final file = File(photoPath!);
     return ClipOval(
+      key: ValueKey(photoPath),
       child: Image.file(
         file,
-        width: 88,
-        height: 88,
+        width: 112,
+        height: 112,
         fit: BoxFit.cover,
         errorBuilder: (_, __, ___) {
-          return const Icon(LucideIcons.imageOff, size: 32);
+          return const Icon(
+            LucideIcons.imageOff,
+            size: 36,
+            key: ValueKey('error'),
+          );
         },
+      ),
+    );
+  }
+}
+
+class _ColorSwatchOption extends StatelessWidget {
+  const _ColorSwatchOption({
+    required this.color,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final Color color;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final onColor =
+        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+        ? Colors.white
+        : Colors.black87;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: selected ? Colors.white : Colors.transparent,
+            width: selected ? 3 : 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.35),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: selected
+            ? Icon(LucideIcons.check, color: onColor, size: 20)
+            : null,
       ),
     );
   }

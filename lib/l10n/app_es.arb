@@ -1,0 +1,83 @@
+{
+  "@@locale": "es",
+  "appTitle": "Baby Log",
+  "homeEditBabyTooltip": "Editar bebé",
+  "homeEmptyDescription": "Aquí aparecerán las métricas y registros de tu bebé.",
+  "homeLoadError": "No se pudo cargar la información del bebé.\n{error}",
+  "@homeLoadError": {
+    "description": "Mensaje de error cuando la pantalla inicial no puede cargar los datos del bebé",
+    "placeholders": {
+      "error": {
+        "example": "Error de base de datos"
+      }
+    }
+  },
+  "formEditTitle": "Editar bebé",
+  "formCreateTitle": "Registrar bebé",
+  "formGenderBoy": "Niño",
+  "formGenderGirl": "Niña",
+  "formGenderBoySemantic": "Bebé niño",
+  "formGenderGirlSemantic": "Bebé niña",
+  "formNameLabel": "Nombre del bebé",
+  "formNameHint": "Escribe el nombre",
+  "formNameError": "El nombre es obligatorio",
+  "formBirthSection": "Nacimiento",
+  "formBirthDateLabel": "Fecha",
+  "formBirthDatePlaceholder": "Selecciona la fecha",
+  "formBirthTimeLabel": "Hora",
+  "formBirthTimePlaceholder": "Selecciona la hora",
+  "formBirthDateHelp": "Fecha de nacimiento",
+  "formBirthTimeHelp": "Hora de nacimiento",
+  "formMeasurementsSection": "Medidas al nacer",
+  "formWeightLabel": "Peso (kg)",
+  "formWeightHint": "Ej. 3.20",
+  "formHeightLabel": "Altura (cm)",
+  "formHeightHint": "Ej. 50.5",
+  "formInterfaceColorTitle": "Color de la interfaz",
+  "formInterfaceColorSubtitle": "Toca para elegir el color de acento.",
+  "formColorPickerTitle": "Color de la interfaz",
+  "formColorPickerConfirm": "De acuerdo",
+  "formSheetCloseTooltip": "Cerrar",
+  "formSaveButton": "Guardar",
+  "formPhotoSheetCamera": "Tomar foto",
+  "formPhotoSheetGallery": "Elegir de la galería",
+  "formPhotoLoadError": "No se pudo cargar la imagen: {error}",
+  "@formPhotoLoadError": {
+    "description": "Mensaje cuando la imagen seleccionada no se pudo guardar",
+    "placeholders": {
+      "error": {
+        "example": "Formato inválido"
+      }
+    }
+  },
+  "formBirthMissingError": "Completa la fecha y hora de nacimiento.",
+  "formUpdateSuccess": "Perfil actualizado.",
+  "formCreateSuccess": "Perfil guardado.",
+  "formSaveError": "Error al guardar: {error}",
+  "@formSaveError": {
+    "description": "Mensaje cuando ocurre un error al guardar el perfil",
+    "placeholders": {
+      "error": {
+        "example": "Conexión perdida"
+      }
+    }
+  },
+  "dashboardBottleLabel": "Biber?n",
+  "dashboardDiaperLabel": "Caca",
+  "dashboardVomitLabel": "V?mito",
+  "dashboardBathLabel": "Ba?o",
+  "dashboardTemperatureLabel": "Temperatura",
+  "dashboardFoodLabel": "Comida",
+  "dashboardMedicalAgendaLabel": "Agenda m?dica",
+  "dashboardMinutesAgoZero": "0 mins",
+  "dashboardEventsEmptyTitle": "No se encontr? informaci?n",
+  "dashboardNavHome": "Inicio",
+  "dashboardNavStats": "Estad?sticas",
+  "dashboardNavTimeline": "L?nea temporal",
+  "dashboardNavDevelopment": "Desarrollo",
+  "dashboardNavAccount": "Cuenta",
+  "dashboardSearchTooltip": "Buscar",
+  "dashboardNotificationsTooltip": "Notificaciones",
+  "dashboardTodayLabel": "Hoy",
+  "dashboardPediatricQuestionsLabel": "Preguntas al pediatra"
+}
