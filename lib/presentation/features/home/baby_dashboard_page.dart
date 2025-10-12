@@ -136,7 +136,7 @@ class _BabyDashboardPageState extends ConsumerState<BabyDashboardPage> {
         backgroundColor: AppColors.surface,
         indicatorColor: accentColor.withValues(alpha: 0.18),
         indicatorShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(4),
         ),
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
@@ -202,11 +202,9 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
         .toList();
 
     Future<void> openBottleForm() async {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => const BottleFeedingPage(),
-        ),
-      );
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const BottleFeedingPage()));
     }
 
     return SafeArea(
@@ -291,11 +289,11 @@ class _ShortcutCarousel extends StatelessWidget {
     ];
 
     return SizedBox(
-      height: 112,
+      height: 120,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: shortcuts.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (_, __) => const SizedBox(width: 2),
         itemBuilder: (context, index) {
           final item = shortcuts[index];
           return _ShortcutButton(data: item);
@@ -322,14 +320,14 @@ class _ShortcutButton extends StatelessWidget {
         Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(4),
             onTap: data.onTap,
             child: _ShortcutCircle(data: data),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 3),
         SizedBox(
-          width: 80,
+          width: 75,
           child: Column(
             children: [
               Text(
@@ -365,15 +363,10 @@ class _ShortcutCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final circle = Ink(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        color: data.color,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Icon(data.icon, size: 22, color: Colors.white),
-      ),
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(color: data.color, shape: BoxShape.circle),
+      child: Center(child: Icon(data.icon, size: 24, color: Colors.white)),
     );
 
     if (data.heroTag == null) {
@@ -382,10 +375,7 @@ class _ShortcutCircle extends StatelessWidget {
 
     return Hero(
       tag: data.heroTag!,
-      child: Material(
-        color: Colors.transparent,
-        child: circle,
-      ),
+      child: Material(color: Colors.transparent, child: circle),
     );
   }
 }
@@ -414,11 +404,10 @@ class _TimelineCard extends StatelessWidget {
     final localeName = l10n.localeName;
     final now = DateTime.now();
     final isToday = _isSameDay(now, selectedDate);
-    final dateLabel = DateFormat(
-      'EEE, d MMM',
-      localeName,
-    ).format(selectedDate);
-    final headerText = isToday ? '${l10n.dashboardTodayLabel}, $dateLabel' : dateLabel;
+    final dateLabel = DateFormat('EEE, d MMM', localeName).format(selectedDate);
+    final headerText = isToday
+        ? '${l10n.dashboardTodayLabel}, $dateLabel'
+        : dateLabel;
     final feedingsByHour = _groupFeedings(feedings);
     final tiles = List<_TimelineTileData>.generate(12, (index) {
       final hour = index * 2;
@@ -435,7 +424,7 @@ class _TimelineCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -448,10 +437,13 @@ class _TimelineCard extends StatelessWidget {
                   child: TextButton(
                     onPressed: onSelectDate,
                     style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
                       backgroundColor: AppColors.surfaceVariant,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
                     child: Row(
@@ -500,7 +492,7 @@ class _TimelineCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(4),
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.surfaceVariant,
@@ -579,15 +571,9 @@ class _TimelineActionButton extends StatelessWidget {
       style: IconButton.styleFrom(
         padding: const EdgeInsets.all(8),
         backgroundColor: AppColors.surfaceVariant,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
-      icon: Icon(
-        icon,
-        size: 18,
-        color: Colors.white.withValues(alpha: 0.8),
-      ),
+      icon: Icon(icon, size: 18, color: Colors.white.withValues(alpha: 0.8)),
     );
   }
 }
@@ -644,18 +630,18 @@ class _TimelineTile extends StatelessWidget {
               right: 0,
               child: Icon(
                 data.icon,
-                size: 18,
+                size: 14,
                 color: Colors.white.withValues(alpha: 0.75),
               ),
             ),
           if (data.hasFeeding)
             Positioned(
-              bottom: 6,
+              bottom: 2,
               left: 0,
               right: 0,
               child: Container(
-                width: 24,
-                height: 24,
+                width: 16,
+                height: 16,
                 decoration: BoxDecoration(
                   color: accentColor.withValues(alpha: 0.18),
                   shape: BoxShape.circle,
@@ -665,16 +651,13 @@ class _TimelineTile extends StatelessWidget {
                   child: data.feedingsCount > 1
                       ? Text(
                           '${data.feedingsCount}',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
                                 color: accentColor,
                                 fontWeight: FontWeight.bold,
                               ),
                         )
-                      : Icon(
-                          LucideIcons.milk,
-                          size: 14,
-                          color: accentColor,
-                        ),
+                      : Icon(LucideIcons.milk, size: 10, color: accentColor),
                 ),
               ),
             ),
@@ -739,7 +722,7 @@ class _EventsPlaceholder extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
       decoration: BoxDecoration(
         color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -762,10 +745,7 @@ class _EventsPlaceholder extends StatelessWidget {
 }
 
 class _FeedingList extends StatefulWidget {
-  const _FeedingList({
-    required this.feedings,
-    required this.accentColor,
-  });
+  const _FeedingList({required this.feedings, required this.accentColor});
 
   final List<FeedingEntry> feedings;
   final Color accentColor;
@@ -789,12 +769,16 @@ class _FeedingListState extends State<_FeedingList>
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final dateFormat = DateFormat.Hm(l10n.localeName);
-    final totalMl = widget.feedings.fold<int>(0, (sum, entry) => sum + entry.amountMl);
+    final totalMl = widget.feedings.fold<int>(
+      0,
+      (sum, entry) => sum + entry.amountMl,
+    );
     final summaryItems = [
       _SummaryData(
         icon: LucideIcons.milk,
         label: l10n.dashboardBottleLabel,
-        value: '${widget.feedings.length} · $totalMl ${l10n.bottleLogAmountUnit}',
+        value:
+            '${widget.feedings.length} · $totalMl ${l10n.bottleLogAmountUnit}',
       ),
       _SummaryData(
         icon: LucideIcons.toilet,
@@ -812,7 +796,7 @@ class _FeedingListState extends State<_FeedingList>
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -833,7 +817,9 @@ class _FeedingListState extends State<_FeedingList>
                     ),
                   ),
                   Icon(
-                    _isExpanded ? LucideIcons.chevronUp : LucideIcons.chevronDown,
+                    _isExpanded
+                        ? LucideIcons.chevronUp
+                        : LucideIcons.chevronDown,
                     size: 18,
                     color: Colors.white.withValues(alpha: 0.7),
                   ),
@@ -846,9 +832,7 @@ class _FeedingListState extends State<_FeedingList>
             spacing: 12,
             runSpacing: 8,
             children: summaryItems
-                .map(
-                  (item) => _SummaryBadge(data: item),
-                )
+                .map((item) => _SummaryBadge(data: item))
                 .toList(),
           ),
           AnimatedSize(
@@ -876,7 +860,9 @@ class _FeedingListState extends State<_FeedingList>
                               width: 38,
                               height: 38,
                               decoration: BoxDecoration(
-                                color: widget.accentColor.withValues(alpha: 0.18),
+                                color: widget.accentColor.withValues(
+                                  alpha: 0.18,
+                                ),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -905,9 +891,8 @@ class _FeedingListState extends State<_FeedingList>
                                     const SizedBox(height: 4),
                                     Text(
                                       entry.notes!,
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: Colors.white70,
-                                      ),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(color: Colors.white70),
                                     ),
                                   ],
                                 ],
