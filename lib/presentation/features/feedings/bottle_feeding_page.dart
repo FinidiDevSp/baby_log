@@ -197,7 +197,7 @@ class _BottleFeedingPageState extends ConsumerState<BottleFeedingPage> {
                             width: 88,
                             child: TextField(
                               controller: _amountController,
-                              inputFormatters: const [
+                              inputFormatters: [
                                 LengthLimitingTextInputFormatter(3),
                                 FilteringTextInputFormatter.digitsOnly,
                               ],
