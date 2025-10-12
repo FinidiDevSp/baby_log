@@ -1,37 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Record of a bottle feeding entry.
-class FeedingEntry {
-  FeedingEntry({
-    required this.timestamp,
-    required this.amountMl,
-    this.notes,
-  });
+import '../../../../core/providers.dart';
+import '../../../../domain/entities/feeding_entry.dart';
 
-  /// When the feeding happened.
-  final DateTime timestamp;
-
-  /// Amount consumed in milliliters.
-  final int amountMl;
-
-  /// Optional notes added by the caregiver.
-  final String? notes;
-}
-
-class FeedingEntriesNotifier extends Notifier<List<FeedingEntry>> {
-  @override
-  List<FeedingEntry> build() => const [];
-
-  void addFeeding(FeedingEntry entry) {
-    final updated = [...state, entry]
-      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    state = List.unmodifiable(updated);
-  }
-}
-
-/// In-memory provider that stores the bottle feeding entries created during the
-/// session. Persistence will be added in future iterations.
+/// Exposes the stored bottle feeding entries ordered from newest to oldest.
 final feedingEntriesProvider =
-    NotifierProvider<FeedingEntriesNotifier, List<FeedingEntry>>(
-  FeedingEntriesNotifier.new,
-);
+    StreamProvider.autoDispose<List<FeedingEntry>>((ref) {
+  return ref.watch(feedingRepositoryProvider).watchFeedings();
+});

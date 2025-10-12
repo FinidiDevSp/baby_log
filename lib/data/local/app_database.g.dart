@@ -307,6 +307,299 @@ class $BabyProfilesTable extends BabyProfiles
   }
 }
 
+class $BottleFeedingsTable extends BottleFeedings
+    with TableInfo<$BottleFeedingsTable, BottleFeedingRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BottleFeedingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _timestampMeta =
+      const VerificationMeta('timestamp');
+  @override
+  late final GeneratedColumn<DateTime> timestamp =
+      GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMlMeta =
+      const VerificationMeta('amountMl');
+  @override
+  late final GeneratedColumn<int> amountMl = GeneratedColumn<int>(
+    'amount_ml',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt =
+      GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, timestamp, amountMl, notes, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'bottle_feedings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BottleFeedingRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    if (data.containsKey('amount_ml')) {
+      context.handle(
+        _amountMlMeta,
+        amountMl.isAcceptableOrUnknown(data['amount_ml']!, _amountMlMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMlMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BottleFeedingRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BottleFeedingRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
+      amountMl: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount_ml'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $BottleFeedingsTable createAlias(String alias) {
+    return $BottleFeedingsTable(attachedDatabase, alias);
+  }
+}
+
+class $StoolEntriesTable extends StoolEntries
+    with TableInfo<$StoolEntriesTable, StoolEntryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StoolEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _timestampMeta =
+      const VerificationMeta('timestamp');
+  @override
+  late final GeneratedColumn<DateTime> timestamp =
+      GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _consistencyMeta =
+      const VerificationMeta('consistency');
+  @override
+  late final GeneratedColumn<int> consistency = GeneratedColumn<int>(
+    'consistency',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt =
+      GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, timestamp, consistency, notes, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'stool_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StoolEntryRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    if (data.containsKey('consistency')) {
+      context.handle(
+        _consistencyMeta,
+        consistency.isAcceptableOrUnknown(
+          data['consistency']!,
+          _consistencyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_consistencyMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StoolEntryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoolEntryRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
+      consistency: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}consistency'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $StoolEntriesTable createAlias(String alias) {
+    return $StoolEntriesTable(attachedDatabase, alias);
+  }
+}
+
 class BabyRow extends DataClass implements Insertable<BabyRow> {
   final int id;
   final String name;
@@ -672,15 +965,419 @@ class BabyProfilesCompanion extends UpdateCompanion<BabyRow> {
   }
 }
 
+class BottleFeedingRow extends DataClass
+    implements Insertable<BottleFeedingRow> {
+  final int id;
+  final DateTime timestamp;
+  final int amountMl;
+  final String? notes;
+  final DateTime createdAt;
+  const BottleFeedingRow({
+    required this.id,
+    required this.timestamp,
+    required this.amountMl,
+    this.notes,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    map['amount_ml'] = Variable<int>(amountMl);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  BottleFeedingsCompanion toCompanion(bool nullToAbsent) {
+    return BottleFeedingsCompanion(
+      id: Value(id),
+      timestamp: Value(timestamp),
+      amountMl: Value(amountMl),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory BottleFeedingRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BottleFeedingRow(
+      id: serializer.fromJson<int>(json['id']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+      amountMl: serializer.fromJson<int>(json['amountMl']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+      'amountMl': serializer.toJson<int>(amountMl),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  BottleFeedingRow copyWith({
+    int? id,
+    DateTime? timestamp,
+    int? amountMl,
+    Value<String?> notes = const Value.absent(),
+    DateTime? createdAt,
+  }) => BottleFeedingRow(
+        id: id ?? this.id,
+        timestamp: timestamp ?? this.timestamp,
+        amountMl: amountMl ?? this.amountMl,
+        notes: notes.present ? notes.value : this.notes,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  BottleFeedingRow copyWithCompanion(BottleFeedingsCompanion data) {
+    return BottleFeedingRow(
+      id: data.id.present ? data.id.value : this.id,
+      timestamp:
+          data.timestamp.present ? data.timestamp.value : this.timestamp,
+      amountMl: data.amountMl.present ? data.amountMl.value : this.amountMl,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BottleFeedingRow(')
+          ..write('id: $id, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('amountMl: $amountMl, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, timestamp, amountMl, notes, createdAt);
+  @override
+  bool operator ==(Object other) => identical(this, other) ||
+      (other is BottleFeedingRow &&
+          other.id == this.id &&
+          other.timestamp == this.timestamp &&
+          other.amountMl == this.amountMl &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt);
+}
+
+class BottleFeedingsCompanion extends UpdateCompanion<BottleFeedingRow> {
+  final Value<int> id;
+  final Value<DateTime> timestamp;
+  final Value<int> amountMl;
+  final Value<String?> notes;
+  final Value<DateTime> createdAt;
+  const BottleFeedingsCompanion({
+    this.id = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.amountMl = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  BottleFeedingsCompanion.insert({
+    this.id = const Value.absent(),
+    required DateTime timestamp,
+    required int amountMl,
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  })  : timestamp = Value(timestamp),
+        amountMl = Value(amountMl);
+
+  static Insertable<BottleFeedingRow> custom({
+    Expression<int>? id,
+    Expression<DateTime>? timestamp,
+    Expression<int>? amountMl,
+    Expression<String>? notes,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (amountMl != null) 'amount_ml': amountMl,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  BottleFeedingsCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? timestamp,
+    Value<int>? amountMl,
+    Value<String?>? notes,
+    Value<DateTime>? createdAt,
+  }) {
+    return BottleFeedingsCompanion(
+      id: id ?? this.id,
+      timestamp: timestamp ?? this.timestamp,
+      amountMl: amountMl ?? this.amountMl,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    if (amountMl.present) {
+      map['amount_ml'] = Variable<int>(amountMl.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BottleFeedingsCompanion(')
+          ..write('id: $id, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('amountMl: $amountMl, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class StoolEntryRow extends DataClass implements Insertable<StoolEntryRow> {
+  final int id;
+  final DateTime timestamp;
+  final int consistency;
+  final String? notes;
+  final DateTime createdAt;
+  const StoolEntryRow({
+    required this.id,
+    required this.timestamp,
+    required this.consistency,
+    this.notes,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    map['consistency'] = Variable<int>(consistency);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  StoolEntriesCompanion toCompanion(bool nullToAbsent) {
+    return StoolEntriesCompanion(
+      id: Value(id),
+      timestamp: Value(timestamp),
+      consistency: Value(consistency),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory StoolEntryRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StoolEntryRow(
+      id: serializer.fromJson<int>(json['id']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+      consistency: serializer.fromJson<int>(json['consistency']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+      'consistency': serializer.toJson<int>(consistency),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  StoolEntryRow copyWith({
+    int? id,
+    DateTime? timestamp,
+    int? consistency,
+    Value<String?> notes = const Value.absent(),
+    DateTime? createdAt,
+  }) => StoolEntryRow(
+        id: id ?? this.id,
+        timestamp: timestamp ?? this.timestamp,
+        consistency: consistency ?? this.consistency,
+        notes: notes.present ? notes.value : this.notes,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  StoolEntryRow copyWithCompanion(StoolEntriesCompanion data) {
+    return StoolEntryRow(
+      id: data.id.present ? data.id.value : this.id,
+      timestamp:
+          data.timestamp.present ? data.timestamp.value : this.timestamp,
+      consistency:
+          data.consistency.present ? data.consistency.value : this.consistency,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoolEntryRow(')
+          ..write('id: $id, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('consistency: $consistency, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, timestamp, consistency, notes, createdAt);
+  @override
+  bool operator ==(Object other) => identical(this, other) ||
+      (other is StoolEntryRow &&
+          other.id == this.id &&
+          other.timestamp == this.timestamp &&
+          other.consistency == this.consistency &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt);
+}
+
+class StoolEntriesCompanion extends UpdateCompanion<StoolEntryRow> {
+  final Value<int> id;
+  final Value<DateTime> timestamp;
+  final Value<int> consistency;
+  final Value<String?> notes;
+  final Value<DateTime> createdAt;
+  const StoolEntriesCompanion({
+    this.id = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.consistency = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  StoolEntriesCompanion.insert({
+    this.id = const Value.absent(),
+    required DateTime timestamp,
+    required int consistency,
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  })  : timestamp = Value(timestamp),
+        consistency = Value(consistency);
+
+  static Insertable<StoolEntryRow> custom({
+    Expression<int>? id,
+    Expression<DateTime>? timestamp,
+    Expression<int>? consistency,
+    Expression<String>? notes,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (consistency != null) 'consistency': consistency,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  StoolEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? timestamp,
+    Value<int>? consistency,
+    Value<String?>? notes,
+    Value<DateTime>? createdAt,
+  }) {
+    return StoolEntriesCompanion(
+      id: id ?? this.id,
+      timestamp: timestamp ?? this.timestamp,
+      consistency: consistency ?? this.consistency,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    if (consistency.present) {
+      map['consistency'] = Variable<int>(consistency.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StoolEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('consistency: $consistency, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $BabyProfilesTable babyProfiles = $BabyProfilesTable(this);
+  late final $BottleFeedingsTable bottleFeedings =
+      $BottleFeedingsTable(this);
+  late final $StoolEntriesTable stoolEntries = $StoolEntriesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [babyProfiles];
+  List<DatabaseSchemaEntity> get allSchemaEntities =>
+      [babyProfiles, bottleFeedings, stoolEntries];
 }
 
 typedef $$BabyProfilesTableCreateCompanionBuilder =

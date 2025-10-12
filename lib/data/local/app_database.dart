@@ -32,13 +32,46 @@ class BabyProfiles extends Table {
       dateTime().clientDefault(() => DateTime.now())();
 }
 
-@DriftDatabase(tables: [BabyProfiles])
+@DataClassName('BottleFeedingRow')
+class BottleFeedings extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get timestamp => dateTime()();
+  IntColumn get amountMl => integer()();
+  TextColumn get notes => text().nullable()();
+  DateTimeColumn get createdAt =>
+      dateTime().clientDefault(() => DateTime.now())();
+}
+
+@DataClassName('StoolEntryRow')
+class StoolEntries extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get timestamp => dateTime()();
+  IntColumn get consistency => integer()();
+  TextColumn get notes => text().nullable()();
+  DateTimeColumn get createdAt =>
+      dateTime().clientDefault(() => DateTime.now())();
+}
+
+@DriftDatabase(tables: [BabyProfiles, BottleFeedings, StoolEntries])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (Migrator m) async {
+          await m.createAll();
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          if (from < 2) {
+            await m.createTable(bottleFeedings);
+            await m.createTable(stoolEntries);
+          }
+        },
+      );
 
   Stream<BabyRow?> watchBabyRow() {
     final query = select(babyProfiles)..limit(1);
@@ -56,5 +89,47 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> upsertBaby(BabyProfilesCompanion entry) {
     return into(babyProfiles).insertOnConflictUpdate(entry);
+  }
+
+  Stream<List<BottleFeedingRow>> watchBottleFeedings() {
+    final query = (select(bottleFeedings)
+          ..orderBy([
+            (tbl) => OrderingTerm.desc(tbl.timestamp),
+            (tbl) => OrderingTerm.desc(tbl.id),
+          ]))
+        .watch();
+    return query;
+  }
+
+  Future<BottleFeedingRow> createBottleFeeding(
+    BottleFeedingsCompanion entry,
+  ) async {
+    final id = await into(bottleFeedings).insert(entry);
+    final query = select(bottleFeedings)..where((tbl) => tbl.id.equals(id));
+    final row = await query.getSingleOrNull();
+    if (row == null) {
+      throw StateError('No se pudo obtener la toma recién creada.');
+    }
+    return row;
+  }
+
+  Stream<List<StoolEntryRow>> watchStoolEntries() {
+    final query = (select(stoolEntries)
+          ..orderBy([
+            (tbl) => OrderingTerm.desc(tbl.timestamp),
+            (tbl) => OrderingTerm.desc(tbl.id),
+          ]))
+        .watch();
+    return query;
+  }
+
+  Future<StoolEntryRow> createStoolEntry(StoolEntriesCompanion entry) async {
+    final id = await into(stoolEntries).insert(entry);
+    final query = select(stoolEntries)..where((tbl) => tbl.id.equals(id));
+    final row = await query.getSingleOrNull();
+    if (row == null) {
+      throw StateError('No se pudo obtener el cambio de pañal recién creado.');
+    }
+    return row;
   }
 }

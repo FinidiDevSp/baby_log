@@ -1,11 +1,12 @@
+import 'package:baby_log/core/providers.dart';
 import 'package:baby_log/core/theme/app_colors.dart';
+import 'package:baby_log/domain/entities/stool_entry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
 
 import '../../../l10n/app_localizations.dart';
-import '../home/state/stool_entries_provider.dart';
 
 class StoolLogPage extends ConsumerStatefulWidget {
   const StoolLogPage({super.key});
@@ -77,7 +78,7 @@ class _StoolLogPageState extends ConsumerState<StoolLogPage> {
     });
   }
 
-  void _save(BuildContext context) {
+  Future<void> _save(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
     final consistency = _selectedConsistency;
 
@@ -88,17 +89,25 @@ class _StoolLogPageState extends ConsumerState<StoolLogPage> {
       return;
     }
 
-    ref.read(stoolEntriesProvider.notifier).addEntry(
-          StoolEntry(
-            timestamp: _selectedDateTime,
-            consistency: consistency,
-            notes: _notesController.text.trim().isEmpty
-                ? null
-                : _notesController.text.trim(),
-          ),
-        );
-
-    Navigator.of(context).pop();
+    try {
+      await ref.read(stoolRepositoryProvider).addStool(
+            StoolEntry(
+              timestamp: _selectedDateTime,
+              consistency: consistency,
+              notes: _notesController.text.trim().isEmpty
+                  ? null
+                  : _notesController.text.trim(),
+            ),
+          );
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pop();
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.formSaveError(error: '$error'))),
+      );
+    }
   }
 
   @override

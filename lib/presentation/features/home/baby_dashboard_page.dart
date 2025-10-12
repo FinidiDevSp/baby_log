@@ -5,6 +5,8 @@ import 'package:lucide_flutter/lucide_flutter.dart';
 
 import 'package:baby_log/core/theme/app_colors.dart';
 import 'package:baby_log/domain/entities/baby_profile.dart';
+import 'package:baby_log/domain/entities/feeding_entry.dart';
+import 'package:baby_log/domain/entities/stool_entry.dart';
 import 'package:baby_log/l10n/app_localizations.dart';
 import 'package:baby_log/presentation/features/baby_form/baby_form_page.dart';
 import 'package:baby_log/presentation/widgets/baby_avatar.dart';
@@ -200,8 +202,10 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final feedings = ref.watch(feedingEntriesProvider);
-    final stools = ref.watch(stoolEntriesProvider);
+    final feedingsAsync = ref.watch(feedingEntriesProvider);
+    final stoolsAsync = ref.watch(stoolEntriesProvider);
+    final feedings = feedingsAsync.value ?? const <FeedingEntry>[];
+    final stools = stoolsAsync.value ?? const <StoolEntry>[];
     final selectedFeedings = feedings
         .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
         .toList();
