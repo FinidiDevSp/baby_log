@@ -10,8 +10,16 @@ part 'app_database.g.dart';
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final directory = await getApplicationDocumentsDirectory();
-    final file = File(p.join(directory.path, 'baby_log.sqlite'));
-    return NativeDatabase.createInBackground(file);
+    final resolvedPath = p.join(directory.path, 'baby_log.sqlite');
+    final file = File(resolvedPath);
+
+    await file.parent.create(recursive: true);
+
+    // Avoid opening the database on a background isolate. Some Android
+    // devices were crashing when the path_provider plugin was invoked from
+    // Drift's background executor, so we initialize the database directly on
+    // the main isolate instead.
+    return NativeDatabase(file);
   });
 }
 
