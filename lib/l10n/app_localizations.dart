@@ -433,6 +433,66 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Preguntas al pediatra'**
   String get dashboardPediatricQuestionsLabel;
+
+  /// No description provided for @bottleLogTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Toma de biberón'**
+  String get bottleLogTitle;
+
+  /// No description provided for @bottleLogDateTimeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Día y hora'**
+  String get bottleLogDateTimeLabel;
+
+  /// No description provided for @bottleLogAmountLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cantidad'**
+  String get bottleLogAmountLabel;
+
+  /// No description provided for @bottleLogAmountUnit.
+  ///
+  /// In es, this message translates to:
+  /// **'ml'**
+  String get bottleLogAmountUnit;
+
+  /// No description provided for @bottleLogNotesLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas'**
+  String get bottleLogNotesLabel;
+
+  /// No description provided for @bottleLogNotesHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade detalles que quieras recordar'**
+  String get bottleLogNotesHint;
+
+  /// No description provided for @bottleLogAmountValidation.
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce una cantidad válida'**
+  String get bottleLogAmountValidation;
+
+  /// No description provided for @bottleLogDecreaseTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Restar 5 ml'**
+  String get bottleLogDecreaseTooltip;
+
+  /// No description provided for @bottleLogIncreaseTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Sumar 5 ml'**
+  String get bottleLogIncreaseTooltip;
+
+  /// No description provided for @bottleLogListTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Últimas tomas'**
+  String get bottleLogListTitle;
 }
 
 class _AppLocalizationsDelegate

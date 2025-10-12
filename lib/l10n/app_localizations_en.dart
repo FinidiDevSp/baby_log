@@ -182,4 +182,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardPediatricQuestionsLabel => 'Ask the pediatrician';
+
+  @override
+  String get bottleLogTitle => 'Bottle feeding';
+
+  @override
+  String get bottleLogDateTimeLabel => 'Date & time';
+
+  @override
+  String get bottleLogAmountLabel => 'Amount';
+
+  @override
+  String get bottleLogAmountUnit => 'ml';
+
+  @override
+  String get bottleLogNotesLabel => 'Notes';
+
+  @override
+  String get bottleLogNotesHint => 'Add any details you want to remember';
+
+  @override
+  String get bottleLogAmountValidation => 'Enter a valid amount';
+
+  @override
+  String get bottleLogDecreaseTooltip => 'Decrease 5 ml';
+
+  @override
+  String get bottleLogIncreaseTooltip => 'Increase 5 ml';
+
+  @override
+  String get bottleLogListTitle => 'Latest feedings';
 }

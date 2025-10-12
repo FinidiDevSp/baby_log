@@ -79,5 +79,15 @@
   "dashboardSearchTooltip": "Buscar",
   "dashboardNotificationsTooltip": "Notificaciones",
   "dashboardTodayLabel": "Hoy",
-  "dashboardPediatricQuestionsLabel": "Preguntas al pediatra"
+  "dashboardPediatricQuestionsLabel": "Preguntas al pediatra",
+  "bottleLogTitle": "Toma de biberón",
+  "bottleLogDateTimeLabel": "Día y hora",
+  "bottleLogAmountLabel": "Cantidad",
+  "bottleLogAmountUnit": "ml",
+  "bottleLogNotesLabel": "Notas",
+  "bottleLogNotesHint": "Añade detalles que quieras recordar",
+  "bottleLogAmountValidation": "Introduce una cantidad válida",
+  "bottleLogDecreaseTooltip": "Restar 5 ml",
+  "bottleLogIncreaseTooltip": "Sumar 5 ml",
+  "bottleLogListTitle": "Últimas tomas"
 }
