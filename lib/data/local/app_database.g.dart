@@ -1376,6 +1376,354 @@ class StoolEntriesCompanion extends UpdateCompanion<StoolEntryRow> {
   }
 }
 
+class $VomitEntriesTable extends VomitEntries
+    with TableInfo<$VomitEntriesTable, VomitEntryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $VomitEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    timestamp,
+    amount,
+    notes,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'vomit_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<VomitEntryRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  VomitEntryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return VomitEntryRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $VomitEntriesTable createAlias(String alias) {
+    return $VomitEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class VomitEntryRow extends DataClass implements Insertable<VomitEntryRow> {
+  final int id;
+  final DateTime timestamp;
+  final int amount;
+  final String? notes;
+  final DateTime createdAt;
+  const VomitEntryRow({
+    required this.id,
+    required this.timestamp,
+    required this.amount,
+    this.notes,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{
+      'id': Variable<int>(id),
+      'timestamp': Variable<DateTime>(timestamp),
+      'amount': Variable<int>(amount),
+      'created_at': Variable<DateTime>(createdAt),
+    };
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    return map;
+  }
+
+  VomitEntriesCompanion toCompanion(bool nullToAbsent) {
+    return VomitEntriesCompanion(
+      id: Value(id),
+      timestamp: Value(timestamp),
+      amount: Value(amount),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory VomitEntryRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return VomitEntryRow(
+      id: serializer.fromJson<int>(json['id']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+      amount: serializer.fromJson<int>(json['amount']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+      'amount': serializer.toJson<int>(amount),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  VomitEntryRow copyWith({
+    int? id,
+    DateTime? timestamp,
+    int? amount,
+    Value<String?> notes = const Value.absent(),
+    DateTime? createdAt,
+  }) => VomitEntryRow(
+    id: id ?? this.id,
+    timestamp: timestamp ?? this.timestamp,
+    amount: amount ?? this.amount,
+    notes: notes.present ? notes.value : this.notes,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  VomitEntryRow copyWithCompanion(VomitEntriesCompanion data) {
+    return VomitEntryRow(
+      id: data.id.present ? data.id.value : this.id,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VomitEntryRow(')
+          ..write('id: $id, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('amount: $amount, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, timestamp, amount, notes, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is VomitEntryRow &&
+          other.id == this.id &&
+          other.timestamp == this.timestamp &&
+          other.amount == this.amount &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt);
+}
+
+class VomitEntriesCompanion extends UpdateCompanion<VomitEntryRow> {
+  final Value<int> id;
+  final Value<DateTime> timestamp;
+  final Value<int> amount;
+  final Value<String?> notes;
+  final Value<DateTime> createdAt;
+  const VomitEntriesCompanion({
+    this.id = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  VomitEntriesCompanion.insert({
+    this.id = const Value.absent(),
+    required DateTime timestamp,
+    required int amount,
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : timestamp = Value(timestamp),
+       amount = Value(amount);
+  static Insertable<VomitEntryRow> custom({
+    Expression<int>? id,
+    Expression<DateTime>? timestamp,
+    Expression<int>? amount,
+    Expression<String>? notes,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (amount != null) 'amount': amount,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  VomitEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? timestamp,
+    Value<int>? amount,
+    Value<String?>? notes,
+    Value<DateTime>? createdAt,
+  }) {
+    return VomitEntriesCompanion(
+      id: id ?? this.id,
+      timestamp: timestamp ?? this.timestamp,
+      amount: amount ?? this.amount,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VomitEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('amount: $amount, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $BathEntriesTable extends BathEntries
     with TableInfo<$BathEntriesTable, BathEntryRow> {
   @override
@@ -1723,6 +2071,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $BabyProfilesTable babyProfiles = $BabyProfilesTable(this);
   late final $BottleFeedingsTable bottleFeedings = $BottleFeedingsTable(this);
   late final $StoolEntriesTable stoolEntries = $StoolEntriesTable(this);
+  late final $VomitEntriesTable vomitEntries = $VomitEntriesTable(this);
   late final $BathEntriesTable bathEntries = $BathEntriesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -1732,6 +2081,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     babyProfiles,
     bottleFeedings,
     stoolEntries,
+    vomitEntries,
     bathEntries,
   ];
 }
@@ -2263,6 +2613,23 @@ typedef $$StoolEntriesTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
     });
 
+typedef $$VomitEntriesTableCreateCompanionBuilder =
+    VomitEntriesCompanion Function({
+      Value<int> id,
+      required DateTime timestamp,
+      required int amount,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+    });
+typedef $$VomitEntriesTableUpdateCompanionBuilder =
+    VomitEntriesCompanion Function({
+      Value<int> id,
+      Value<DateTime> timestamp,
+      Value<int> amount,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+    });
+
 class $$StoolEntriesTableFilterComposer
     extends Composer<_$AppDatabase, $StoolEntriesTable> {
   $$StoolEntriesTableFilterComposer({
@@ -2442,6 +2809,189 @@ typedef $$StoolEntriesTableProcessedTableManager =
       StoolEntryRow,
       PrefetchHooks Function()
     >;
+class $$VomitEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $VomitEntriesTable> {
+  $$VomitEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$VomitEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $VomitEntriesTable> {
+  $$VomitEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$VomitEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $VomitEntriesTable> {
+  $$VomitEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+
+  GeneratedColumn<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$VomitEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $VomitEntriesTable,
+          VomitEntryRow,
+          $$VomitEntriesTableFilterComposer,
+          $$VomitEntriesTableOrderingComposer,
+          $$VomitEntriesTableAnnotationComposer,
+          $$VomitEntriesTableCreateCompanionBuilder,
+          $$VomitEntriesTableUpdateCompanionBuilder,
+          (
+            VomitEntryRow,
+            BaseReferences<_$AppDatabase, $VomitEntriesTable, VomitEntryRow>,
+          ),
+          VomitEntryRow,
+          PrefetchHooks Function()
+        > {
+  $$VomitEntriesTableTableManager(_$AppDatabase db, $VomitEntriesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$VomitEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$VomitEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$VomitEntriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+                Value<int> amount = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => VomitEntriesCompanion(
+                id: id,
+                timestamp: timestamp,
+                amount: amount,
+                notes: notes,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required DateTime timestamp,
+                required int amount,
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => VomitEntriesCompanion.insert(
+                id: id,
+                timestamp: timestamp,
+                amount: amount,
+                notes: notes,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (results, base) => BaseReferences(
+            $db: db,
+            $table: table,
+            referencingTable: base,
+            results: results,
+          ),
+          prefetchHooksCallback: () => const PrefetchHooks(),
+        ),
+      );
+}
+
+typedef $$VomitEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $VomitEntriesTable,
+      VomitEntryRow,
+      $$VomitEntriesTableFilterComposer,
+      $$VomitEntriesTableOrderingComposer,
+      $$VomitEntriesTableAnnotationComposer,
+      $$VomitEntriesTableCreateCompanionBuilder,
+      $$VomitEntriesTableUpdateCompanionBuilder,
+      (
+        VomitEntryRow,
+        BaseReferences<_$AppDatabase, $VomitEntriesTable, VomitEntryRow>,
+      ),
+      VomitEntryRow,
+      PrefetchHooks Function()
+    >;
+
 typedef $$BathEntriesTableCreateCompanionBuilder =
     BathEntriesCompanion Function({
       Value<int> id,
@@ -2646,6 +3196,8 @@ class $AppDatabaseManager {
       $$BottleFeedingsTableTableManager(_db, _db.bottleFeedings);
   $$StoolEntriesTableTableManager get stoolEntries =>
       $$StoolEntriesTableTableManager(_db, _db.stoolEntries);
+  $$VomitEntriesTableTableManager get vomitEntries =>
+      $$VomitEntriesTableTableManager(_db, _db.vomitEntries);
   $$BathEntriesTableTableManager get bathEntries =>
       $$BathEntriesTableTableManager(_db, _db.bathEntries);
 }

@@ -143,5 +143,16 @@
   "stoolLogNotesLabel": "Notes",
   "stoolLogNotesHint": "Add any detail you want to remember",
   "stoolLogConsistencyValidation": "Select a consistency option",
+  "vomitLogTitle": "Vomit log",
+  "vomitLogAmountLabel": "Amount",
+  "vomitLogAmountLowOption": "Low",
+  "vomitLogAmountMediumOption": "Medium",
+  "vomitLogAmountHighOption": "High",
+  "vomitLogAmountLowDescription": "Light vomit",
+  "vomitLogAmountMediumDescription": "Moderate vomit",
+  "vomitLogAmountHighDescription": "Abundant vomit",
+  "vomitLogNotesLabel": "Notes",
+  "vomitLogNotesHint": "Add any detail you want to remember",
+  "vomitLogAmountValidation": "Select an amount option",
   "bottleLogListTitle": "Latest feedings"
 }

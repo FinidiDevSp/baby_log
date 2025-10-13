@@ -8,6 +8,7 @@ import 'package:baby_log/domain/entities/baby_profile.dart';
 import 'package:baby_log/domain/entities/bath_entry.dart';
 import 'package:baby_log/domain/entities/feeding_entry.dart';
 import 'package:baby_log/domain/entities/stool_entry.dart';
+import 'package:baby_log/domain/entities/vomit_entry.dart';
 import 'package:baby_log/l10n/app_localizations.dart';
 import 'package:baby_log/presentation/features/baby_form/baby_form_page.dart';
 import 'package:baby_log/presentation/widgets/baby_avatar.dart';
@@ -15,12 +16,15 @@ import 'package:baby_log/presentation/widgets/baby_avatar.dart';
 import 'state/bath_entries_provider.dart';
 import 'state/feeding_entries_provider.dart';
 import 'state/stool_entries_provider.dart';
+import 'state/vomit_entries_provider.dart';
 import '../baths/bath_log_page.dart';
 import '../diapers/stool_log_page.dart';
 import '../feedings/bottle_feeding_page.dart';
+import '../vomits/vomit_log_page.dart';
 
 const _stoolAccentColor = Color(0xFF4CAF50);
 const _bathAccentColor = Color(0xFF2D81FF);
+const _vomitAccentColor = Color(0xFF1ABC9C);
 
 /// Dashboard shown once a baby profile exists.
 class BabyDashboardPage extends ConsumerStatefulWidget {
@@ -232,14 +236,19 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     final l10n = AppLocalizations.of(context);
     final feedingsAsync = ref.watch(feedingEntriesProvider);
     final stoolsAsync = ref.watch(stoolEntriesProvider);
+    final vomitsAsync = ref.watch(vomitEntriesProvider);
     final bathsAsync = ref.watch(bathEntriesProvider);
     final feedings = feedingsAsync.value ?? const <FeedingEntry>[];
     final stools = stoolsAsync.value ?? const <StoolEntry>[];
+    final vomits = vomitsAsync.value ?? const <VomitEntry>[];
     final baths = bathsAsync.value ?? const <BathEntry>[];
     final selectedFeedings = feedings
         .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
         .toList();
     final selectedStools = stools
+        .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
+        .toList();
+    final selectedVomits = vomits
         .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
         .toList();
     final selectedBaths = baths
@@ -256,6 +265,12 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       Navigator.of(
         context,
       ).push(MaterialPageRoute(builder: (_) => const StoolLogPage()));
+    }
+
+    void openVomitForm() {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const VomitLogPage()));
     }
 
     void openBathForm() {
@@ -282,6 +297,15 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       stoolStatus = _formatElapsedTime(l10n, latestStool.timestamp);
     }
 
+    String? vomitStatus;
+    if (vomits.isNotEmpty) {
+      final latestVomit = vomits.reduce(
+        (previous, current) =>
+            previous.timestamp.isAfter(current.timestamp) ? previous : current,
+      );
+      vomitStatus = _formatElapsedTime(l10n, latestVomit.timestamp);
+    }
+
     String? bathStatus;
     if (baths.isNotEmpty) {
       final latestBath = baths.reduce(
@@ -294,6 +318,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     final hasEntries =
         selectedFeedings.isNotEmpty ||
         selectedStools.isNotEmpty ||
+        selectedVomits.isNotEmpty ||
         selectedBaths.isNotEmpty;
 
     return SafeArea(
@@ -303,9 +328,11 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
           _ShortcutCarousel(
             onBottleTap: openBottleForm,
             onStoolTap: openStoolForm,
+            onVomitTap: openVomitForm,
             onBathTap: openBathForm,
             bottleStatus: bottleStatus,
             stoolStatus: stoolStatus,
+            vomitStatus: vomitStatus,
             bathStatus: bathStatus,
           ),
           const SizedBox(height: 16),
@@ -313,6 +340,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
             accentColor: widget.accentColor,
             feedings: selectedFeedings,
             stools: selectedStools,
+            vomits: selectedVomits,
             baths: selectedBaths,
             selectedDate: _selectedDate,
             onSelectDate: _openDayPicker,
@@ -327,6 +355,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
               accentColor: widget.accentColor,
               feedings: selectedFeedings,
               stools: selectedStools,
+              vomits: selectedVomits,
               baths: selectedBaths,
             ),
         ],
@@ -339,17 +368,21 @@ class _ShortcutCarousel extends StatelessWidget {
   const _ShortcutCarousel({
     required this.onBottleTap,
     required this.onStoolTap,
+    required this.onVomitTap,
     required this.onBathTap,
     this.bottleStatus,
     this.stoolStatus,
+    this.vomitStatus,
     this.bathStatus,
   });
 
   final VoidCallback onBottleTap;
   final VoidCallback onStoolTap;
+  final VoidCallback onVomitTap;
   final VoidCallback onBathTap;
   final String? bottleStatus;
   final String? stoolStatus;
+  final String? vomitStatus;
   final String? bathStatus;
 
   @override
@@ -373,9 +406,12 @@ class _ShortcutCarousel extends StatelessWidget {
         status: stoolStatus,
       ),
       _ShortcutData(
-        color: const Color(0xFF1ABC9C),
+        color: _vomitAccentColor,
         icon: LucideIcons.triangleAlert,
         label: l10n.dashboardVomitLabel,
+        onTap: onVomitTap,
+        heroTag: 'vomit_shortcut',
+        status: vomitStatus,
       ),
       _ShortcutData(
         color: _bathAccentColor,
@@ -504,6 +540,7 @@ class _TimelineCard extends StatelessWidget {
   const _TimelineCard({
     required this.feedings,
     required this.stools,
+    required this.vomits,
     required this.baths,
     required this.accentColor,
     required this.selectedDate,
@@ -514,6 +551,7 @@ class _TimelineCard extends StatelessWidget {
 
   final List<FeedingEntry> feedings;
   final List<StoolEntry> stools;
+  final List<VomitEntry> vomits;
   final List<BathEntry> baths;
   final Color accentColor;
   final DateTime selectedDate;
@@ -534,6 +572,7 @@ class _TimelineCard extends StatelessWidget {
         : dateLabel;
     final feedingsByHour = _groupFeedings(feedings);
     final stoolsByHour = _groupStools(stools);
+    final vomitsByHour = _groupVomits(vomits);
     final bathsByHour = _groupBaths(baths);
     final tiles = List<_TimelineTileData>.generate(12, (index) {
       final hour = index * 2;
@@ -543,6 +582,7 @@ class _TimelineCard extends StatelessWidget {
         icon: _iconForHour(hour),
         feedings: feedingsByHour[hour] ?? const [],
         stools: stoolsByHour[hour] ?? const [],
+        vomits: vomitsByHour[hour] ?? const [],
         baths: bathsByHour[hour] ?? const [],
       );
     });
@@ -712,6 +752,7 @@ class _TimelineTileData {
     this.icon,
     this.feedings = const [],
     this.stools = const [],
+    this.vomits = const [],
     this.baths = const [],
   });
 
@@ -720,6 +761,7 @@ class _TimelineTileData {
   final IconData? icon;
   final List<FeedingEntry> feedings;
   final List<StoolEntry> stools;
+  final List<VomitEntry> vomits;
   final List<BathEntry> baths;
 
   String get label => hour.toString().padLeft(2, '0');
@@ -765,6 +807,7 @@ class _TimelineTile extends StatelessWidget {
             ),
           if (data.feedings.isNotEmpty ||
               data.stools.isNotEmpty ||
+              data.vomits.isNotEmpty ||
               data.baths.isNotEmpty)
             Positioned(
               bottom: 2,
@@ -786,6 +829,12 @@ class _TimelineTile extends StatelessWidget {
                       icon: LucideIcons.toilet,
                       count: data.stools.length,
                       color: _stoolAccentColor,
+                    ),
+                  if (data.vomits.isNotEmpty)
+                    _TimelineEventBadge(
+                      icon: LucideIcons.triangleAlert,
+                      count: data.vomits.length,
+                      color: _vomitAccentColor,
                     ),
                   if (data.baths.isNotEmpty)
                     _TimelineEventBadge(
@@ -863,6 +912,15 @@ Map<int, List<StoolEntry>> _groupStools(List<StoolEntry> stools) {
   return map;
 }
 
+Map<int, List<VomitEntry>> _groupVomits(List<VomitEntry> vomits) {
+  final map = <int, List<VomitEntry>>{};
+  for (final entry in vomits) {
+    final tileHour = (entry.timestamp.hour ~/ 2) * 2;
+    map.putIfAbsent(tileHour, () => []).add(entry);
+  }
+  return map;
+}
+
 Map<int, List<BathEntry>> _groupBaths(List<BathEntry> baths) {
   final map = <int, List<BathEntry>>{};
   for (final entry in baths) {
@@ -880,6 +938,17 @@ String _stoolDescription(AppLocalizations l10n, StoolConsistency consistency) {
       return l10n.stoolLogConsistencySoftDescription;
     case StoolConsistency.firm:
       return l10n.stoolLogConsistencyFirmDescription;
+  }
+}
+
+String _vomitDescription(AppLocalizations l10n, VomitAmount amount) {
+  switch (amount) {
+    case VomitAmount.low:
+      return l10n.vomitLogAmountLowDescription;
+    case VomitAmount.medium:
+      return l10n.vomitLogAmountMediumDescription;
+    case VomitAmount.high:
+      return l10n.vomitLogAmountHighDescription;
   }
 }
 
@@ -960,12 +1029,14 @@ class _DailyLogList extends StatefulWidget {
   const _DailyLogList({
     required this.feedings,
     required this.stools,
+    required this.vomits,
     required this.baths,
     required this.accentColor,
   });
 
   final List<FeedingEntry> feedings;
   final List<StoolEntry> stools;
+  final List<VomitEntry> vomits;
   final List<BathEntry> baths;
   final Color accentColor;
 
@@ -993,10 +1064,12 @@ class _DailyLogListState extends State<_DailyLogList>
       (sum, entry) => sum + entry.amountMl,
     );
     final stoolCount = widget.stools.length;
+    final vomitCount = widget.vomits.length;
     final bathCount = widget.baths.length;
     final entries = [
       ...widget.feedings.map(_DailyLogEntry.feeding),
       ...widget.stools.map(_DailyLogEntry.stool),
+      ...widget.vomits.map(_DailyLogEntry.vomit),
       ...widget.baths.map(_DailyLogEntry.bath),
     ]..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     final summaryItems = [
@@ -1019,7 +1092,7 @@ class _DailyLogListState extends State<_DailyLogList>
       _SummaryData(
         icon: LucideIcons.triangleAlert,
         label: l10n.dashboardVomitLabel,
-        value: '0',
+        value: vomitCount.toString(),
       ),
     ];
 
@@ -1192,6 +1265,59 @@ class _DailyLogListState extends State<_DailyLogList>
                                 ),
                               ],
                             );
+                          case _DailyLogType.vomit:
+                            final vomit = entry.vomit!;
+                            final description =
+                                _vomitDescription(l10n, vomit.amount);
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: _vomitAccentColor.withValues(
+                                      alpha: 0.18,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    LucideIcons.triangleAlert,
+                                    size: 18,
+                                    color: _vomitAccentColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        timeLabel,
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        description,
+                                        style: theme.textTheme.bodyMedium,
+                                      ),
+                                      if ((vomit.notes ?? '').isNotEmpty) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          vomit.notes!,
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(color: Colors.white70),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
                           case _DailyLogType.bath:
                             final bath = entry.bath!;
                             final description = _bathDescription(
@@ -1260,12 +1386,13 @@ class _DailyLogListState extends State<_DailyLogList>
   }
 }
 
-enum _DailyLogType { feeding, stool, bath }
+enum _DailyLogType { feeding, stool, vomit, bath }
 
 class _DailyLogEntry {
   _DailyLogEntry.feeding(FeedingEntry entry)
     : feeding = entry,
       stool = null,
+      vomit = null,
       bath = null,
       type = _DailyLogType.feeding,
       timestamp = entry.timestamp;
@@ -1273,19 +1400,30 @@ class _DailyLogEntry {
   _DailyLogEntry.stool(StoolEntry entry)
     : feeding = null,
       stool = entry,
+      vomit = null,
       bath = null,
       type = _DailyLogType.stool,
+      timestamp = entry.timestamp;
+
+  _DailyLogEntry.vomit(VomitEntry entry)
+    : feeding = null,
+      stool = null,
+      vomit = entry,
+      bath = null,
+      type = _DailyLogType.vomit,
       timestamp = entry.timestamp;
 
   _DailyLogEntry.bath(BathEntry entry)
     : feeding = null,
       stool = null,
+      vomit = null,
       bath = entry,
       type = _DailyLogType.bath,
       timestamp = entry.timestamp;
 
   final FeedingEntry? feeding;
   final StoolEntry? stool;
+  final VomitEntry? vomit;
   final BathEntry? bath;
   final _DailyLogType type;
   final DateTime timestamp;

@@ -316,5 +316,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stoolLogConsistencyValidation => 'Select a consistency option';
 
   @override
+  String get vomitLogTitle => 'Vomit log';
+
+  @override
+  String get vomitLogAmountLabel => 'Amount';
+
+  @override
+  String get vomitLogAmountLowOption => 'Low';
+
+  @override
+  String get vomitLogAmountMediumOption => 'Medium';
+
+  @override
+  String get vomitLogAmountHighOption => 'High';
+
+  @override
+  String get vomitLogAmountLowDescription => 'Light vomit';
+
+  @override
+  String get vomitLogAmountMediumDescription => 'Moderate vomit';
+
+  @override
+  String get vomitLogAmountHighDescription => 'Abundant vomit';
+
+  @override
+  String get vomitLogNotesLabel => 'Notes';
+
+  @override
+  String get vomitLogNotesHint => 'Add any detail you want to remember';
+
+  @override
+  String get vomitLogAmountValidation => 'Select an amount option';
+
+  @override
   String get bottleLogListTitle => 'Latest feedings';
 }

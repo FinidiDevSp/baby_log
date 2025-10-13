@@ -143,5 +143,16 @@
   "stoolLogNotesLabel": "Notas",
   "stoolLogNotesHint": "Añade detalles que quieras recordar",
   "stoolLogConsistencyValidation": "Selecciona una consistencia",
+  "vomitLogTitle": "Registro de vómito",
+  "vomitLogAmountLabel": "Cantidad",
+  "vomitLogAmountLowOption": "Poca",
+  "vomitLogAmountMediumOption": "Media",
+  "vomitLogAmountHighOption": "Abundante",
+  "vomitLogAmountLowDescription": "Vómito ligero",
+  "vomitLogAmountMediumDescription": "Vómito moderado",
+  "vomitLogAmountHighDescription": "Vómito abundante",
+  "vomitLogNotesLabel": "Notas",
+  "vomitLogNotesHint": "Añade detalles que quieras recordar",
+  "vomitLogAmountValidation": "Selecciona una cantidad",
   "bottleLogListTitle": "Últimas tomas"
 }

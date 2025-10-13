@@ -60,6 +60,16 @@ class StoolEntries extends Table {
       dateTime().clientDefault(() => DateTime.now())();
 }
 
+@DataClassName('VomitEntryRow')
+class VomitEntries extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get timestamp => dateTime()();
+  IntColumn get amount => integer()();
+  TextColumn get notes => text().nullable()();
+  DateTimeColumn get createdAt =>
+      dateTime().clientDefault(() => DateTime.now())();
+}
+
 @DataClassName('BathEntryRow')
 class BathEntries extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -71,14 +81,20 @@ class BathEntries extends Table {
 }
 
 @DriftDatabase(
-  tables: [BabyProfiles, BottleFeedings, StoolEntries, BathEntries],
+  tables: [
+    BabyProfiles,
+    BottleFeedings,
+    StoolEntries,
+    VomitEntries,
+    BathEntries,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -92,6 +108,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 3) {
         await m.createTable(bathEntries);
+      }
+      if (from < 4) {
+        await m.createTable(vomitEntries);
       }
     },
   );
@@ -152,6 +171,26 @@ class AppDatabase extends _$AppDatabase {
     final row = await query.getSingleOrNull();
     if (row == null) {
       throw StateError('No se pudo obtener el cambio de pañal recién creado.');
+    }
+    return row;
+  }
+
+  Stream<List<VomitEntryRow>> watchVomitEntries() {
+    final query =
+        (select(vomitEntries)..orderBy([
+              (tbl) => OrderingTerm.desc(tbl.timestamp),
+              (tbl) => OrderingTerm.desc(tbl.id),
+            ]))
+            .watch();
+    return query;
+  }
+
+  Future<VomitEntryRow> createVomitEntry(VomitEntriesCompanion entry) async {
+    final id = await into(vomitEntries).insert(entry);
+    final query = select(vomitEntries)..where((tbl) => tbl.id.equals(id));
+    final row = await query.getSingleOrNull();
+    if (row == null) {
+      throw StateError('No se pudo obtener el vómito recién creado.');
     }
     return row;
   }
