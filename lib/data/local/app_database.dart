@@ -90,6 +90,17 @@ class TemperatureEntries extends Table {
       dateTime().clientDefault(() => DateTime.now())();
 }
 
+@DataClassName('PediatricianQuestionRow')
+class PediatricianQuestions extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get content => text().withLength(min: 1, max: 500)();
+  BoolColumn get resolved => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt =>
+      dateTime().clientDefault(() => DateTime.now())();
+  DateTimeColumn get updatedAt =>
+      dateTime().clientDefault(() => DateTime.now())();
+}
+
 @DriftDatabase(
   tables: [
     BabyProfiles,
@@ -98,6 +109,7 @@ class TemperatureEntries extends Table {
     VomitEntries,
     BathEntries,
     TemperatureEntries,
+    PediatricianQuestions,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -105,7 +117,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -125,6 +137,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 5) {
         await m.createTable(temperatureEntries);
+      }
+      if (from < 6) {
+        await m.createTable(pediatricianQuestions);
       }
     },
   );
@@ -243,14 +258,56 @@ class AppDatabase extends _$AppDatabase {
     TemperatureEntriesCompanion entry,
   ) async {
     final id = await into(temperatureEntries).insert(entry);
-    final query =
-        select(temperatureEntries)..where((tbl) => tbl.id.equals(id));
+    final query = select(temperatureEntries)..where((tbl) => tbl.id.equals(id));
     final row = await query.getSingleOrNull();
     if (row == null) {
-      throw StateError(
-        'No se pudo obtener la temperatura recién creada.',
-      );
+      throw StateError('No se pudo obtener la temperatura recién creada.');
     }
     return row;
+  }
+
+  Stream<List<PediatricianQuestionRow>> watchPediatricianQuestions() {
+    final query =
+        (select(pediatricianQuestions)..orderBy([
+              (tbl) => OrderingTerm(expression: tbl.resolved),
+              (tbl) => OrderingTerm.desc(tbl.createdAt),
+              (tbl) => OrderingTerm.desc(tbl.id),
+            ]))
+            .watch();
+    return query;
+  }
+
+  Future<PediatricianQuestionRow> createPediatricianQuestion(
+    PediatricianQuestionsCompanion entry,
+  ) async {
+    final id = await into(pediatricianQuestions).insert(entry);
+    final query = select(pediatricianQuestions)
+      ..where((tbl) => tbl.id.equals(id));
+    final row = await query.getSingleOrNull();
+    if (row == null) {
+      throw StateError('No se pudo obtener la pregunta recién creada.');
+    }
+    return row;
+  }
+
+  Future<PediatricianQuestionRow> updatePediatricianQuestion(
+    int id,
+    PediatricianQuestionsCompanion entry,
+  ) async {
+    await (update(pediatricianQuestions)..where((tbl) => tbl.id.equals(id)))
+        .write(entry.copyWith(updatedAt: Value(DateTime.now())));
+    final query = select(pediatricianQuestions)
+      ..where((tbl) => tbl.id.equals(id));
+    final row = await query.getSingleOrNull();
+    if (row == null) {
+      throw StateError('No se pudo obtener la pregunta actualizada.');
+    }
+    return row;
+  }
+
+  Future<void> deletePediatricianQuestion(int id) async {
+    await (delete(
+      pediatricianQuestions,
+    )..where((tbl) => tbl.id.equals(id))).go();
   }
 }

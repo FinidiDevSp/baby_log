@@ -69,6 +69,17 @@
   "dashboardTemperatureLabel": "Temperature",
   "dashboardFoodLabel": "Feeding",
   "dashboardMedicalAgendaLabel": "AGENDA",
+  "dashboardQuestionsPending": "{count, plural, one {# pending} other {# pending}}",
+  "@dashboardQuestionsPending": {
+    "description": "Status shown on the questions shortcut when there are pending items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "dashboardQuestionsAllClear": "All clear",
   "dashboardElapsedJustNow": "Just now",
   "dashboardElapsedMinutes": "{count, plural, =1 {1 min ago} other {{count} mins ago}}",
   "@dashboardElapsedMinutes": {
@@ -163,5 +174,99 @@
   "temperatureLogValueValidation": "Enter a valid temperature",
   "temperatureLogNotesLabel": "Notes",
   "temperatureLogNotesHint": "Add any notes you want to remember",
-  "bottleLogListTitle": "Latest feedings"
+  "bottleLogListTitle": "Latest feedings",
+  "questionsTitle": "Questions",
+  "questionsShareTooltip": "Share pending questions",
+  "questionsShareTitle": "Questions for the pediatrician",
+  "questionsShareMessage": "These are the topics we want to discuss in our next appointment.",
+  "questionsShareError": "Couldn't share: {error}",
+  "@questionsShareError": {
+    "description": "Error while generating or sharing the PDF",
+    "placeholders": {
+      "error": {
+        "example": "Permission denied"
+      }
+    }
+  },
+  "questionsValidationMessage": "Write the question before saving.",
+  "questionsSaveError": "Couldn't save the question: {error}",
+  "@questionsSaveError": {
+    "description": "Error when saving a question",
+    "placeholders": {
+      "error": {
+        "example": "Database error"
+      }
+    }
+  },
+  "questionsUpdateError": "Couldn't update the question: {error}",
+  "@questionsUpdateError": {
+    "description": "Error when updating a question",
+    "placeholders": {
+      "error": {
+        "example": "Database error"
+      }
+    }
+  },
+  "questionsDeleteError": "Couldn't delete the question: {error}",
+  "@questionsDeleteError": {
+    "description": "Error when deleting a question",
+    "placeholders": {
+      "error": {
+        "example": "Database error"
+      }
+    }
+  },
+  "questionsComposerTitle": "Write your question",
+  "questionsComposerPlaceholder": "E.g. Ask about starting solid food",
+  "questionsComposerAction": "Save question",
+  "questionsPendingSection": "Pending",
+  "questionsResolvedSection": "Resolved",
+  "questionsDeleteDialogTitle": "Delete question?",
+  "questionsDeleteDialogMessage": "This will remove the question from the list.",
+  "questionsDeleteDialogConfirm": "Delete",
+  "questionsEditDialogTitle": "Edit question",
+  "questionsEditDialogLabel": "Question",
+  "questionsEditDialogCancel": "Cancel",
+  "questionsEditDialogSave": "Save",
+  "questionsEditAction": "Edit",
+  "questionsDeleteAction": "Delete",
+  "questionsEmptyTitle": "Capture your doubts",
+  "questionsEmptySubtitle": "Write down what you want to ask during the next pediatric visit.",
+  "questionsLoadError": "We couldn't load your questions. Please try again.",
+  "questionsAgeUnknown": "Age unavailable",
+  "questionsAgeLessThanWeek": "Less than a week",
+  "questionsAgeWeeks": "{count, plural, one {# week} other {# weeks}}",
+  "@questionsAgeWeeks": {
+    "description": "Baby age expressed in weeks",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "questionsAgeMonths": "{count, plural, one {# month} other {# months}}",
+  "@questionsAgeMonths": {
+    "description": "Baby age expressed in months",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "questionsAgeMonthsAndWeeks": "{months, plural, one {# month} other {# months}} and {weeks, plural, one {# week} other {# weeks}}",
+  "@questionsAgeMonthsAndWeeks": {
+    "description": "Baby age combining months and weeks",
+    "placeholders": {
+      "months": {
+        "type": "int",
+        "example": "3"
+      },
+      "weeks": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  }
 }

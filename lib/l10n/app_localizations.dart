@@ -368,6 +368,18 @@ abstract class AppLocalizations {
   /// **'AGENDA'**
   String get dashboardMedicalAgendaLabel;
 
+  /// Estado mostrado en el acceso directo de preguntas cuando hay pendientes
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, one {# pendiente} other {# pendientes}}'**
+  String dashboardQuestionsPending(int count);
+
+  /// No description provided for @dashboardQuestionsAllClear.
+  ///
+  /// In es, this message translates to:
+  /// **'Al día'**
+  String get dashboardQuestionsAllClear;
+
   /// No description provided for @dashboardElapsedJustNow.
   ///
   /// In es, this message translates to:
@@ -769,6 +781,192 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Últimas tomas'**
   String get bottleLogListTitle;
+
+  /// No description provided for @questionsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Preguntas'**
+  String get questionsTitle;
+
+  /// No description provided for @questionsShareTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Compartir preguntas pendientes'**
+  String get questionsShareTooltip;
+
+  /// No description provided for @questionsShareTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Preguntas para el pediatra'**
+  String get questionsShareTitle;
+
+  /// No description provided for @questionsShareMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Estas son las dudas que queremos comentar en la próxima visita.'**
+  String get questionsShareMessage;
+
+  /// Error al generar o compartir el PDF
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo compartir: {error}'**
+  String questionsShareError(Object error);
+
+  /// No description provided for @questionsValidationMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe tu pregunta antes de guardar.'**
+  String get questionsValidationMessage;
+
+  /// Error al guardar una pregunta
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo guardar la pregunta: {error}'**
+  String questionsSaveError(Object error);
+
+  /// Error al actualizar una pregunta
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo actualizar la pregunta: {error}'**
+  String questionsUpdateError(Object error);
+
+  /// Error al eliminar una pregunta
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo eliminar la pregunta: {error}'**
+  String questionsDeleteError(Object error);
+
+  /// No description provided for @questionsComposerTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Anota tu duda'**
+  String get questionsComposerTitle;
+
+  /// No description provided for @questionsComposerPlaceholder.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej. Recordar preguntar sobre la introducción de sólidos'**
+  String get questionsComposerPlaceholder;
+
+  /// No description provided for @questionsComposerAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar pregunta'**
+  String get questionsComposerAction;
+
+  /// No description provided for @questionsPendingSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Pendientes'**
+  String get questionsPendingSection;
+
+  /// No description provided for @questionsResolvedSection.
+  ///
+  /// In es, this message translates to:
+  /// **'Resueltas'**
+  String get questionsResolvedSection;
+
+  /// No description provided for @questionsDeleteDialogTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar pregunta?'**
+  String get questionsDeleteDialogTitle;
+
+  /// No description provided for @questionsDeleteDialogMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'La pregunta se quitará de la lista.'**
+  String get questionsDeleteDialogMessage;
+
+  /// No description provided for @questionsDeleteDialogConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get questionsDeleteDialogConfirm;
+
+  /// No description provided for @questionsEditDialogTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar pregunta'**
+  String get questionsEditDialogTitle;
+
+  /// No description provided for @questionsEditDialogLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Pregunta'**
+  String get questionsEditDialogLabel;
+
+  /// No description provided for @questionsEditDialogCancel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar'**
+  String get questionsEditDialogCancel;
+
+  /// No description provided for @questionsEditDialogSave.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar'**
+  String get questionsEditDialogSave;
+
+  /// No description provided for @questionsEditAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar'**
+  String get questionsEditAction;
+
+  /// No description provided for @questionsDeleteAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get questionsDeleteAction;
+
+  /// No description provided for @questionsEmptyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Anota tus dudas'**
+  String get questionsEmptyTitle;
+
+  /// No description provided for @questionsEmptySubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Guarda las preguntas que quieras llevar a la próxima visita con el pediatra.'**
+  String get questionsEmptySubtitle;
+
+  /// No description provided for @questionsLoadError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudieron cargar tus preguntas. Intenta de nuevo.'**
+  String get questionsLoadError;
+
+  /// No description provided for @questionsAgeUnknown.
+  ///
+  /// In es, this message translates to:
+  /// **'Edad no disponible'**
+  String get questionsAgeUnknown;
+
+  /// No description provided for @questionsAgeLessThanWeek.
+  ///
+  /// In es, this message translates to:
+  /// **'Menos de una semana'**
+  String get questionsAgeLessThanWeek;
+
+  /// Edad del bebé expresada en semanas
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, one {# semana} other {# semanas}}'**
+  String questionsAgeWeeks(int count);
+
+  /// Edad del bebé expresada en meses
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, one {# mes} other {# meses}}'**
+  String questionsAgeMonths(int count);
+
+  /// Edad combinando meses y semanas
+  ///
+  /// In es, this message translates to:
+  /// **'{months, plural, one {# mes} other {# meses}} y {weeks, plural, one {# semana} other {# semanas}}'**
+  String questionsAgeMonthsAndWeeks(int months, int weeks);
 }
 
 class _AppLocalizationsDelegate

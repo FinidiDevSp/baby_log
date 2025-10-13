@@ -10,8 +10,10 @@ import 'package:baby_log/domain/entities/feeding_entry.dart';
 import 'package:baby_log/domain/entities/stool_entry.dart';
 import 'package:baby_log/domain/entities/temperature_entry.dart';
 import 'package:baby_log/domain/entities/vomit_entry.dart';
+import 'package:baby_log/domain/entities/pediatrician_question.dart';
 import 'package:baby_log/l10n/app_localizations.dart';
 import 'package:baby_log/presentation/features/baby_form/baby_form_page.dart';
+import 'package:baby_log/presentation/features/questions/pediatrician_questions_page.dart';
 import 'package:baby_log/presentation/widgets/baby_avatar.dart';
 
 import 'state/bath_entries_provider.dart';
@@ -22,6 +24,7 @@ import 'state/vomit_entries_provider.dart';
 import '../baths/bath_log_page.dart';
 import '../diapers/stool_log_page.dart';
 import '../feedings/bottle_feeding_page.dart';
+import '../questions/state/pediatrician_questions_provider.dart';
 import '../temperatures/temperature_log_page.dart';
 import '../vomits/vomit_log_page.dart';
 
@@ -243,12 +246,22 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     final vomitsAsync = ref.watch(vomitEntriesProvider);
     final bathsAsync = ref.watch(bathEntriesProvider);
     final temperaturesAsync = ref.watch(temperatureEntriesProvider);
+    final questionsAsync = ref.watch(pediatricianQuestionsProvider);
     final feedings = feedingsAsync.value ?? const <FeedingEntry>[];
     final stools = stoolsAsync.value ?? const <StoolEntry>[];
     final vomits = vomitsAsync.value ?? const <VomitEntry>[];
     final baths = bathsAsync.value ?? const <BathEntry>[];
-    final temperatures =
-        temperaturesAsync.value ?? const <TemperatureEntry>[];
+    final temperatures = temperaturesAsync.value ?? const <TemperatureEntry>[];
+    final questions = questionsAsync.value ?? const <PediatricianQuestion>[];
+    final pendingQuestionsCount = questions
+        .where((question) => !question.isResolved)
+        .length;
+    String? questionsStatus;
+    if (questionsAsync.value != null) {
+      questionsStatus = pendingQuestionsCount > 0
+          ? l10n.dashboardQuestionsPending(pendingQuestionsCount)
+          : l10n.dashboardQuestionsAllClear;
+    }
     final selectedFeedings = feedings
         .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
         .toList();
@@ -292,8 +305,12 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     void openTemperatureForm() {
       Navigator.of(
         context,
-      ).push(
-        MaterialPageRoute(builder: (_) => const TemperatureLogPage()),
+      ).push(MaterialPageRoute(builder: (_) => const TemperatureLogPage()));
+    }
+
+    void openQuestionsPage() {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const PediatricianQuestionsPage()),
       );
     }
 
@@ -339,10 +356,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
         (previous, current) =>
             previous.timestamp.isAfter(current.timestamp) ? previous : current,
       );
-      temperatureStatus = _formatElapsedTime(
-        l10n,
-        latestTemperature.timestamp,
-      );
+      temperatureStatus = _formatElapsedTime(l10n, latestTemperature.timestamp);
     }
 
     final hasEntries =
@@ -362,11 +376,13 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
             onVomitTap: openVomitForm,
             onBathTap: openBathForm,
             onTemperatureTap: openTemperatureForm,
+            onQuestionsTap: openQuestionsPage,
             bottleStatus: bottleStatus,
             stoolStatus: stoolStatus,
             vomitStatus: vomitStatus,
             bathStatus: bathStatus,
             temperatureStatus: temperatureStatus,
+            questionsStatus: questionsStatus,
           ),
           const SizedBox(height: 16),
           _TimelineCard(
@@ -406,11 +422,13 @@ class _ShortcutCarousel extends StatelessWidget {
     required this.onVomitTap,
     required this.onBathTap,
     required this.onTemperatureTap,
+    required this.onQuestionsTap,
     this.bottleStatus,
     this.stoolStatus,
     this.vomitStatus,
     this.bathStatus,
     this.temperatureStatus,
+    this.questionsStatus,
   });
 
   final VoidCallback onBottleTap;
@@ -418,11 +436,13 @@ class _ShortcutCarousel extends StatelessWidget {
   final VoidCallback onVomitTap;
   final VoidCallback onBathTap;
   final VoidCallback onTemperatureTap;
+  final VoidCallback onQuestionsTap;
   final String? bottleStatus;
   final String? stoolStatus;
   final String? vomitStatus;
   final String? bathStatus;
   final String? temperatureStatus;
+  final String? questionsStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -482,6 +502,9 @@ class _ShortcutCarousel extends StatelessWidget {
         color: const Color(0xFF8E8CD8),
         icon: LucideIcons.messageCircleQuestionMark,
         label: l10n.dashboardPediatricQuestionsLabel,
+        onTap: onQuestionsTap,
+        heroTag: 'questions_shortcut',
+        status: questionsStatus,
       ),
     ];
 
@@ -1138,10 +1161,9 @@ class _DailyLogListState extends State<_DailyLogList>
     final latestTemperature = widget.temperatures.isEmpty
         ? null
         : widget.temperatures.reduce(
-            (previous, current) =>
-                previous.timestamp.isAfter(current.timestamp)
-                    ? previous
-                    : current,
+            (previous, current) => previous.timestamp.isAfter(current.timestamp)
+                ? previous
+                : current,
           );
     final temperatureSummaryValue = latestTemperature == null
         ? '0 · ${l10n.temperatureLogValueUnit}'
@@ -1353,8 +1375,10 @@ class _DailyLogListState extends State<_DailyLogList>
                             );
                           case _DailyLogType.vomit:
                             final vomit = entry.vomit!;
-                            final description =
-                                _vomitDescription(l10n, vomit.amount);
+                            final description = _vomitDescription(
+                              l10n,
+                              vomit.amount,
+                            );
                             return Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -1499,17 +1523,15 @@ class _DailyLogListState extends State<_DailyLogList>
                                         valueLabel,
                                         style: theme.textTheme.bodyMedium,
                                       ),
-                                      if ((temperature.notes ?? '').isNotEmpty)
-                                        ...[
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            temperature.notes!,
-                                            style: theme.textTheme.bodySmall
-                                                ?.copyWith(
-                                              color: Colors.white70,
-                                            ),
-                                          ),
-                                        ],
+                                      if ((temperature.notes ?? '')
+                                          .isNotEmpty) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          temperature.notes!,
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(color: Colors.white70),
+                                        ),
+                                      ],
                                     ],
                                   ),
                                 ),
