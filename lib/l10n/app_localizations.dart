@@ -374,22 +374,22 @@ abstract class AppLocalizations {
   /// **'Justo ahora'**
   String get dashboardElapsedJustNow;
 
-  /// No description provided for @dashboardElapsedMinutes.
+  /// Tiempo relativo en minutos desde el último evento
   ///
   /// In es, this message translates to:
-  /// **'Hace {count} mins'**
+  /// **'{count, plural, =1 {Hace 1 min} other {Hace {count} mins}}'**
   String dashboardElapsedMinutes(int count);
 
-  /// No description provided for @dashboardElapsedHours.
+  /// Tiempo relativo en horas desde el último evento
   ///
   /// In es, this message translates to:
-  /// **'Hace {count} h'**
+  /// **'{count, plural, =1 {Hace 1 h} other {Hace {count} h}}'**
   String dashboardElapsedHours(int count);
 
-  /// No description provided for @dashboardElapsedDays.
+  /// Tiempo relativo en días desde el último evento
   ///
   /// In es, this message translates to:
-  /// **'Hace {count} días'**
+  /// **'{count, plural, =1 {Hace 1 día} other {Hace {count} días}}'**
   String dashboardElapsedDays(int count);
 
   /// No description provided for @dashboardEventsEmptyTitle.
@@ -529,6 +529,54 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Últimos registros'**
   String get homeLogListTitle;
+
+  /// No description provided for @bathLogTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Baño'**
+  String get bathLogTitle;
+
+  /// No description provided for @bathLogTypeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo de baño'**
+  String get bathLogTypeLabel;
+
+  /// No description provided for @bathLogTypeFullOption.
+  ///
+  /// In es, this message translates to:
+  /// **'Completo'**
+  String get bathLogTypeFullOption;
+
+  /// No description provided for @bathLogTypeQuickOption.
+  ///
+  /// In es, this message translates to:
+  /// **'Rápido'**
+  String get bathLogTypeQuickOption;
+
+  /// No description provided for @bathLogTypeFullDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Baño completo'**
+  String get bathLogTypeFullDescription;
+
+  /// No description provided for @bathLogTypeQuickDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Baño rápido'**
+  String get bathLogTypeQuickDescription;
+
+  /// No description provided for @bathLogNotesLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas'**
+  String get bathLogNotesLabel;
+
+  /// No description provided for @bathLogNotesHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade detalles que quieras recordar'**
+  String get bathLogNotesHint;
 
   /// No description provided for @stoolLogTitle.
   ///

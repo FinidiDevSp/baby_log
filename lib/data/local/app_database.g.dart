@@ -307,299 +307,6 @@ class $BabyProfilesTable extends BabyProfiles
   }
 }
 
-class $BottleFeedingsTable extends BottleFeedings
-    with TableInfo<$BottleFeedingsTable, BottleFeedingRow> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $BottleFeedingsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _timestampMeta =
-      const VerificationMeta('timestamp');
-  @override
-  late final GeneratedColumn<DateTime> timestamp =
-      GeneratedColumn<DateTime>(
-    'timestamp',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _amountMlMeta =
-      const VerificationMeta('amountMl');
-  @override
-  late final GeneratedColumn<int> amountMl = GeneratedColumn<int>(
-    'amount_ml',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
-  @override
-  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
-    'notes',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  @override
-  late final GeneratedColumn<DateTime> createdAt =
-      GeneratedColumn<DateTime>(
-    'created_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    clientDefault: () => DateTime.now(),
-  );
-  @override
-  List<GeneratedColumn> get $columns =>
-      [id, timestamp, amountMl, notes, createdAt];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'bottle_feedings';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<BottleFeedingRow> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('timestamp')) {
-      context.handle(
-        _timestampMeta,
-        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_timestampMeta);
-    }
-    if (data.containsKey('amount_ml')) {
-      context.handle(
-        _amountMlMeta,
-        amountMl.isAcceptableOrUnknown(data['amount_ml']!, _amountMlMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_amountMlMeta);
-    }
-    if (data.containsKey('notes')) {
-      context.handle(
-        _notesMeta,
-        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
-      );
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  BottleFeedingRow map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return BottleFeedingRow(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      timestamp: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}timestamp'],
-      )!,
-      amountMl: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}amount_ml'],
-      )!,
-      notes: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}notes'],
-      ),
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
-      )!,
-    );
-  }
-
-  @override
-  $BottleFeedingsTable createAlias(String alias) {
-    return $BottleFeedingsTable(attachedDatabase, alias);
-  }
-}
-
-class $StoolEntriesTable extends StoolEntries
-    with TableInfo<$StoolEntriesTable, StoolEntryRow> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $StoolEntriesTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _timestampMeta =
-      const VerificationMeta('timestamp');
-  @override
-  late final GeneratedColumn<DateTime> timestamp =
-      GeneratedColumn<DateTime>(
-    'timestamp',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _consistencyMeta =
-      const VerificationMeta('consistency');
-  @override
-  late final GeneratedColumn<int> consistency = GeneratedColumn<int>(
-    'consistency',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
-  @override
-  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
-    'notes',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
-  @override
-  late final GeneratedColumn<DateTime> createdAt =
-      GeneratedColumn<DateTime>(
-    'created_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    clientDefault: () => DateTime.now(),
-  );
-  @override
-  List<GeneratedColumn> get $columns =>
-      [id, timestamp, consistency, notes, createdAt];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'stool_entries';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<StoolEntryRow> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('timestamp')) {
-      context.handle(
-        _timestampMeta,
-        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_timestampMeta);
-    }
-    if (data.containsKey('consistency')) {
-      context.handle(
-        _consistencyMeta,
-        consistency.isAcceptableOrUnknown(
-          data['consistency']!,
-          _consistencyMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_consistencyMeta);
-    }
-    if (data.containsKey('notes')) {
-      context.handle(
-        _notesMeta,
-        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
-      );
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  StoolEntryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return StoolEntryRow(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      timestamp: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}timestamp'],
-      )!,
-      consistency: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}consistency'],
-      )!,
-      notes: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}notes'],
-      ),
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
-      )!,
-    );
-  }
-
-  @override
-  $StoolEntriesTable createAlias(String alias) {
-    return $StoolEntriesTable(attachedDatabase, alias);
-  }
-}
-
 class BabyRow extends DataClass implements Insertable<BabyRow> {
   final int id;
   final String name;
@@ -965,6 +672,157 @@ class BabyProfilesCompanion extends UpdateCompanion<BabyRow> {
   }
 }
 
+class $BottleFeedingsTable extends BottleFeedings
+    with TableInfo<$BottleFeedingsTable, BottleFeedingRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BottleFeedingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMlMeta = const VerificationMeta(
+    'amountMl',
+  );
+  @override
+  late final GeneratedColumn<int> amountMl = GeneratedColumn<int>(
+    'amount_ml',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    timestamp,
+    amountMl,
+    notes,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'bottle_feedings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BottleFeedingRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    if (data.containsKey('amount_ml')) {
+      context.handle(
+        _amountMlMeta,
+        amountMl.isAcceptableOrUnknown(data['amount_ml']!, _amountMlMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMlMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BottleFeedingRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BottleFeedingRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
+      amountMl: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount_ml'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $BottleFeedingsTable createAlias(String alias) {
+    return $BottleFeedingsTable(attachedDatabase, alias);
+  }
+}
+
 class BottleFeedingRow extends DataClass
     implements Insertable<BottleFeedingRow> {
   final int id;
@@ -1036,17 +894,16 @@ class BottleFeedingRow extends DataClass
     Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
   }) => BottleFeedingRow(
-        id: id ?? this.id,
-        timestamp: timestamp ?? this.timestamp,
-        amountMl: amountMl ?? this.amountMl,
-        notes: notes.present ? notes.value : this.notes,
-        createdAt: createdAt ?? this.createdAt,
-      );
+    id: id ?? this.id,
+    timestamp: timestamp ?? this.timestamp,
+    amountMl: amountMl ?? this.amountMl,
+    notes: notes.present ? notes.value : this.notes,
+    createdAt: createdAt ?? this.createdAt,
+  );
   BottleFeedingRow copyWithCompanion(BottleFeedingsCompanion data) {
     return BottleFeedingRow(
       id: data.id.present ? data.id.value : this.id,
-      timestamp:
-          data.timestamp.present ? data.timestamp.value : this.timestamp,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
       amountMl: data.amountMl.present ? data.amountMl.value : this.amountMl,
       notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -1068,7 +925,8 @@ class BottleFeedingRow extends DataClass
   @override
   int get hashCode => Object.hash(id, timestamp, amountMl, notes, createdAt);
   @override
-  bool operator ==(Object other) => identical(this, other) ||
+  bool operator ==(Object other) =>
+      identical(this, other) ||
       (other is BottleFeedingRow &&
           other.id == this.id &&
           other.timestamp == this.timestamp &&
@@ -1096,9 +954,8 @@ class BottleFeedingsCompanion extends UpdateCompanion<BottleFeedingRow> {
     required int amountMl,
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
-  })  : timestamp = Value(timestamp),
-        amountMl = Value(amountMl);
-
+  }) : timestamp = Value(timestamp),
+       amountMl = Value(amountMl);
   static Insertable<BottleFeedingRow> custom({
     Expression<int>? id,
     Expression<DateTime>? timestamp,
@@ -1162,6 +1019,160 @@ class BottleFeedingsCompanion extends UpdateCompanion<BottleFeedingRow> {
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
+  }
+}
+
+class $StoolEntriesTable extends StoolEntries
+    with TableInfo<$StoolEntriesTable, StoolEntryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StoolEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _consistencyMeta = const VerificationMeta(
+    'consistency',
+  );
+  @override
+  late final GeneratedColumn<int> consistency = GeneratedColumn<int>(
+    'consistency',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    timestamp,
+    consistency,
+    notes,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'stool_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StoolEntryRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    if (data.containsKey('consistency')) {
+      context.handle(
+        _consistencyMeta,
+        consistency.isAcceptableOrUnknown(
+          data['consistency']!,
+          _consistencyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_consistencyMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StoolEntryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StoolEntryRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
+      consistency: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}consistency'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $StoolEntriesTable createAlias(String alias) {
+    return $StoolEntriesTable(attachedDatabase, alias);
   }
 }
 
@@ -1235,19 +1246,19 @@ class StoolEntryRow extends DataClass implements Insertable<StoolEntryRow> {
     Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
   }) => StoolEntryRow(
-        id: id ?? this.id,
-        timestamp: timestamp ?? this.timestamp,
-        consistency: consistency ?? this.consistency,
-        notes: notes.present ? notes.value : this.notes,
-        createdAt: createdAt ?? this.createdAt,
-      );
+    id: id ?? this.id,
+    timestamp: timestamp ?? this.timestamp,
+    consistency: consistency ?? this.consistency,
+    notes: notes.present ? notes.value : this.notes,
+    createdAt: createdAt ?? this.createdAt,
+  );
   StoolEntryRow copyWithCompanion(StoolEntriesCompanion data) {
     return StoolEntryRow(
       id: data.id.present ? data.id.value : this.id,
-      timestamp:
-          data.timestamp.present ? data.timestamp.value : this.timestamp,
-      consistency:
-          data.consistency.present ? data.consistency.value : this.consistency,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+      consistency: data.consistency.present
+          ? data.consistency.value
+          : this.consistency,
       notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
@@ -1268,7 +1279,8 @@ class StoolEntryRow extends DataClass implements Insertable<StoolEntryRow> {
   @override
   int get hashCode => Object.hash(id, timestamp, consistency, notes, createdAt);
   @override
-  bool operator ==(Object other) => identical(this, other) ||
+  bool operator ==(Object other) =>
+      identical(this, other) ||
       (other is StoolEntryRow &&
           other.id == this.id &&
           other.timestamp == this.timestamp &&
@@ -1296,9 +1308,8 @@ class StoolEntriesCompanion extends UpdateCompanion<StoolEntryRow> {
     required int consistency,
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
-  })  : timestamp = Value(timestamp),
-        consistency = Value(consistency);
-
+  }) : timestamp = Value(timestamp),
+       consistency = Value(consistency);
   static Insertable<StoolEntryRow> custom({
     Expression<int>? id,
     Expression<DateTime>? timestamp,
@@ -1365,19 +1376,364 @@ class StoolEntriesCompanion extends UpdateCompanion<StoolEntryRow> {
   }
 }
 
+class $BathEntriesTable extends BathEntries
+    with TableInfo<$BathEntriesTable, BathEntryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BathEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<int> type = GeneratedColumn<int>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, timestamp, type, notes, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'bath_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BathEntryRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BathEntryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BathEntryRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}type'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $BathEntriesTable createAlias(String alias) {
+    return $BathEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class BathEntryRow extends DataClass implements Insertable<BathEntryRow> {
+  final int id;
+  final DateTime timestamp;
+  final int type;
+  final String? notes;
+  final DateTime createdAt;
+  const BathEntryRow({
+    required this.id,
+    required this.timestamp,
+    required this.type,
+    this.notes,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    map['type'] = Variable<int>(type);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  BathEntriesCompanion toCompanion(bool nullToAbsent) {
+    return BathEntriesCompanion(
+      id: Value(id),
+      timestamp: Value(timestamp),
+      type: Value(type),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory BathEntryRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BathEntryRow(
+      id: serializer.fromJson<int>(json['id']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+      type: serializer.fromJson<int>(json['type']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+      'type': serializer.toJson<int>(type),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  BathEntryRow copyWith({
+    int? id,
+    DateTime? timestamp,
+    int? type,
+    Value<String?> notes = const Value.absent(),
+    DateTime? createdAt,
+  }) => BathEntryRow(
+    id: id ?? this.id,
+    timestamp: timestamp ?? this.timestamp,
+    type: type ?? this.type,
+    notes: notes.present ? notes.value : this.notes,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  BathEntryRow copyWithCompanion(BathEntriesCompanion data) {
+    return BathEntryRow(
+      id: data.id.present ? data.id.value : this.id,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+      type: data.type.present ? data.type.value : this.type,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BathEntryRow(')
+          ..write('id: $id, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('type: $type, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, timestamp, type, notes, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BathEntryRow &&
+          other.id == this.id &&
+          other.timestamp == this.timestamp &&
+          other.type == this.type &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt);
+}
+
+class BathEntriesCompanion extends UpdateCompanion<BathEntryRow> {
+  final Value<int> id;
+  final Value<DateTime> timestamp;
+  final Value<int> type;
+  final Value<String?> notes;
+  final Value<DateTime> createdAt;
+  const BathEntriesCompanion({
+    this.id = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.type = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  BathEntriesCompanion.insert({
+    this.id = const Value.absent(),
+    required DateTime timestamp,
+    required int type,
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : timestamp = Value(timestamp),
+       type = Value(type);
+  static Insertable<BathEntryRow> custom({
+    Expression<int>? id,
+    Expression<DateTime>? timestamp,
+    Expression<int>? type,
+    Expression<String>? notes,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (type != null) 'type': type,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  BathEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? timestamp,
+    Value<int>? type,
+    Value<String?>? notes,
+    Value<DateTime>? createdAt,
+  }) {
+    return BathEntriesCompanion(
+      id: id ?? this.id,
+      timestamp: timestamp ?? this.timestamp,
+      type: type ?? this.type,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<int>(type.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BathEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('type: $type, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $BabyProfilesTable babyProfiles = $BabyProfilesTable(this);
-  late final $BottleFeedingsTable bottleFeedings =
-      $BottleFeedingsTable(this);
+  late final $BottleFeedingsTable bottleFeedings = $BottleFeedingsTable(this);
   late final $StoolEntriesTable stoolEntries = $StoolEntriesTable(this);
+  late final $BathEntriesTable bathEntries = $BathEntriesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [babyProfiles, bottleFeedings, stoolEntries];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    babyProfiles,
+    bottleFeedings,
+    stoolEntries,
+    bathEntries,
+  ];
 }
 
 typedef $$BabyProfilesTableCreateCompanionBuilder =
@@ -1690,10 +2046,606 @@ typedef $$BabyProfilesTableProcessedTableManager =
       BabyRow,
       PrefetchHooks Function()
     >;
+typedef $$BottleFeedingsTableCreateCompanionBuilder =
+    BottleFeedingsCompanion Function({
+      Value<int> id,
+      required DateTime timestamp,
+      required int amountMl,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+    });
+typedef $$BottleFeedingsTableUpdateCompanionBuilder =
+    BottleFeedingsCompanion Function({
+      Value<int> id,
+      Value<DateTime> timestamp,
+      Value<int> amountMl,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+    });
+
+class $$BottleFeedingsTableFilterComposer
+    extends Composer<_$AppDatabase, $BottleFeedingsTable> {
+  $$BottleFeedingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amountMl => $composableBuilder(
+    column: $table.amountMl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BottleFeedingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $BottleFeedingsTable> {
+  $$BottleFeedingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amountMl => $composableBuilder(
+    column: $table.amountMl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BottleFeedingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BottleFeedingsTable> {
+  $$BottleFeedingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+
+  GeneratedColumn<int> get amountMl =>
+      $composableBuilder(column: $table.amountMl, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$BottleFeedingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BottleFeedingsTable,
+          BottleFeedingRow,
+          $$BottleFeedingsTableFilterComposer,
+          $$BottleFeedingsTableOrderingComposer,
+          $$BottleFeedingsTableAnnotationComposer,
+          $$BottleFeedingsTableCreateCompanionBuilder,
+          $$BottleFeedingsTableUpdateCompanionBuilder,
+          (
+            BottleFeedingRow,
+            BaseReferences<
+              _$AppDatabase,
+              $BottleFeedingsTable,
+              BottleFeedingRow
+            >,
+          ),
+          BottleFeedingRow,
+          PrefetchHooks Function()
+        > {
+  $$BottleFeedingsTableTableManager(
+    _$AppDatabase db,
+    $BottleFeedingsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BottleFeedingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BottleFeedingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BottleFeedingsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+                Value<int> amountMl = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => BottleFeedingsCompanion(
+                id: id,
+                timestamp: timestamp,
+                amountMl: amountMl,
+                notes: notes,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required DateTime timestamp,
+                required int amountMl,
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => BottleFeedingsCompanion.insert(
+                id: id,
+                timestamp: timestamp,
+                amountMl: amountMl,
+                notes: notes,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BottleFeedingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BottleFeedingsTable,
+      BottleFeedingRow,
+      $$BottleFeedingsTableFilterComposer,
+      $$BottleFeedingsTableOrderingComposer,
+      $$BottleFeedingsTableAnnotationComposer,
+      $$BottleFeedingsTableCreateCompanionBuilder,
+      $$BottleFeedingsTableUpdateCompanionBuilder,
+      (
+        BottleFeedingRow,
+        BaseReferences<_$AppDatabase, $BottleFeedingsTable, BottleFeedingRow>,
+      ),
+      BottleFeedingRow,
+      PrefetchHooks Function()
+    >;
+typedef $$StoolEntriesTableCreateCompanionBuilder =
+    StoolEntriesCompanion Function({
+      Value<int> id,
+      required DateTime timestamp,
+      required int consistency,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+    });
+typedef $$StoolEntriesTableUpdateCompanionBuilder =
+    StoolEntriesCompanion Function({
+      Value<int> id,
+      Value<DateTime> timestamp,
+      Value<int> consistency,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+    });
+
+class $$StoolEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $StoolEntriesTable> {
+  $$StoolEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get consistency => $composableBuilder(
+    column: $table.consistency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StoolEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $StoolEntriesTable> {
+  $$StoolEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get consistency => $composableBuilder(
+    column: $table.consistency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StoolEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StoolEntriesTable> {
+  $$StoolEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+
+  GeneratedColumn<int> get consistency => $composableBuilder(
+    column: $table.consistency,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$StoolEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StoolEntriesTable,
+          StoolEntryRow,
+          $$StoolEntriesTableFilterComposer,
+          $$StoolEntriesTableOrderingComposer,
+          $$StoolEntriesTableAnnotationComposer,
+          $$StoolEntriesTableCreateCompanionBuilder,
+          $$StoolEntriesTableUpdateCompanionBuilder,
+          (
+            StoolEntryRow,
+            BaseReferences<_$AppDatabase, $StoolEntriesTable, StoolEntryRow>,
+          ),
+          StoolEntryRow,
+          PrefetchHooks Function()
+        > {
+  $$StoolEntriesTableTableManager(_$AppDatabase db, $StoolEntriesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StoolEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StoolEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StoolEntriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+                Value<int> consistency = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => StoolEntriesCompanion(
+                id: id,
+                timestamp: timestamp,
+                consistency: consistency,
+                notes: notes,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required DateTime timestamp,
+                required int consistency,
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => StoolEntriesCompanion.insert(
+                id: id,
+                timestamp: timestamp,
+                consistency: consistency,
+                notes: notes,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StoolEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StoolEntriesTable,
+      StoolEntryRow,
+      $$StoolEntriesTableFilterComposer,
+      $$StoolEntriesTableOrderingComposer,
+      $$StoolEntriesTableAnnotationComposer,
+      $$StoolEntriesTableCreateCompanionBuilder,
+      $$StoolEntriesTableUpdateCompanionBuilder,
+      (
+        StoolEntryRow,
+        BaseReferences<_$AppDatabase, $StoolEntriesTable, StoolEntryRow>,
+      ),
+      StoolEntryRow,
+      PrefetchHooks Function()
+    >;
+typedef $$BathEntriesTableCreateCompanionBuilder =
+    BathEntriesCompanion Function({
+      Value<int> id,
+      required DateTime timestamp,
+      required int type,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+    });
+typedef $$BathEntriesTableUpdateCompanionBuilder =
+    BathEntriesCompanion Function({
+      Value<int> id,
+      Value<DateTime> timestamp,
+      Value<int> type,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+    });
+
+class $$BathEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $BathEntriesTable> {
+  $$BathEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BathEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $BathEntriesTable> {
+  $$BathEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BathEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BathEntriesTable> {
+  $$BathEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+
+  GeneratedColumn<int> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$BathEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BathEntriesTable,
+          BathEntryRow,
+          $$BathEntriesTableFilterComposer,
+          $$BathEntriesTableOrderingComposer,
+          $$BathEntriesTableAnnotationComposer,
+          $$BathEntriesTableCreateCompanionBuilder,
+          $$BathEntriesTableUpdateCompanionBuilder,
+          (
+            BathEntryRow,
+            BaseReferences<_$AppDatabase, $BathEntriesTable, BathEntryRow>,
+          ),
+          BathEntryRow,
+          PrefetchHooks Function()
+        > {
+  $$BathEntriesTableTableManager(_$AppDatabase db, $BathEntriesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BathEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BathEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BathEntriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+                Value<int> type = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => BathEntriesCompanion(
+                id: id,
+                timestamp: timestamp,
+                type: type,
+                notes: notes,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required DateTime timestamp,
+                required int type,
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => BathEntriesCompanion.insert(
+                id: id,
+                timestamp: timestamp,
+                type: type,
+                notes: notes,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BathEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BathEntriesTable,
+      BathEntryRow,
+      $$BathEntriesTableFilterComposer,
+      $$BathEntriesTableOrderingComposer,
+      $$BathEntriesTableAnnotationComposer,
+      $$BathEntriesTableCreateCompanionBuilder,
+      $$BathEntriesTableUpdateCompanionBuilder,
+      (
+        BathEntryRow,
+        BaseReferences<_$AppDatabase, $BathEntriesTable, BathEntryRow>,
+      ),
+      BathEntryRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$BabyProfilesTableTableManager get babyProfiles =>
       $$BabyProfilesTableTableManager(_db, _db.babyProfiles);
+  $$BottleFeedingsTableTableManager get bottleFeedings =>
+      $$BottleFeedingsTableTableManager(_db, _db.bottleFeedings);
+  $$StoolEntriesTableTableManager get stoolEntries =>
+      $$StoolEntriesTableTableManager(_db, _db.stoolEntries);
+  $$BathEntriesTableTableManager get bathEntries =>
+      $$BathEntriesTableTableManager(_db, _db.bathEntries);
 }

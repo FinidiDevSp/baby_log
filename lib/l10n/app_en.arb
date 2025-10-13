@@ -76,7 +76,7 @@
     "placeholders": {
       "count": {
         "type": "int",
-        "example": 5
+        "example": "5"
       }
     }
   },
@@ -86,7 +86,7 @@
     "placeholders": {
       "count": {
         "type": "int",
-        "example": 3
+        "example": "3"
       }
     }
   },
@@ -96,7 +96,7 @@
     "placeholders": {
       "count": {
         "type": "int",
-        "example": 2
+        "example": "2"
       }
     }
   },
@@ -123,6 +123,14 @@
   "bottleLogDecreaseTooltip": "Decrease 5 ml",
   "bottleLogIncreaseTooltip": "Increase 5 ml",
   "homeLogListTitle": "Latest logs",
+  "bathLogTitle": "Bath",
+  "bathLogTypeLabel": "Bath type",
+  "bathLogTypeFullOption": "Complete",
+  "bathLogTypeQuickOption": "Quick",
+  "bathLogTypeFullDescription": "Complete bath",
+  "bathLogTypeQuickDescription": "Quick bath",
+  "bathLogNotesLabel": "Notes",
+  "bathLogNotesHint": "Add any details you want to remember",
   "stoolLogTitle": "Diaper change",
   "stoolLogDateTimeLabel": "Date & time",
   "stoolLogConsistencyLabel": "Consistency",
