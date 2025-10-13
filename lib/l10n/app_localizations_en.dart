@@ -151,6 +151,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardMedicalAgendaLabel => 'AGENDA';
 
   @override
+  String dashboardQuestionsPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# pending',
+      one: '# pending',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardQuestionsAllClear => 'All clear';
+
+  @override
   String get dashboardElapsedJustNow => 'Just now';
 
   @override
@@ -374,4 +388,140 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bottleLogListTitle => 'Latest feedings';
+
+  @override
+  String get questionsTitle => 'Questions';
+
+  @override
+  String get questionsShareTooltip => 'Share pending questions';
+
+  @override
+  String get questionsShareTitle => 'Questions for the pediatrician';
+
+  @override
+  String get questionsShareMessage =>
+      'These are the topics we want to discuss in our next appointment.';
+
+  @override
+  String questionsShareError(Object error) {
+    return 'Couldn\'t share: $error';
+  }
+
+  @override
+  String get questionsValidationMessage => 'Write the question before saving.';
+
+  @override
+  String questionsSaveError(Object error) {
+    return 'Couldn\'t save the question: $error';
+  }
+
+  @override
+  String questionsUpdateError(Object error) {
+    return 'Couldn\'t update the question: $error';
+  }
+
+  @override
+  String questionsDeleteError(Object error) {
+    return 'Couldn\'t delete the question: $error';
+  }
+
+  @override
+  String get questionsComposerTitle => 'Write your question';
+
+  @override
+  String get questionsComposerPlaceholder =>
+      'E.g. Ask about starting solid food';
+
+  @override
+  String get questionsComposerAction => 'Save question';
+
+  @override
+  String get questionsPendingSection => 'Pending';
+
+  @override
+  String get questionsResolvedSection => 'Resolved';
+
+  @override
+  String get questionsDeleteDialogTitle => 'Delete question?';
+
+  @override
+  String get questionsDeleteDialogMessage =>
+      'This will remove the question from the list.';
+
+  @override
+  String get questionsDeleteDialogConfirm => 'Delete';
+
+  @override
+  String get questionsEditDialogTitle => 'Edit question';
+
+  @override
+  String get questionsEditDialogLabel => 'Question';
+
+  @override
+  String get questionsEditDialogCancel => 'Cancel';
+
+  @override
+  String get questionsEditDialogSave => 'Save';
+
+  @override
+  String get questionsEditAction => 'Edit';
+
+  @override
+  String get questionsDeleteAction => 'Delete';
+
+  @override
+  String get questionsEmptyTitle => 'Capture your doubts';
+
+  @override
+  String get questionsEmptySubtitle =>
+      'Write down what you want to ask during the next pediatric visit.';
+
+  @override
+  String get questionsLoadError =>
+      'We couldn\'t load your questions. Please try again.';
+
+  @override
+  String get questionsAgeUnknown => 'Age unavailable';
+
+  @override
+  String get questionsAgeLessThanWeek => 'Less than a week';
+
+  @override
+  String questionsAgeWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# weeks',
+      one: '# week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String questionsAgeMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# months',
+      one: '# month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String questionsAgeMonthsAndWeeks(int months, int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      months,
+      locale: localeName,
+      other: '# months',
+      one: '# month',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '# weeks',
+      one: '# week',
+    );
+    return '$_temp0 and $_temp1';
+  }
 }

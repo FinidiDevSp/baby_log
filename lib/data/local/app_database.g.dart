@@ -1540,15 +1540,14 @@ class VomitEntryRow extends DataClass implements Insertable<VomitEntryRow> {
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{
-      'id': Variable<int>(id),
-      'timestamp': Variable<DateTime>(timestamp),
-      'amount': Variable<int>(amount),
-      'created_at': Variable<DateTime>(createdAt),
-    };
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    map['amount'] = Variable<int>(amount);
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
+    map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
 
@@ -2084,8 +2083,9 @@ class $TemperatureEntriesTable extends TemperatureEntries
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _timestampMeta =
-      const VerificationMeta('timestamp');
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
   @override
   late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
     'timestamp',
@@ -2094,11 +2094,11 @@ class $TemperatureEntriesTable extends TemperatureEntries
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _valueCelsiusMeta =
-      const VerificationMeta('valueCelsius');
+  static const VerificationMeta _valueCelsiusMeta = const VerificationMeta(
+    'valueCelsius',
+  );
   @override
-  late final GeneratedColumn<double> valueCelsius =
-      GeneratedColumn<double>(
+  late final GeneratedColumn<double> valueCelsius = GeneratedColumn<double>(
     'value_celsius',
     aliasedName,
     false,
@@ -2128,12 +2128,12 @@ class $TemperatureEntriesTable extends TemperatureEntries
   );
   @override
   List<GeneratedColumn> get $columns => [
-        id,
-        timestamp,
-        valueCelsius,
-        notes,
-        createdAt,
-      ];
+    id,
+    timestamp,
+    valueCelsius,
+    notes,
+    createdAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2234,15 +2234,14 @@ class TemperatureEntryRow extends DataClass
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{
-      'id': Variable<int>(id),
-      'timestamp': Variable<DateTime>(timestamp),
-      'value_celsius': Variable<double>(valueCelsius),
-      'created_at': Variable<DateTime>(createdAt),
-    };
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    map['value_celsius'] = Variable<double>(valueCelsius);
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
+    map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
 
@@ -2290,17 +2289,16 @@ class TemperatureEntryRow extends DataClass
     Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
   }) => TemperatureEntryRow(
-        id: id ?? this.id,
-        timestamp: timestamp ?? this.timestamp,
-        valueCelsius: valueCelsius ?? this.valueCelsius,
-        notes: notes.present ? notes.value : this.notes,
-        createdAt: createdAt ?? this.createdAt,
-      );
+    id: id ?? this.id,
+    timestamp: timestamp ?? this.timestamp,
+    valueCelsius: valueCelsius ?? this.valueCelsius,
+    notes: notes.present ? notes.value : this.notes,
+    createdAt: createdAt ?? this.createdAt,
+  );
   TemperatureEntryRow copyWithCompanion(TemperatureEntriesCompanion data) {
     return TemperatureEntryRow(
       id: data.id.present ? data.id.value : this.id,
-      timestamp:
-          data.timestamp.present ? data.timestamp.value : this.timestamp,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
       valueCelsius: data.valueCelsius.present
           ? data.valueCelsius.value
           : this.valueCelsius,
@@ -2335,8 +2333,7 @@ class TemperatureEntryRow extends DataClass
           other.createdAt == this.createdAt);
 }
 
-class TemperatureEntriesCompanion
-    extends UpdateCompanion<TemperatureEntryRow> {
+class TemperatureEntriesCompanion extends UpdateCompanion<TemperatureEntryRow> {
   final Value<int> id;
   final Value<DateTime> timestamp;
   final Value<double> valueCelsius;
@@ -2355,8 +2352,8 @@ class TemperatureEntriesCompanion
     required double valueCelsius,
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
-  })  : timestamp = Value(timestamp),
-        valueCelsius = Value(valueCelsius);
+  }) : timestamp = Value(timestamp),
+       valueCelsius = Value(valueCelsius);
   static Insertable<TemperatureEntryRow> custom({
     Expression<int>? id,
     Expression<DateTime>? timestamp,
@@ -2423,6 +2420,366 @@ class TemperatureEntriesCompanion
   }
 }
 
+class $PediatricianQuestionsTable extends PediatricianQuestions
+    with TableInfo<$PediatricianQuestionsTable, PediatricianQuestionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PediatricianQuestionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _contentMeta = const VerificationMeta(
+    'content',
+  );
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+    'content',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 500,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _resolvedMeta = const VerificationMeta(
+    'resolved',
+  );
+  @override
+  late final GeneratedColumn<bool> resolved = GeneratedColumn<bool>(
+    'resolved',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("resolved" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    content,
+    resolved,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pediatrician_questions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PediatricianQuestionRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('content')) {
+      context.handle(
+        _contentMeta,
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('resolved')) {
+      context.handle(
+        _resolvedMeta,
+        resolved.isAcceptableOrUnknown(data['resolved']!, _resolvedMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PediatricianQuestionRow map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PediatricianQuestionRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      content: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content'],
+      )!,
+      resolved: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}resolved'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PediatricianQuestionsTable createAlias(String alias) {
+    return $PediatricianQuestionsTable(attachedDatabase, alias);
+  }
+}
+
+class PediatricianQuestionRow extends DataClass
+    implements Insertable<PediatricianQuestionRow> {
+  final int id;
+  final String content;
+  final bool resolved;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const PediatricianQuestionRow({
+    required this.id,
+    required this.content,
+    required this.resolved,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['content'] = Variable<String>(content);
+    map['resolved'] = Variable<bool>(resolved);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  PediatricianQuestionsCompanion toCompanion(bool nullToAbsent) {
+    return PediatricianQuestionsCompanion(
+      id: Value(id),
+      content: Value(content),
+      resolved: Value(resolved),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory PediatricianQuestionRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PediatricianQuestionRow(
+      id: serializer.fromJson<int>(json['id']),
+      content: serializer.fromJson<String>(json['content']),
+      resolved: serializer.fromJson<bool>(json['resolved']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'content': serializer.toJson<String>(content),
+      'resolved': serializer.toJson<bool>(resolved),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  PediatricianQuestionRow copyWith({
+    int? id,
+    String? content,
+    bool? resolved,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => PediatricianQuestionRow(
+    id: id ?? this.id,
+    content: content ?? this.content,
+    resolved: resolved ?? this.resolved,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  PediatricianQuestionRow copyWithCompanion(
+    PediatricianQuestionsCompanion data,
+  ) {
+    return PediatricianQuestionRow(
+      id: data.id.present ? data.id.value : this.id,
+      content: data.content.present ? data.content.value : this.content,
+      resolved: data.resolved.present ? data.resolved.value : this.resolved,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PediatricianQuestionRow(')
+          ..write('id: $id, ')
+          ..write('content: $content, ')
+          ..write('resolved: $resolved, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, content, resolved, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PediatricianQuestionRow &&
+          other.id == this.id &&
+          other.content == this.content &&
+          other.resolved == this.resolved &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class PediatricianQuestionsCompanion
+    extends UpdateCompanion<PediatricianQuestionRow> {
+  final Value<int> id;
+  final Value<String> content;
+  final Value<bool> resolved;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const PediatricianQuestionsCompanion({
+    this.id = const Value.absent(),
+    this.content = const Value.absent(),
+    this.resolved = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  PediatricianQuestionsCompanion.insert({
+    this.id = const Value.absent(),
+    required String content,
+    this.resolved = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : content = Value(content);
+  static Insertable<PediatricianQuestionRow> custom({
+    Expression<int>? id,
+    Expression<String>? content,
+    Expression<bool>? resolved,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (content != null) 'content': content,
+      if (resolved != null) 'resolved': resolved,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  PediatricianQuestionsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? content,
+    Value<bool>? resolved,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
+    return PediatricianQuestionsCompanion(
+      id: id ?? this.id,
+      content: content ?? this.content,
+      resolved: resolved ?? this.resolved,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (resolved.present) {
+      map['resolved'] = Variable<bool>(resolved.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PediatricianQuestionsCompanion(')
+          ..write('id: $id, ')
+          ..write('content: $content, ')
+          ..write('resolved: $resolved, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2433,6 +2790,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $BathEntriesTable bathEntries = $BathEntriesTable(this);
   late final $TemperatureEntriesTable temperatureEntries =
       $TemperatureEntriesTable(this);
+  late final $PediatricianQuestionsTable pediatricianQuestions =
+      $PediatricianQuestionsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2444,6 +2803,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     vomitEntries,
     bathEntries,
     temperatureEntries,
+    pediatricianQuestions,
   ];
 }
 
@@ -2974,23 +3334,6 @@ typedef $$StoolEntriesTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
     });
 
-typedef $$VomitEntriesTableCreateCompanionBuilder =
-    VomitEntriesCompanion Function({
-      Value<int> id,
-      required DateTime timestamp,
-      required int amount,
-      Value<String?> notes,
-      Value<DateTime> createdAt,
-    });
-typedef $$VomitEntriesTableUpdateCompanionBuilder =
-    VomitEntriesCompanion Function({
-      Value<int> id,
-      Value<DateTime> timestamp,
-      Value<int> amount,
-      Value<String?> notes,
-      Value<DateTime> createdAt,
-    });
-
 class $$StoolEntriesTableFilterComposer
     extends Composer<_$AppDatabase, $StoolEntriesTable> {
   $$StoolEntriesTableFilterComposer({
@@ -3170,6 +3513,23 @@ typedef $$StoolEntriesTableProcessedTableManager =
       StoolEntryRow,
       PrefetchHooks Function()
     >;
+typedef $$VomitEntriesTableCreateCompanionBuilder =
+    VomitEntriesCompanion Function({
+      Value<int> id,
+      required DateTime timestamp,
+      required int amount,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+    });
+typedef $$VomitEntriesTableUpdateCompanionBuilder =
+    VomitEntriesCompanion Function({
+      Value<int> id,
+      Value<DateTime> timestamp,
+      Value<int> amount,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+    });
+
 class $$VomitEntriesTableFilterComposer
     extends Composer<_$AppDatabase, $VomitEntriesTable> {
   $$VomitEntriesTableFilterComposer({
@@ -3255,10 +3615,8 @@ class $$VomitEntriesTableAnnotationComposer
   GeneratedColumn<DateTime> get timestamp =>
       $composableBuilder(column: $table.timestamp, builder: (column) => column);
 
-  GeneratedColumn<int> get amount => $composableBuilder(
-    column: $table.amount,
-    builder: (column) => column,
-  );
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
@@ -3349,7 +3707,6 @@ typedef $$VomitEntriesTableProcessedTableManager =
       VomitEntryRow,
       PrefetchHooks Function()
     >;
-
 typedef $$BathEntriesTableCreateCompanionBuilder =
     BathEntriesCompanion Function({
       Value<int> id,
@@ -3544,7 +3901,6 @@ typedef $$BathEntriesTableProcessedTableManager =
       BathEntryRow,
       PrefetchHooks Function()
     >;
-
 typedef $$TemperatureEntriesTableCreateCompanionBuilder =
     TemperatureEntriesCompanion Function({
       Value<int> id,
@@ -3572,29 +3928,29 @@ class $$TemperatureEntriesTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-        column: $table.id,
-        builder: (column) => ColumnFilters(column),
-      );
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get timestamp => $composableBuilder(
-        column: $table.timestamp,
-        builder: (column) => ColumnFilters(column),
-      );
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get valueCelsius => $composableBuilder(
-        column: $table.valueCelsius,
-        builder: (column) => ColumnFilters(column),
-      );
+    column: $table.valueCelsius,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get notes => $composableBuilder(
-        column: $table.notes,
-        builder: (column) => ColumnFilters(column),
-      );
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
-        column: $table.createdAt,
-        builder: (column) => ColumnFilters(column),
-      );
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$TemperatureEntriesTableOrderingComposer
@@ -3607,29 +3963,29 @@ class $$TemperatureEntriesTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-        column: $table.id,
-        builder: (column) => ColumnOrderings(column),
-      );
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get timestamp => $composableBuilder(
-        column: $table.timestamp,
-        builder: (column) => ColumnOrderings(column),
-      );
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get valueCelsius => $composableBuilder(
-        column: $table.valueCelsius,
-        builder: (column) => ColumnOrderings(column),
-      );
+    column: $table.valueCelsius,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get notes => $composableBuilder(
-        column: $table.notes,
-        builder: (column) => ColumnOrderings(column),
-      );
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-        column: $table.createdAt,
-        builder: (column) => ColumnOrderings(column),
-      );
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TemperatureEntriesTableAnnotationComposer
@@ -3644,23 +4000,19 @@ class $$TemperatureEntriesTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get timestamp => $composableBuilder(
-        column: $table.timestamp,
-        builder: (column) => column,
-      );
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
 
   GeneratedColumn<double> get valueCelsius => $composableBuilder(
-        column: $table.valueCelsius,
-        builder: (column) => column,
-      );
+    column: $table.valueCelsius,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt => $composableBuilder(
-        column: $table.createdAt,
-        builder: (column) => column,
-      );
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
 
 class $$TemperatureEntriesTableTableManager
@@ -3677,66 +4029,64 @@ class $$TemperatureEntriesTableTableManager
           (
             TemperatureEntryRow,
             BaseReferences<
-                _$AppDatabase, $TemperatureEntriesTable, TemperatureEntryRow>,
+              _$AppDatabase,
+              $TemperatureEntriesTable,
+              TemperatureEntryRow
+            >,
           ),
           TemperatureEntryRow,
           PrefetchHooks Function()
         > {
   $$TemperatureEntriesTableTableManager(
-      _$AppDatabase db, $TemperatureEntriesTable table)
-      : super(
-          TableManagerState(
-            db: db,
-            table: table,
-            createFilteringComposer: () =>
-                $$TemperatureEntriesTableFilterComposer(
-                  $db: db,
-                  $table: table,
-                ),
-            createOrderingComposer: () =>
-                $$TemperatureEntriesTableOrderingComposer(
-                  $db: db,
-                  $table: table,
-                ),
-            createComputedFieldComposer: () =>
-                $$TemperatureEntriesTableAnnotationComposer(
-                  $db: db,
-                  $table: table,
-                ),
-            updateCompanionCallback:
-                ({
-                  Value<int> id = const Value.absent(),
-                  Value<DateTime> timestamp = const Value.absent(),
-                  Value<double> valueCelsius = const Value.absent(),
-                  Value<String?> notes = const Value.absent(),
-                  Value<DateTime> createdAt = const Value.absent(),
-                }) => TemperatureEntriesCompanion(
-                  id: id,
-                  timestamp: timestamp,
-                  valueCelsius: valueCelsius,
-                  notes: notes,
-                  createdAt: createdAt,
-                ),
-            createCompanionCallback:
-                ({
-                  Value<int> id = const Value.absent(),
-                  required DateTime timestamp,
-                  required double valueCelsius,
-                  Value<String?> notes = const Value.absent(),
-                  Value<DateTime> createdAt = const Value.absent(),
-                }) => TemperatureEntriesCompanion.insert(
-                  id: id,
-                  timestamp: timestamp,
-                  valueCelsius: valueCelsius,
-                  notes: notes,
-                  createdAt: createdAt,
-                ),
-            withReferenceMapper: (p0) => p0
-                .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-                .toList(),
-            prefetchHooksCallback: null,
-          ),
-        );
+    _$AppDatabase db,
+    $TemperatureEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TemperatureEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TemperatureEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TemperatureEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+                Value<double> valueCelsius = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => TemperatureEntriesCompanion(
+                id: id,
+                timestamp: timestamp,
+                valueCelsius: valueCelsius,
+                notes: notes,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required DateTime timestamp,
+                required double valueCelsius,
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => TemperatureEntriesCompanion.insert(
+                id: id,
+                timestamp: timestamp,
+                valueCelsius: valueCelsius,
+                notes: notes,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
 }
 
 typedef $$TemperatureEntriesTableProcessedTableManager =
@@ -3752,9 +4102,225 @@ typedef $$TemperatureEntriesTableProcessedTableManager =
       (
         TemperatureEntryRow,
         BaseReferences<
-            _$AppDatabase, $TemperatureEntriesTable, TemperatureEntryRow>,
+          _$AppDatabase,
+          $TemperatureEntriesTable,
+          TemperatureEntryRow
+        >,
       ),
       TemperatureEntryRow,
+      PrefetchHooks Function()
+    >;
+typedef $$PediatricianQuestionsTableCreateCompanionBuilder =
+    PediatricianQuestionsCompanion Function({
+      Value<int> id,
+      required String content,
+      Value<bool> resolved,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+typedef $$PediatricianQuestionsTableUpdateCompanionBuilder =
+    PediatricianQuestionsCompanion Function({
+      Value<int> id,
+      Value<String> content,
+      Value<bool> resolved,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+
+class $$PediatricianQuestionsTableFilterComposer
+    extends Composer<_$AppDatabase, $PediatricianQuestionsTable> {
+  $$PediatricianQuestionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get resolved => $composableBuilder(
+    column: $table.resolved,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PediatricianQuestionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PediatricianQuestionsTable> {
+  $$PediatricianQuestionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get resolved => $composableBuilder(
+    column: $table.resolved,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PediatricianQuestionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PediatricianQuestionsTable> {
+  $$PediatricianQuestionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<bool> get resolved =>
+      $composableBuilder(column: $table.resolved, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$PediatricianQuestionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PediatricianQuestionsTable,
+          PediatricianQuestionRow,
+          $$PediatricianQuestionsTableFilterComposer,
+          $$PediatricianQuestionsTableOrderingComposer,
+          $$PediatricianQuestionsTableAnnotationComposer,
+          $$PediatricianQuestionsTableCreateCompanionBuilder,
+          $$PediatricianQuestionsTableUpdateCompanionBuilder,
+          (
+            PediatricianQuestionRow,
+            BaseReferences<
+              _$AppDatabase,
+              $PediatricianQuestionsTable,
+              PediatricianQuestionRow
+            >,
+          ),
+          PediatricianQuestionRow,
+          PrefetchHooks Function()
+        > {
+  $$PediatricianQuestionsTableTableManager(
+    _$AppDatabase db,
+    $PediatricianQuestionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PediatricianQuestionsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PediatricianQuestionsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PediatricianQuestionsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> content = const Value.absent(),
+                Value<bool> resolved = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => PediatricianQuestionsCompanion(
+                id: id,
+                content: content,
+                resolved: resolved,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String content,
+                Value<bool> resolved = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => PediatricianQuestionsCompanion.insert(
+                id: id,
+                content: content,
+                resolved: resolved,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PediatricianQuestionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PediatricianQuestionsTable,
+      PediatricianQuestionRow,
+      $$PediatricianQuestionsTableFilterComposer,
+      $$PediatricianQuestionsTableOrderingComposer,
+      $$PediatricianQuestionsTableAnnotationComposer,
+      $$PediatricianQuestionsTableCreateCompanionBuilder,
+      $$PediatricianQuestionsTableUpdateCompanionBuilder,
+      (
+        PediatricianQuestionRow,
+        BaseReferences<
+          _$AppDatabase,
+          $PediatricianQuestionsTable,
+          PediatricianQuestionRow
+        >,
+      ),
+      PediatricianQuestionRow,
       PrefetchHooks Function()
     >;
 
@@ -3773,4 +4339,6 @@ class $AppDatabaseManager {
       $$BathEntriesTableTableManager(_db, _db.bathEntries);
   $$TemperatureEntriesTableTableManager get temperatureEntries =>
       $$TemperatureEntriesTableTableManager(_db, _db.temperatureEntries);
+  $$PediatricianQuestionsTableTableManager get pediatricianQuestions =>
+      $$PediatricianQuestionsTableTableManager(_db, _db.pediatricianQuestions);
 }

@@ -152,6 +152,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dashboardMedicalAgendaLabel => 'AGENDA';
 
   @override
+  String dashboardQuestionsPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# pendientes',
+      one: '# pendiente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardQuestionsAllClear => 'Al día';
+
+  @override
   String get dashboardElapsedJustNow => 'Justo ahora';
 
   @override
@@ -376,4 +390,141 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get bottleLogListTitle => 'Últimas tomas';
+
+  @override
+  String get questionsTitle => 'Preguntas';
+
+  @override
+  String get questionsShareTooltip => 'Compartir preguntas pendientes';
+
+  @override
+  String get questionsShareTitle => 'Preguntas para el pediatra';
+
+  @override
+  String get questionsShareMessage =>
+      'Estas son las dudas que queremos comentar en la próxima visita.';
+
+  @override
+  String questionsShareError(Object error) {
+    return 'No se pudo compartir: $error';
+  }
+
+  @override
+  String get questionsValidationMessage =>
+      'Escribe tu pregunta antes de guardar.';
+
+  @override
+  String questionsSaveError(Object error) {
+    return 'No se pudo guardar la pregunta: $error';
+  }
+
+  @override
+  String questionsUpdateError(Object error) {
+    return 'No se pudo actualizar la pregunta: $error';
+  }
+
+  @override
+  String questionsDeleteError(Object error) {
+    return 'No se pudo eliminar la pregunta: $error';
+  }
+
+  @override
+  String get questionsComposerTitle => 'Anota tu duda';
+
+  @override
+  String get questionsComposerPlaceholder =>
+      'Ej. Recordar preguntar sobre la introducción de sólidos';
+
+  @override
+  String get questionsComposerAction => 'Guardar pregunta';
+
+  @override
+  String get questionsPendingSection => 'Pendientes';
+
+  @override
+  String get questionsResolvedSection => 'Resueltas';
+
+  @override
+  String get questionsDeleteDialogTitle => '¿Eliminar pregunta?';
+
+  @override
+  String get questionsDeleteDialogMessage =>
+      'La pregunta se quitará de la lista.';
+
+  @override
+  String get questionsDeleteDialogConfirm => 'Eliminar';
+
+  @override
+  String get questionsEditDialogTitle => 'Editar pregunta';
+
+  @override
+  String get questionsEditDialogLabel => 'Pregunta';
+
+  @override
+  String get questionsEditDialogCancel => 'Cancelar';
+
+  @override
+  String get questionsEditDialogSave => 'Guardar';
+
+  @override
+  String get questionsEditAction => 'Editar';
+
+  @override
+  String get questionsDeleteAction => 'Eliminar';
+
+  @override
+  String get questionsEmptyTitle => 'Anota tus dudas';
+
+  @override
+  String get questionsEmptySubtitle =>
+      'Guarda las preguntas que quieras llevar a la próxima visita con el pediatra.';
+
+  @override
+  String get questionsLoadError =>
+      'No se pudieron cargar tus preguntas. Intenta de nuevo.';
+
+  @override
+  String get questionsAgeUnknown => 'Edad no disponible';
+
+  @override
+  String get questionsAgeLessThanWeek => 'Menos de una semana';
+
+  @override
+  String questionsAgeWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# semanas',
+      one: '# semana',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String questionsAgeMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '# meses',
+      one: '# mes',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String questionsAgeMonthsAndWeeks(int months, int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      months,
+      locale: localeName,
+      other: '# meses',
+      one: '# mes',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '# semanas',
+      one: '# semana',
+    );
+    return '$_temp0 y $_temp1';
+  }
 }

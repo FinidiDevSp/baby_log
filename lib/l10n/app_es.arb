@@ -69,6 +69,17 @@
   "dashboardTemperatureLabel": "Temperatura",
   "dashboardFoodLabel": "Comida",
   "dashboardMedicalAgendaLabel": "AGENDA",
+  "dashboardQuestionsPending": "{count, plural, one {# pendiente} other {# pendientes}}",
+  "@dashboardQuestionsPending": {
+    "description": "Estado mostrado en el acceso directo de preguntas cuando hay pendientes",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "dashboardQuestionsAllClear": "Al día",
   "dashboardElapsedJustNow": "Justo ahora",
   "dashboardElapsedMinutes": "{count, plural, =1 {Hace 1 min} other {Hace {count} mins}}",
   "@dashboardElapsedMinutes": {
@@ -163,5 +174,99 @@
   "temperatureLogValueValidation": "Introduce una temperatura válida",
   "temperatureLogNotesLabel": "Notas",
   "temperatureLogNotesHint": "Añade detalles que quieras recordar",
-  "bottleLogListTitle": "Últimas tomas"
+  "bottleLogListTitle": "Últimas tomas",
+  "questionsTitle": "Preguntas",
+  "questionsShareTooltip": "Compartir preguntas pendientes",
+  "questionsShareTitle": "Preguntas para el pediatra",
+  "questionsShareMessage": "Estas son las dudas que queremos comentar en la próxima visita.",
+  "questionsShareError": "No se pudo compartir: {error}",
+  "@questionsShareError": {
+    "description": "Error al generar o compartir el PDF",
+    "placeholders": {
+      "error": {
+        "example": "Permiso denegado"
+      }
+    }
+  },
+  "questionsValidationMessage": "Escribe tu pregunta antes de guardar.",
+  "questionsSaveError": "No se pudo guardar la pregunta: {error}",
+  "@questionsSaveError": {
+    "description": "Error al guardar una pregunta",
+    "placeholders": {
+      "error": {
+        "example": "Error de base de datos"
+      }
+    }
+  },
+  "questionsUpdateError": "No se pudo actualizar la pregunta: {error}",
+  "@questionsUpdateError": {
+    "description": "Error al actualizar una pregunta",
+    "placeholders": {
+      "error": {
+        "example": "Error de base de datos"
+      }
+    }
+  },
+  "questionsDeleteError": "No se pudo eliminar la pregunta: {error}",
+  "@questionsDeleteError": {
+    "description": "Error al eliminar una pregunta",
+    "placeholders": {
+      "error": {
+        "example": "Error de base de datos"
+      }
+    }
+  },
+  "questionsComposerTitle": "Anota tu duda",
+  "questionsComposerPlaceholder": "Ej. Recordar preguntar sobre la introducción de sólidos",
+  "questionsComposerAction": "Guardar pregunta",
+  "questionsPendingSection": "Pendientes",
+  "questionsResolvedSection": "Resueltas",
+  "questionsDeleteDialogTitle": "¿Eliminar pregunta?",
+  "questionsDeleteDialogMessage": "La pregunta se quitará de la lista.",
+  "questionsDeleteDialogConfirm": "Eliminar",
+  "questionsEditDialogTitle": "Editar pregunta",
+  "questionsEditDialogLabel": "Pregunta",
+  "questionsEditDialogCancel": "Cancelar",
+  "questionsEditDialogSave": "Guardar",
+  "questionsEditAction": "Editar",
+  "questionsDeleteAction": "Eliminar",
+  "questionsEmptyTitle": "Anota tus dudas",
+  "questionsEmptySubtitle": "Guarda las preguntas que quieras llevar a la próxima visita con el pediatra.",
+  "questionsLoadError": "No se pudieron cargar tus preguntas. Intenta de nuevo.",
+  "questionsAgeUnknown": "Edad no disponible",
+  "questionsAgeLessThanWeek": "Menos de una semana",
+  "questionsAgeWeeks": "{count, plural, one {# semana} other {# semanas}}",
+  "@questionsAgeWeeks": {
+    "description": "Edad del bebé expresada en semanas",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "questionsAgeMonths": "{count, plural, one {# mes} other {# meses}}",
+  "@questionsAgeMonths": {
+    "description": "Edad del bebé expresada en meses",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "questionsAgeMonthsAndWeeks": "{months, plural, one {# mes} other {# meses}} y {weeks, plural, one {# semana} other {# semanas}}",
+  "@questionsAgeMonthsAndWeeks": {
+    "description": "Edad combinando meses y semanas",
+    "placeholders": {
+      "months": {
+        "type": "int",
+        "example": "3"
+      },
+      "weeks": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  }
 }
