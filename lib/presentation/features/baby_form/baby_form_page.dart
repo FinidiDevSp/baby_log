@@ -118,24 +118,25 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
         ),
         body: SafeArea(
           child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildHeaderCard(context),
-                const SizedBox(height: 24),
-                _buildNameField(),
-                const SizedBox(height: 24),
-                _buildDateAndTimePickers(context),
-                const SizedBox(height: 24),
-                _buildMeasurements(),
-                const SizedBox(height: 24),
-                _buildInterfaceColor(),
-                const SizedBox(height: 32),
-                _buildSaveButton(isEditing),
-              ],
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildHeaderCard(context),
+                  const SizedBox(height: 24),
+                  _buildNameField(),
+                  const SizedBox(height: 24),
+                  _buildDateAndTimePickers(context),
+                  const SizedBox(height: 24),
+                  _buildMeasurements(),
+                  const SizedBox(height: 24),
+                  _buildInterfaceColor(),
+                  const SizedBox(height: 32),
+                  _buildSaveButton(isEditing),
+                ],
+              ),
             ),
           ),
         ),
@@ -255,7 +256,10 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.formBirthSection, style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          l10n.formBirthSection,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         const SizedBox(height: 12),
         Row(
           children: [
@@ -363,15 +367,14 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
                 color: _accentColor,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: Colors.white.withOpacity(0.7),
                   width: 2,
                 ),
               ),
             ),
             const SizedBox(width: 8),
             const Icon(LucideIcons.chevronRight, size: 18),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -419,8 +422,7 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
                         for (final color in _accentPalette)
                           _ColorSwatchOption(
                             color: color,
-                            selected:
-                                tempSelection.toARGB32() == color.toARGB32(),
+                            selected: tempSelection.value == color.value,
                             onTap: () {
                               setSheetState(() {
                                 tempSelection = color;
@@ -447,14 +449,14 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
       },
     );
 
-    if (!mounted || selected == null) {
-      return;
-    }
+    if (!mounted) return;
+    if (selected == null) return;
 
+    final chosen = selected; // non-null here
     setState(() {
-      _accentColor = selected;
+      _accentColor = chosen;
     });
-    _themeController.updateAccent(selected);
+    _themeController.updateAccent(chosen);
   }
 
   Widget _buildSaveButton(bool isEditing) {
@@ -584,7 +586,8 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
   }
 
   int _colorToStorage(Color color) {
-    return color.toARGB32();
+    // Guarda como ARGB de 32 bits (estándar en Flutter).
+    return color.value;
   }
 
   Future<void> _onSave(bool isEditing) async {
@@ -597,9 +600,9 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
     }
 
     if (_birthDate == null || _birthTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.formBirthMissingError)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.formBirthMissingError)));
       return;
     }
 
@@ -643,9 +646,7 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.formSaveError(error.toString()))),
       );
     } finally {
@@ -705,7 +706,11 @@ class _GenderOption extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: selected ? onAccent : Colors.white70, size: 30),
+                Icon(
+                  icon,
+                  color: selected ? onAccent : Colors.white70,
+                  size: 30,
+                ),
                 const SizedBox(height: 12),
                 Text(
                   label,
@@ -834,7 +839,7 @@ class _ColorSwatchOption extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: color.withValues(alpha: 0.35),
+              color: color.withOpacity(0.35),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),

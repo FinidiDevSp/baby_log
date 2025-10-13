@@ -470,12 +470,6 @@ abstract class AppLocalizations {
   /// **'Preguntas'**
   String get dashboardPediatricQuestionsLabel;
 
-  /// No description provided for @dashboardTemperatureLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Temperatura'**
-  String get dashboardTemperatureLabel;
-
   /// No description provided for @bottleLogTitle.
   ///
   /// In es, this message translates to:
@@ -523,54 +517,6 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Restar 5 ml'**
   String get bottleLogDecreaseTooltip;
-
-  /// No description provided for @temperatureLogTitle.
-  ///
-  /// In es, this message translates to:
-  /// **'Temperatura'**
-  String get temperatureLogTitle;
-
-  /// No description provided for @temperatureLogValueLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Temperatura'**
-  String get temperatureLogValueLabel;
-
-  /// No description provided for @temperatureLogValueUnit.
-  ///
-  /// In es, this message translates to:
-  /// **'°C'**
-  String get temperatureLogValueUnit;
-
-  /// No description provided for @temperatureLogDecreaseTooltip.
-  ///
-  /// In es, this message translates to:
-  /// **'Restar 0,1 °C'**
-  String get temperatureLogDecreaseTooltip;
-
-  /// No description provided for @temperatureLogIncreaseTooltip.
-  ///
-  /// In es, this message translates to:
-  /// **'Sumar 0,1 °C'**
-  String get temperatureLogIncreaseTooltip;
-
-  /// No description provided for @temperatureLogValueValidation.
-  ///
-  /// In es, this message translates to:
-  /// **'Introduce una temperatura válida'**
-  String get temperatureLogValueValidation;
-
-  /// No description provided for @temperatureLogNotesLabel.
-  ///
-  /// In es, this message translates to:
-  /// **'Notas'**
-  String get temperatureLogNotesLabel;
-
-  /// No description provided for @temperatureLogNotesHint.
-  ///
-  /// In es, this message translates to:
-  /// **'Añade detalles que quieras recordar'**
-  String get temperatureLogNotesHint;
 
   /// No description provided for @bottleLogIncreaseTooltip.
   ///
@@ -769,6 +715,54 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Selecciona una cantidad'**
   String get vomitLogAmountValidation;
+
+  /// No description provided for @temperatureLogTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Temperatura'**
+  String get temperatureLogTitle;
+
+  /// No description provided for @temperatureLogValueLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Temperatura'**
+  String get temperatureLogValueLabel;
+
+  /// No description provided for @temperatureLogValueUnit.
+  ///
+  /// In es, this message translates to:
+  /// **'°C'**
+  String get temperatureLogValueUnit;
+
+  /// No description provided for @temperatureLogDecreaseTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Restar 0,1 °C'**
+  String get temperatureLogDecreaseTooltip;
+
+  /// No description provided for @temperatureLogIncreaseTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Sumar 0,1 °C'**
+  String get temperatureLogIncreaseTooltip;
+
+  /// No description provided for @temperatureLogValueValidation.
+  ///
+  /// In es, this message translates to:
+  /// **'Introduce una temperatura válida'**
+  String get temperatureLogValueValidation;
+
+  /// No description provided for @temperatureLogNotesLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas'**
+  String get temperatureLogNotesLabel;
+
+  /// No description provided for @temperatureLogNotesHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade detalles que quieras recordar'**
+  String get temperatureLogNotesHint;
 
   /// No description provided for @bottleLogListTitle.
   ///

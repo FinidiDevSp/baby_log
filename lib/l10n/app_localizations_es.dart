@@ -227,9 +227,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dashboardPediatricQuestionsLabel => 'Preguntas';
 
   @override
-  String get dashboardTemperatureLabel => 'Temperatura';
-
-  @override
   String get bottleLogTitle => 'Toma de biberón';
 
   @override
@@ -252,32 +249,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get bottleLogDecreaseTooltip => 'Restar 5 ml';
-
-  @override
-  String get temperatureLogTitle => 'Temperatura';
-
-  @override
-  String get temperatureLogValueLabel => 'Temperatura';
-
-  @override
-  String get temperatureLogValueUnit => '°C';
-
-  @override
-  String get temperatureLogDecreaseTooltip => 'Restar 0,1 °C';
-
-  @override
-  String get temperatureLogIncreaseTooltip => 'Sumar 0,1 °C';
-
-  @override
-  String get temperatureLogValueValidation =>
-      'Introduce una temperatura válida';
-
-  @override
-  String get temperatureLogNotesLabel => 'Notas';
-
-  @override
-  String get temperatureLogNotesHint =>
-      'Añade detalles que quieras recordar';
 
   @override
   String get bottleLogIncreaseTooltip => 'Sumar 5 ml';
@@ -377,6 +348,31 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get vomitLogAmountValidation => 'Selecciona una cantidad';
+
+  @override
+  String get temperatureLogTitle => 'Temperatura';
+
+  @override
+  String get temperatureLogValueLabel => 'Temperatura';
+
+  @override
+  String get temperatureLogValueUnit => '°C';
+
+  @override
+  String get temperatureLogDecreaseTooltip => 'Restar 0,1 °C';
+
+  @override
+  String get temperatureLogIncreaseTooltip => 'Sumar 0,1 °C';
+
+  @override
+  String get temperatureLogValueValidation =>
+      'Introduce una temperatura válida';
+
+  @override
+  String get temperatureLogNotesLabel => 'Notas';
+
+  @override
+  String get temperatureLogNotesHint => 'Añade detalles que quieras recordar';
 
   @override
   String get bottleLogListTitle => 'Últimas tomas';

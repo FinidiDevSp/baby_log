@@ -5,8 +5,10 @@ import '../local/app_database.dart' as db;
 
 StoolEntry mapStoolRowToDomain(db.StoolEntryRow row) {
   final consistencyIndex = row.consistency;
-  final safeIndex = consistencyIndex.clamp(0, StoolConsistency.values.length - 1)
-      as int;
+  final safeIndex = consistencyIndex.clamp(
+    0,
+    StoolConsistency.values.length - 1,
+  );
   final consistency = StoolConsistency.values[safeIndex];
   return StoolEntry(
     id: row.id,
