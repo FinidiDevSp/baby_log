@@ -226,6 +226,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardPediatricQuestionsLabel => 'Questions';
 
   @override
+  String get dashboardTemperatureLabel => 'Temperature';
+
+  @override
   String get bottleLogTitle => 'Bottle feeding';
 
   @override
@@ -248,6 +251,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bottleLogDecreaseTooltip => 'Decrease 5 ml';
+
+  @override
+  String get temperatureLogTitle => 'Temperature';
+
+  @override
+  String get temperatureLogValueLabel => 'Temperature';
+
+  @override
+  String get temperatureLogValueUnit => '°C';
+
+  @override
+  String get temperatureLogDecreaseTooltip => 'Decrease 0.1 °C';
+
+  @override
+  String get temperatureLogIncreaseTooltip => 'Increase 0.1 °C';
+
+  @override
+  String get temperatureLogValueValidation => 'Enter a valid temperature';
+
+  @override
+  String get temperatureLogNotesLabel => 'Notes';
+
+  @override
+  String get temperatureLogNotesHint => 'Add any notes you want to remember';
 
   @override
   String get bottleLogIncreaseTooltip => 'Increase 5 ml';

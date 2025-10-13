@@ -80,6 +80,16 @@ class BathEntries extends Table {
       dateTime().clientDefault(() => DateTime.now())();
 }
 
+@DataClassName('TemperatureEntryRow')
+class TemperatureEntries extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get timestamp => dateTime()();
+  RealColumn get valueCelsius => real()();
+  TextColumn get notes => text().nullable()();
+  DateTimeColumn get createdAt =>
+      dateTime().clientDefault(() => DateTime.now())();
+}
+
 @DriftDatabase(
   tables: [
     BabyProfiles,
@@ -87,6 +97,7 @@ class BathEntries extends Table {
     StoolEntries,
     VomitEntries,
     BathEntries,
+    TemperatureEntries,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -94,7 +105,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -111,6 +122,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 4) {
         await m.createTable(vomitEntries);
+      }
+      if (from < 5) {
+        await m.createTable(temperatureEntries);
       }
     },
   );
@@ -211,6 +225,31 @@ class AppDatabase extends _$AppDatabase {
     final row = await query.getSingleOrNull();
     if (row == null) {
       throw StateError('No se pudo obtener el baño recién creado.');
+    }
+    return row;
+  }
+
+  Stream<List<TemperatureEntryRow>> watchTemperatureEntries() {
+    final query =
+        (select(temperatureEntries)..orderBy([
+              (tbl) => OrderingTerm.desc(tbl.timestamp),
+              (tbl) => OrderingTerm.desc(tbl.id),
+            ]))
+            .watch();
+    return query;
+  }
+
+  Future<TemperatureEntryRow> createTemperatureEntry(
+    TemperatureEntriesCompanion entry,
+  ) async {
+    final id = await into(temperatureEntries).insert(entry);
+    final query =
+        select(temperatureEntries)..where((tbl) => tbl.id.equals(id));
+    final row = await query.getSingleOrNull();
+    if (row == null) {
+      throw StateError(
+        'No se pudo obtener la temperatura recién creada.',
+      );
     }
     return row;
   }

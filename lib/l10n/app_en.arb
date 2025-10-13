@@ -113,6 +113,7 @@
   "dashboardImportTooltip": "Import data",
   "dashboardExportTooltip": "Export data",
   "dashboardPediatricQuestionsLabel": "Questions",
+  "dashboardTemperatureLabel": "Temperature",
   "bottleLogTitle": "Bottle feeding",
   "bottleLogDateTimeLabel": "Date & time",
   "bottleLogAmountLabel": "Amount",
@@ -154,5 +155,13 @@
   "vomitLogNotesLabel": "Notes",
   "vomitLogNotesHint": "Add any detail you want to remember",
   "vomitLogAmountValidation": "Select an amount option",
+  "temperatureLogTitle": "Temperature",
+  "temperatureLogValueLabel": "Temperature",
+  "temperatureLogValueUnit": "°C",
+  "temperatureLogDecreaseTooltip": "Decrease 0.1 °C",
+  "temperatureLogIncreaseTooltip": "Increase 0.1 °C",
+  "temperatureLogValueValidation": "Enter a valid temperature",
+  "temperatureLogNotesLabel": "Notes",
+  "temperatureLogNotesHint": "Add any notes you want to remember",
   "bottleLogListTitle": "Latest feedings"
 }
