@@ -148,10 +148,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardFoodLabel => 'Feeding';
 
   @override
-  String get dashboardMedicalAgendaLabel => 'Medical agenda';
+  String get dashboardMedicalAgendaLabel => 'AGENDA';
 
   @override
-  String get dashboardMinutesAgoZero => '0 mins';
+  String get dashboardElapsedJustNow => 'Just now';
+
+  @override
+  String dashboardElapsedMinutes(int count) {
+    return intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      one: '1 min ago',
+      other: '$count mins ago',
+    );
+  }
+
+  @override
+  String dashboardElapsedHours(int count) {
+    return intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      one: '1 hr ago',
+      other: '$count hrs ago',
+    );
+  }
+
+  @override
+  String dashboardElapsedDays(int count) {
+    return intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      one: '1 day ago',
+      other: '$count days ago',
+    );
+  }
 
   @override
   String get dashboardEventsEmptyTitle => 'No information found';
@@ -190,7 +220,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardExportTooltip => 'Export data';
 
   @override
-  String get dashboardPediatricQuestionsLabel => 'Ask the pediatrician';
+  String get dashboardPediatricQuestionsLabel => 'Questions';
 
   @override
   String get bottleLogTitle => 'Bottle feeding';

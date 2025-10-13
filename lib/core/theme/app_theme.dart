@@ -41,22 +41,22 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.surface,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(4),
           borderSide: const BorderSide(color: AppColors.outline),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(4),
           borderSide: const BorderSide(color: AppColors.outline),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(4),
           borderSide: BorderSide(
             color: accentColor,
             width: 1.5,
           ),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(4),
           borderSide: BorderSide(
             color: accentColor,
             width: 1.5,
@@ -74,7 +74,7 @@ class AppTheme {
         labelStyle: const TextStyle(color: Colors.white),
         secondaryLabelStyle: TextStyle(color: onAccent),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(4),
         ),
         side: BorderSide(color: AppColors.outline.withValues(alpha: 0.6)),
         selectedShadowColor: focusOverlay,
@@ -85,7 +85,7 @@ class AppTheme {
           foregroundColor: onAccent,
           minimumSize: const Size.fromHeight(56),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(4),
           ),
         ),
       ),
@@ -108,7 +108,7 @@ class AppTheme {
           side: BorderSide(color: accentColor),
           minimumSize: const Size.fromHeight(56),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(4),
           ),
         ).copyWith(
           overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
@@ -181,7 +181,7 @@ class AppTheme {
           },
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(4),
         ),
       ),
       timePickerTheme: TimePickerThemeData(
