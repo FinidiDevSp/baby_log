@@ -6,11 +6,13 @@ import '../data/repositories/baby_repository_impl.dart';
 import '../data/repositories/bath_repository_impl.dart';
 import '../data/repositories/feeding_repository_impl.dart';
 import '../data/repositories/stool_repository_impl.dart';
+import '../data/repositories/vomit_repository_impl.dart';
 import '../domain/entities/baby_profile.dart';
 import '../domain/repositories/baby_repository.dart';
 import '../domain/repositories/bath_repository.dart';
 import '../domain/repositories/feeding_repository.dart';
 import '../domain/repositories/stool_repository.dart';
+import '../domain/repositories/vomit_repository.dart';
 
 final appDatabaseProvider = Provider<db.AppDatabase>((ref) {
   final database = db.AppDatabase();
@@ -36,6 +38,11 @@ final bathRepositoryProvider = Provider<BathRepository>((ref) {
 final stoolRepositoryProvider = Provider<StoolRepository>((ref) {
   final database = ref.watch(appDatabaseProvider);
   return StoolRepositoryImpl(database);
+});
+
+final vomitRepositoryProvider = Provider<VomitRepository>((ref) {
+  final database = ref.watch(appDatabaseProvider);
+  return VomitRepositoryImpl(database);
 });
 
 final babyStreamProvider = StreamProvider<BabyProfile?>((ref) {

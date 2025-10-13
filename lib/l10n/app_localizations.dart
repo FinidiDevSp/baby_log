@@ -650,6 +650,72 @@ abstract class AppLocalizations {
   /// **'Selecciona una consistencia'**
   String get stoolLogConsistencyValidation;
 
+  /// No description provided for @vomitLogTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Registro de vómito'**
+  String get vomitLogTitle;
+
+  /// No description provided for @vomitLogAmountLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cantidad'**
+  String get vomitLogAmountLabel;
+
+  /// No description provided for @vomitLogAmountLowOption.
+  ///
+  /// In es, this message translates to:
+  /// **'Poca'**
+  String get vomitLogAmountLowOption;
+
+  /// No description provided for @vomitLogAmountMediumOption.
+  ///
+  /// In es, this message translates to:
+  /// **'Media'**
+  String get vomitLogAmountMediumOption;
+
+  /// No description provided for @vomitLogAmountHighOption.
+  ///
+  /// In es, this message translates to:
+  /// **'Abundante'**
+  String get vomitLogAmountHighOption;
+
+  /// No description provided for @vomitLogAmountLowDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Vómito ligero'**
+  String get vomitLogAmountLowDescription;
+
+  /// No description provided for @vomitLogAmountMediumDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Vómito moderado'**
+  String get vomitLogAmountMediumDescription;
+
+  /// No description provided for @vomitLogAmountHighDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Vómito abundante'**
+  String get vomitLogAmountHighDescription;
+
+  /// No description provided for @vomitLogNotesLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas'**
+  String get vomitLogNotesLabel;
+
+  /// No description provided for @vomitLogNotesHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Añade detalles que quieras recordar'**
+  String get vomitLogNotesHint;
+
+  /// No description provided for @vomitLogAmountValidation.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona una cantidad'**
+  String get vomitLogAmountValidation;
+
   /// No description provided for @bottleLogListTitle.
   ///
   /// In es, this message translates to:
