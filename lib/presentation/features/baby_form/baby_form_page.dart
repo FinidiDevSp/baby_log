@@ -153,7 +153,7 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(4),
                 boxShadow: const [
                   BoxShadow(
                     color: Colors.black26,
@@ -331,7 +331,7 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(4),
         ),
         child: Row(
           children: [
@@ -384,7 +384,7 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
       ),
       builder: (context) {
         return StatefulBuilder(
@@ -475,7 +475,7 @@ class _BabyFormPageState extends ConsumerState<BabyFormPage> {
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
       ),
       builder: (context) {
         return SafeArea(
@@ -700,7 +700,7 @@ class _GenderOption extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: selected ? accentColor : AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(4),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -869,7 +869,7 @@ class _SelectableTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(4),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

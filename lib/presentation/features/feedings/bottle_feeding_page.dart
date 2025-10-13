@@ -221,7 +221,7 @@ class _BottleFeedingPageState extends ConsumerState<BottleFeedingPage> {
                                   vertical: 8,
                                 ),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(4),
                                   borderSide: BorderSide(
                                     color: theme.colorScheme.outlineVariant,
                                   ),
@@ -259,7 +259,7 @@ class _BottleFeedingPageState extends ConsumerState<BottleFeedingPage> {
                       filled: true,
                       fillColor: AppColors.surfaceVariant,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide.none,
                       ),
                       contentPadding: const EdgeInsets.all(16),

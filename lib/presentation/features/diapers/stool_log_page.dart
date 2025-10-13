@@ -25,6 +25,7 @@ class _StoolLogPageState extends ConsumerState<StoolLogPage> {
     super.initState();
     _selectedDateTime = DateTime.now();
     _notesController = TextEditingController();
+    _selectedConsistency = StoolConsistency.soft;
   }
 
   @override
@@ -180,36 +181,45 @@ class _StoolLogPageState extends ConsumerState<StoolLogPage> {
                     style: theme.textTheme.labelMedium,
                   ),
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                  Row(
                     children: [
-                      _ConsistencyOptionButton(
-                        label: l10n.stoolLogConsistencyLiquidOption,
-                        isSelected: _selectedConsistency == StoolConsistency.liquid,
-                        onTap: () {
-                          setState(() {
-                            _selectedConsistency = StoolConsistency.liquid;
-                          });
-                        },
+                      Expanded(
+                        child: _ConsistencyOptionButton(
+                          label: l10n.stoolLogConsistencyLiquidOption,
+                          isSelected:
+                              _selectedConsistency == StoolConsistency.liquid,
+                          onTap: () {
+                            setState(() {
+                              _selectedConsistency = StoolConsistency.liquid;
+                            });
+                          },
+                        ),
                       ),
-                      _ConsistencyOptionButton(
-                        label: l10n.stoolLogConsistencySoftOption,
-                        isSelected: _selectedConsistency == StoolConsistency.soft,
-                        onTap: () {
-                          setState(() {
-                            _selectedConsistency = StoolConsistency.soft;
-                          });
-                        },
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _ConsistencyOptionButton(
+                          label: l10n.stoolLogConsistencySoftOption,
+                          isSelected:
+                              _selectedConsistency == StoolConsistency.soft,
+                          onTap: () {
+                            setState(() {
+                              _selectedConsistency = StoolConsistency.soft;
+                            });
+                          },
+                        ),
                       ),
-                      _ConsistencyOptionButton(
-                        label: l10n.stoolLogConsistencyFirmOption,
-                        isSelected: _selectedConsistency == StoolConsistency.firm,
-                        onTap: () {
-                          setState(() {
-                            _selectedConsistency = StoolConsistency.firm;
-                          });
-                        },
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _ConsistencyOptionButton(
+                          label: l10n.stoolLogConsistencyFirmOption,
+                          isSelected:
+                              _selectedConsistency == StoolConsistency.firm,
+                          onTap: () {
+                            setState(() {
+                              _selectedConsistency = StoolConsistency.firm;
+                            });
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -228,7 +238,7 @@ class _StoolLogPageState extends ConsumerState<StoolLogPage> {
                       filled: true,
                       fillColor: AppColors.surfaceVariant,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(4),
                         borderSide: BorderSide.none,
                       ),
                       contentPadding: const EdgeInsets.all(16),
@@ -352,19 +362,46 @@ class _ConsistencyOptionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textColor =
+        isSelected ? colorScheme.onPrimary : Colors.white.withValues(alpha: 0.9);
 
-    return ChoiceChip(
-      label: Text(label),
+    return Semantics(
+      button: true,
       selected: isSelected,
-      onSelected: (_) => onTap(),
-      labelStyle: theme.textTheme.labelLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-        color: Colors.white,
+      label: label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(4),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? colorScheme.primary
+                  : AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color: isSelected
+                    ? Colors.transparent
+                    : Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            child: Center(
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
-      selectedColor: theme.colorScheme.primary,
-      backgroundColor: AppColors.surfaceVariant,
-      showCheckmark: false,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     );
   }
 }

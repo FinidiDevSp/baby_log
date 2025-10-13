@@ -199,6 +199,30 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     }
   }
 
+  String? _formatElapsedTime(AppLocalizations l10n, DateTime? timestamp) {
+    if (timestamp == null) {
+      return null;
+    }
+    final now = DateTime.now();
+    var difference = now.difference(timestamp);
+    if (difference.isNegative) {
+      difference = Duration.zero;
+    }
+    if (difference < const Duration(minutes: 1)) {
+      return l10n.dashboardElapsedJustNow;
+    }
+    if (difference < const Duration(hours: 1)) {
+      final minutes = difference.inMinutes;
+      return l10n.dashboardElapsedMinutes(minutes);
+    }
+    if (difference < const Duration(days: 1)) {
+      final hours = difference.inHours;
+      return l10n.dashboardElapsedHours(hours);
+    }
+    final days = difference.inDays;
+    return l10n.dashboardElapsedDays(days);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -223,6 +247,21 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
           .push(MaterialPageRoute(builder: (_) => const StoolLogPage()));
     }
 
+    String? bottleStatus;
+    if (feedings.isNotEmpty) {
+      final latestFeeding = feedings.reduce((previous, current) =>
+          previous.timestamp.isAfter(current.timestamp) ? previous : current);
+      bottleStatus =
+          _formatElapsedTime(l10n, latestFeeding.timestamp);
+    }
+
+    String? stoolStatus;
+    if (stools.isNotEmpty) {
+      final latestStool = stools.reduce((previous, current) =>
+          previous.timestamp.isAfter(current.timestamp) ? previous : current);
+      stoolStatus = _formatElapsedTime(l10n, latestStool.timestamp);
+    }
+
     final hasEntries =
         selectedFeedings.isNotEmpty || selectedStools.isNotEmpty;
 
@@ -233,6 +272,8 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
           _ShortcutCarousel(
             onBottleTap: openBottleForm,
             onStoolTap: openStoolForm,
+            bottleStatus: bottleStatus,
+            stoolStatus: stoolStatus,
           ),
           const SizedBox(height: 16),
           _TimelineCard(
@@ -263,10 +304,14 @@ class _ShortcutCarousel extends StatelessWidget {
   const _ShortcutCarousel({
     required this.onBottleTap,
     required this.onStoolTap,
+    this.bottleStatus,
+    this.stoolStatus,
   });
 
   final VoidCallback onBottleTap;
   final VoidCallback onStoolTap;
+  final String? bottleStatus;
+  final String? stoolStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -278,6 +323,7 @@ class _ShortcutCarousel extends StatelessWidget {
         label: l10n.dashboardBottleLabel,
         onTap: onBottleTap,
         heroTag: 'bottle_shortcut',
+        status: bottleStatus,
       ),
       _ShortcutData(
         color: const Color(0xFF4CAF50),
@@ -285,6 +331,7 @@ class _ShortcutCarousel extends StatelessWidget {
         label: l10n.dashboardDiaperLabel,
         onTap: onStoolTap,
         heroTag: 'stool_shortcut',
+        status: stoolStatus,
       ),
       _ShortcutData(
         color: const Color(0xFF1ABC9C),
@@ -340,7 +387,6 @@ class _ShortcutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return Column(
@@ -369,14 +415,16 @@ class _ShortcutButton extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                l10n.dashboardMinutesAgoZero,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: Colors.white70,
+              if (data.status != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  data.status!,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: Colors.white70,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
@@ -719,7 +767,7 @@ class _TimelineEventBadge extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: showCount ? 6 : 0),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(4),
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Center(
@@ -907,7 +955,7 @@ class _DailyLogListState extends State<_DailyLogList>
         children: [
           InkWell(
             onTap: _toggleExpanded,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(4),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Row(
@@ -1122,7 +1170,7 @@ class _SummaryBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1209,6 +1257,7 @@ class _ShortcutData {
     required this.label,
     this.onTap,
     this.heroTag,
+    this.status,
   });
 
   final Color color;
@@ -1216,4 +1265,5 @@ class _ShortcutData {
   final String label;
   final VoidCallback? onTap;
   final String? heroTag;
+  final String? status;
 }

@@ -68,8 +68,38 @@
   "dashboardBathLabel": "Ba?o",
   "dashboardTemperatureLabel": "Temperatura",
   "dashboardFoodLabel": "Comida",
-  "dashboardMedicalAgendaLabel": "Agenda m?dica",
-  "dashboardMinutesAgoZero": "0 mins",
+  "dashboardMedicalAgendaLabel": "AGENDA",
+  "dashboardElapsedJustNow": "Justo ahora",
+  "dashboardElapsedMinutes": "{count, plural, =1 {Hace 1 min} other {Hace {count} mins}}",
+  "@dashboardElapsedMinutes": {
+    "description": "Tiempo relativo en minutos desde el último evento",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": 5
+      }
+    }
+  },
+  "dashboardElapsedHours": "{count, plural, =1 {Hace 1 h} other {Hace {count} h}}",
+  "@dashboardElapsedHours": {
+    "description": "Tiempo relativo en horas desde el último evento",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": 3
+      }
+    }
+  },
+  "dashboardElapsedDays": "{count, plural, =1 {Hace 1 día} other {Hace {count} días}}",
+  "@dashboardElapsedDays": {
+    "description": "Tiempo relativo en días desde el último evento",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": 2
+      }
+    }
+  },
   "dashboardEventsEmptyTitle": "No se encontr? informaci?n",
   "dashboardNavHome": "Inicio",
   "dashboardNavStats": "Estad?sticas",
@@ -82,7 +112,7 @@
   "dashboardChangeDayTooltip": "Cambiar día",
   "dashboardImportTooltip": "Importar datos",
   "dashboardExportTooltip": "Exportar datos",
-  "dashboardPediatricQuestionsLabel": "Preguntas al pediatra",
+  "dashboardPediatricQuestionsLabel": "Preguntas",
   "bottleLogTitle": "Toma de biberón",
   "bottleLogDateTimeLabel": "Día y hora",
   "bottleLogAmountLabel": "Cantidad",

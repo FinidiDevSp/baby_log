@@ -68,8 +68,38 @@
   "dashboardBathLabel": "Bath",
   "dashboardTemperatureLabel": "Temperature",
   "dashboardFoodLabel": "Feeding",
-  "dashboardMedicalAgendaLabel": "Medical agenda",
-  "dashboardMinutesAgoZero": "0 mins",
+  "dashboardMedicalAgendaLabel": "AGENDA",
+  "dashboardElapsedJustNow": "Just now",
+  "dashboardElapsedMinutes": "{count, plural, =1 {1 min ago} other {{count} mins ago}}",
+  "@dashboardElapsedMinutes": {
+    "description": "Relative time in minutes since the last event",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": 5
+      }
+    }
+  },
+  "dashboardElapsedHours": "{count, plural, =1 {1 hr ago} other {{count} hrs ago}}",
+  "@dashboardElapsedHours": {
+    "description": "Relative time in hours since the last event",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": 3
+      }
+    }
+  },
+  "dashboardElapsedDays": "{count, plural, =1 {1 day ago} other {{count} days ago}}",
+  "@dashboardElapsedDays": {
+    "description": "Relative time in days since the last event",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": 2
+      }
+    }
+  },
   "dashboardEventsEmptyTitle": "No information found",
   "dashboardNavHome": "Home",
   "dashboardNavStats": "Statistics",
@@ -82,7 +112,7 @@
   "dashboardChangeDayTooltip": "Choose another day",
   "dashboardImportTooltip": "Import data",
   "dashboardExportTooltip": "Export data",
-  "dashboardPediatricQuestionsLabel": "Ask the pediatrician",
+  "dashboardPediatricQuestionsLabel": "Questions",
   "bottleLogTitle": "Bottle feeding",
   "bottleLogDateTimeLabel": "Date & time",
   "bottleLogAmountLabel": "Amount",

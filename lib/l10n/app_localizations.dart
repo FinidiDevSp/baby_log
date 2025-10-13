@@ -365,14 +365,32 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardMedicalAgendaLabel.
   ///
   /// In es, this message translates to:
-  /// **'Agenda m?dica'**
+  /// **'AGENDA'**
   String get dashboardMedicalAgendaLabel;
 
-  /// No description provided for @dashboardMinutesAgoZero.
+  /// No description provided for @dashboardElapsedJustNow.
   ///
   /// In es, this message translates to:
-  /// **'0 mins'**
-  String get dashboardMinutesAgoZero;
+  /// **'Justo ahora'**
+  String get dashboardElapsedJustNow;
+
+  /// No description provided for @dashboardElapsedMinutes.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace {count} mins'**
+  String dashboardElapsedMinutes(int count);
+
+  /// No description provided for @dashboardElapsedHours.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace {count} h'**
+  String dashboardElapsedHours(int count);
+
+  /// No description provided for @dashboardElapsedDays.
+  ///
+  /// In es, this message translates to:
+  /// **'Hace {count} días'**
+  String dashboardElapsedDays(int count);
 
   /// No description provided for @dashboardEventsEmptyTitle.
   ///
@@ -449,7 +467,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardPediatricQuestionsLabel.
   ///
   /// In es, this message translates to:
-  /// **'Preguntas al pediatra'**
+  /// **'Preguntas'**
   String get dashboardPediatricQuestionsLabel;
 
   /// No description provided for @bottleLogTitle.
