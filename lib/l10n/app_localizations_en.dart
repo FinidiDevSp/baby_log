@@ -155,32 +155,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String dashboardElapsedMinutes(int count) {
-    return intl.Intl.pluralLogic(
+    String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      one: '1 min ago',
       other: '$count mins ago',
+      one: '1 min ago',
     );
+    return '$_temp0';
   }
 
   @override
   String dashboardElapsedHours(int count) {
-    return intl.Intl.pluralLogic(
+    String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      one: '1 hr ago',
       other: '$count hrs ago',
+      one: '1 hr ago',
     );
+    return '$_temp0';
   }
 
   @override
   String dashboardElapsedDays(int count) {
-    return intl.Intl.pluralLogic(
+    String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      one: '1 day ago',
       other: '$count days ago',
+      one: '1 day ago',
     );
+    return '$_temp0';
   }
 
   @override
@@ -251,6 +254,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeLogListTitle => 'Latest logs';
+
+  @override
+  String get bathLogTitle => 'Bath';
+
+  @override
+  String get bathLogTypeLabel => 'Bath type';
+
+  @override
+  String get bathLogTypeFullOption => 'Complete';
+
+  @override
+  String get bathLogTypeQuickOption => 'Quick';
+
+  @override
+  String get bathLogTypeFullDescription => 'Complete bath';
+
+  @override
+  String get bathLogTypeQuickDescription => 'Quick bath';
+
+  @override
+  String get bathLogNotesLabel => 'Notes';
+
+  @override
+  String get bathLogNotesHint => 'Add any details you want to remember';
 
   @override
   String get stoolLogTitle => 'Diaper change';

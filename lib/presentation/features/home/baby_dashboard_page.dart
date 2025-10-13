@@ -5,18 +5,22 @@ import 'package:lucide_flutter/lucide_flutter.dart';
 
 import 'package:baby_log/core/theme/app_colors.dart';
 import 'package:baby_log/domain/entities/baby_profile.dart';
+import 'package:baby_log/domain/entities/bath_entry.dart';
 import 'package:baby_log/domain/entities/feeding_entry.dart';
 import 'package:baby_log/domain/entities/stool_entry.dart';
 import 'package:baby_log/l10n/app_localizations.dart';
 import 'package:baby_log/presentation/features/baby_form/baby_form_page.dart';
 import 'package:baby_log/presentation/widgets/baby_avatar.dart';
 
+import 'state/bath_entries_provider.dart';
 import 'state/feeding_entries_provider.dart';
 import 'state/stool_entries_provider.dart';
+import '../baths/bath_log_page.dart';
 import '../diapers/stool_log_page.dart';
 import '../feedings/bottle_feeding_page.dart';
 
 const _stoolAccentColor = Color(0xFF4CAF50);
+const _bathAccentColor = Color(0xFF2D81FF);
 
 /// Dashboard shown once a baby profile exists.
 class BabyDashboardPage extends ConsumerStatefulWidget {
@@ -228,42 +232,69 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     final l10n = AppLocalizations.of(context);
     final feedingsAsync = ref.watch(feedingEntriesProvider);
     final stoolsAsync = ref.watch(stoolEntriesProvider);
+    final bathsAsync = ref.watch(bathEntriesProvider);
     final feedings = feedingsAsync.value ?? const <FeedingEntry>[];
     final stools = stoolsAsync.value ?? const <StoolEntry>[];
+    final baths = bathsAsync.value ?? const <BathEntry>[];
     final selectedFeedings = feedings
         .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
         .toList();
     final selectedStools = stools
         .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
         .toList();
+    final selectedBaths = baths
+        .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
+        .toList();
 
     void openBottleForm() {
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => const BottleFeedingPage()));
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const BottleFeedingPage()));
     }
 
     void openStoolForm() {
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => const StoolLogPage()));
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const StoolLogPage()));
+    }
+
+    void openBathForm() {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const BathLogPage()));
     }
 
     String? bottleStatus;
     if (feedings.isNotEmpty) {
-      final latestFeeding = feedings.reduce((previous, current) =>
-          previous.timestamp.isAfter(current.timestamp) ? previous : current);
-      bottleStatus =
-          _formatElapsedTime(l10n, latestFeeding.timestamp);
+      final latestFeeding = feedings.reduce(
+        (previous, current) =>
+            previous.timestamp.isAfter(current.timestamp) ? previous : current,
+      );
+      bottleStatus = _formatElapsedTime(l10n, latestFeeding.timestamp);
     }
 
     String? stoolStatus;
     if (stools.isNotEmpty) {
-      final latestStool = stools.reduce((previous, current) =>
-          previous.timestamp.isAfter(current.timestamp) ? previous : current);
+      final latestStool = stools.reduce(
+        (previous, current) =>
+            previous.timestamp.isAfter(current.timestamp) ? previous : current,
+      );
       stoolStatus = _formatElapsedTime(l10n, latestStool.timestamp);
     }
 
+    String? bathStatus;
+    if (baths.isNotEmpty) {
+      final latestBath = baths.reduce(
+        (previous, current) =>
+            previous.timestamp.isAfter(current.timestamp) ? previous : current,
+      );
+      bathStatus = _formatElapsedTime(l10n, latestBath.timestamp);
+    }
+
     final hasEntries =
-        selectedFeedings.isNotEmpty || selectedStools.isNotEmpty;
+        selectedFeedings.isNotEmpty ||
+        selectedStools.isNotEmpty ||
+        selectedBaths.isNotEmpty;
 
     return SafeArea(
       child: ListView(
@@ -272,14 +303,17 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
           _ShortcutCarousel(
             onBottleTap: openBottleForm,
             onStoolTap: openStoolForm,
+            onBathTap: openBathForm,
             bottleStatus: bottleStatus,
             stoolStatus: stoolStatus,
+            bathStatus: bathStatus,
           ),
           const SizedBox(height: 16),
           _TimelineCard(
             accentColor: widget.accentColor,
             feedings: selectedFeedings,
             stools: selectedStools,
+            baths: selectedBaths,
             selectedDate: _selectedDate,
             onSelectDate: _openDayPicker,
             onImport: () {},
@@ -293,6 +327,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
               accentColor: widget.accentColor,
               feedings: selectedFeedings,
               stools: selectedStools,
+              baths: selectedBaths,
             ),
         ],
       ),
@@ -304,14 +339,18 @@ class _ShortcutCarousel extends StatelessWidget {
   const _ShortcutCarousel({
     required this.onBottleTap,
     required this.onStoolTap,
+    required this.onBathTap,
     this.bottleStatus,
     this.stoolStatus,
+    this.bathStatus,
   });
 
   final VoidCallback onBottleTap;
   final VoidCallback onStoolTap;
+  final VoidCallback onBathTap;
   final String? bottleStatus;
   final String? stoolStatus;
+  final String? bathStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -339,9 +378,12 @@ class _ShortcutCarousel extends StatelessWidget {
         label: l10n.dashboardVomitLabel,
       ),
       _ShortcutData(
-        color: const Color(0xFF2D81FF),
+        color: _bathAccentColor,
         icon: LucideIcons.bath,
         label: l10n.dashboardBathLabel,
+        onTap: onBathTap,
+        heroTag: 'bath_shortcut',
+        status: bathStatus,
       ),
       _ShortcutData(
         color: const Color(0xFFFF9800),
@@ -462,6 +504,7 @@ class _TimelineCard extends StatelessWidget {
   const _TimelineCard({
     required this.feedings,
     required this.stools,
+    required this.baths,
     required this.accentColor,
     required this.selectedDate,
     required this.onSelectDate,
@@ -471,6 +514,7 @@ class _TimelineCard extends StatelessWidget {
 
   final List<FeedingEntry> feedings;
   final List<StoolEntry> stools;
+  final List<BathEntry> baths;
   final Color accentColor;
   final DateTime selectedDate;
   final VoidCallback onSelectDate;
@@ -490,6 +534,7 @@ class _TimelineCard extends StatelessWidget {
         : dateLabel;
     final feedingsByHour = _groupFeedings(feedings);
     final stoolsByHour = _groupStools(stools);
+    final bathsByHour = _groupBaths(baths);
     final tiles = List<_TimelineTileData>.generate(12, (index) {
       final hour = index * 2;
       return _TimelineTileData(
@@ -498,6 +543,7 @@ class _TimelineCard extends StatelessWidget {
         icon: _iconForHour(hour),
         feedings: feedingsByHour[hour] ?? const [],
         stools: stoolsByHour[hour] ?? const [],
+        baths: bathsByHour[hour] ?? const [],
       );
     });
 
@@ -666,6 +712,7 @@ class _TimelineTileData {
     this.icon,
     this.feedings = const [],
     this.stools = const [],
+    this.baths = const [],
   });
 
   final int hour;
@@ -673,6 +720,7 @@ class _TimelineTileData {
   final IconData? icon;
   final List<FeedingEntry> feedings;
   final List<StoolEntry> stools;
+  final List<BathEntry> baths;
 
   String get label => hour.toString().padLeft(2, '0');
 }
@@ -715,7 +763,9 @@ class _TimelineTile extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.75),
               ),
             ),
-          if (data.feedings.isNotEmpty || data.stools.isNotEmpty)
+          if (data.feedings.isNotEmpty ||
+              data.stools.isNotEmpty ||
+              data.baths.isNotEmpty)
             Positioned(
               bottom: 2,
               left: 0,
@@ -736,6 +786,12 @@ class _TimelineTile extends StatelessWidget {
                       icon: LucideIcons.toilet,
                       count: data.stools.length,
                       color: _stoolAccentColor,
+                    ),
+                  if (data.baths.isNotEmpty)
+                    _TimelineEventBadge(
+                      icon: LucideIcons.bath,
+                      count: data.baths.length,
+                      color: _bathAccentColor,
                     ),
                 ],
               ),
@@ -807,10 +863,16 @@ Map<int, List<StoolEntry>> _groupStools(List<StoolEntry> stools) {
   return map;
 }
 
-String _stoolDescription(
-  AppLocalizations l10n,
-  StoolConsistency consistency,
-) {
+Map<int, List<BathEntry>> _groupBaths(List<BathEntry> baths) {
+  final map = <int, List<BathEntry>>{};
+  for (final entry in baths) {
+    final tileHour = (entry.timestamp.hour ~/ 2) * 2;
+    map.putIfAbsent(tileHour, () => []).add(entry);
+  }
+  return map;
+}
+
+String _stoolDescription(AppLocalizations l10n, StoolConsistency consistency) {
   switch (consistency) {
     case StoolConsistency.liquid:
       return l10n.stoolLogConsistencyLiquidDescription;
@@ -818,6 +880,15 @@ String _stoolDescription(
       return l10n.stoolLogConsistencySoftDescription;
     case StoolConsistency.firm:
       return l10n.stoolLogConsistencyFirmDescription;
+  }
+}
+
+String _bathDescription(AppLocalizations l10n, BathType type) {
+  switch (type) {
+    case BathType.full:
+      return l10n.bathLogTypeFullDescription;
+    case BathType.quick:
+      return l10n.bathLogTypeQuickDescription;
   }
 }
 
@@ -889,11 +960,13 @@ class _DailyLogList extends StatefulWidget {
   const _DailyLogList({
     required this.feedings,
     required this.stools,
+    required this.baths,
     required this.accentColor,
   });
 
   final List<FeedingEntry> feedings;
   final List<StoolEntry> stools;
+  final List<BathEntry> baths;
   final Color accentColor;
 
   @override
@@ -920,11 +993,12 @@ class _DailyLogListState extends State<_DailyLogList>
       (sum, entry) => sum + entry.amountMl,
     );
     final stoolCount = widget.stools.length;
+    final bathCount = widget.baths.length;
     final entries = [
       ...widget.feedings.map(_DailyLogEntry.feeding),
       ...widget.stools.map(_DailyLogEntry.stool),
-    ]
-      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+      ...widget.baths.map(_DailyLogEntry.bath),
+    ]..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     final summaryItems = [
       _SummaryData(
         icon: LucideIcons.milk,
@@ -936,6 +1010,11 @@ class _DailyLogListState extends State<_DailyLogList>
         icon: LucideIcons.toilet,
         label: l10n.dashboardDiaperLabel,
         value: stoolCount.toString(),
+      ),
+      _SummaryData(
+        icon: LucideIcons.bath,
+        label: l10n.dashboardBathLabel,
+        value: bathCount.toString(),
       ),
       _SummaryData(
         icon: LucideIcons.triangleAlert,
@@ -1016,8 +1095,9 @@ class _DailyLogListState extends State<_DailyLogList>
                                   width: 38,
                                   height: 38,
                                   decoration: BoxDecoration(
-                                    color: widget.accentColor
-                                        .withValues(alpha: 0.18),
+                                    color: widget.accentColor.withValues(
+                                      alpha: 0.18,
+                                    ),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
@@ -1029,14 +1109,15 @@ class _DailyLogListState extends State<_DailyLogList>
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         timeLabel,
                                         style: theme.textTheme.titleSmall
                                             ?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
@@ -1048,9 +1129,7 @@ class _DailyLogListState extends State<_DailyLogList>
                                         Text(
                                           feeding.notes!,
                                           style: theme.textTheme.bodySmall
-                                              ?.copyWith(
-                                            color: Colors.white70,
-                                          ),
+                                              ?.copyWith(color: Colors.white70),
                                         ),
                                       ],
                                     ],
@@ -1060,8 +1139,10 @@ class _DailyLogListState extends State<_DailyLogList>
                             );
                           case _DailyLogType.stool:
                             final stool = entry.stool!;
-                            final description =
-                                _stoolDescription(l10n, stool.consistency);
+                            final description = _stoolDescription(
+                              l10n,
+                              stool.consistency,
+                            );
                             return Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -1069,8 +1150,9 @@ class _DailyLogListState extends State<_DailyLogList>
                                   width: 38,
                                   height: 38,
                                   decoration: BoxDecoration(
-                                    color:
-                                        _stoolAccentColor.withValues(alpha: 0.18),
+                                    color: _stoolAccentColor.withValues(
+                                      alpha: 0.18,
+                                    ),
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
@@ -1082,14 +1164,15 @@ class _DailyLogListState extends State<_DailyLogList>
                                 const SizedBox(width: 14),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         timeLabel,
                                         style: theme.textTheme.titleSmall
                                             ?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
@@ -1101,9 +1184,62 @@ class _DailyLogListState extends State<_DailyLogList>
                                         Text(
                                           stool.notes!,
                                           style: theme.textTheme.bodySmall
-                                              ?.copyWith(
-                                            color: Colors.white70,
-                                          ),
+                                              ?.copyWith(color: Colors.white70),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          case _DailyLogType.bath:
+                            final bath = entry.bath!;
+                            final description = _bathDescription(
+                              l10n,
+                              bath.type,
+                            );
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: _bathAccentColor.withValues(
+                                      alpha: 0.18,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    LucideIcons.bath,
+                                    size: 18,
+                                    color: _bathAccentColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        timeLabel,
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        description,
+                                        style: theme.textTheme.bodyMedium,
+                                      ),
+                                      if ((bath.notes ?? '').isNotEmpty) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          bath.notes!,
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(color: Colors.white70),
                                         ),
                                       ],
                                     ],
@@ -1124,23 +1260,33 @@ class _DailyLogListState extends State<_DailyLogList>
   }
 }
 
-enum _DailyLogType { feeding, stool }
+enum _DailyLogType { feeding, stool, bath }
 
 class _DailyLogEntry {
   _DailyLogEntry.feeding(FeedingEntry entry)
-      : feeding = entry,
-        stool = null,
-        type = _DailyLogType.feeding,
-        timestamp = entry.timestamp;
+    : feeding = entry,
+      stool = null,
+      bath = null,
+      type = _DailyLogType.feeding,
+      timestamp = entry.timestamp;
 
   _DailyLogEntry.stool(StoolEntry entry)
-      : feeding = null,
-        stool = entry,
-        type = _DailyLogType.stool,
-        timestamp = entry.timestamp;
+    : feeding = null,
+      stool = entry,
+      bath = null,
+      type = _DailyLogType.stool,
+      timestamp = entry.timestamp;
+
+  _DailyLogEntry.bath(BathEntry entry)
+    : feeding = null,
+      stool = null,
+      bath = entry,
+      type = _DailyLogType.bath,
+      timestamp = entry.timestamp;
 
   final FeedingEntry? feeding;
   final StoolEntry? stool;
+  final BathEntry? bath;
   final _DailyLogType type;
   final DateTime timestamp;
 }

@@ -76,7 +76,7 @@
     "placeholders": {
       "count": {
         "type": "int",
-        "example": 5
+        "example": "5"
       }
     }
   },
@@ -86,7 +86,7 @@
     "placeholders": {
       "count": {
         "type": "int",
-        "example": 3
+        "example": "3"
       }
     }
   },
@@ -96,7 +96,7 @@
     "placeholders": {
       "count": {
         "type": "int",
-        "example": 2
+        "example": "2"
       }
     }
   },
@@ -123,6 +123,14 @@
   "bottleLogDecreaseTooltip": "Restar 5 ml",
   "bottleLogIncreaseTooltip": "Sumar 5 ml",
   "homeLogListTitle": "Últimos registros",
+  "bathLogTitle": "Baño",
+  "bathLogTypeLabel": "Tipo de baño",
+  "bathLogTypeFullOption": "Completo",
+  "bathLogTypeQuickOption": "Rápido",
+  "bathLogTypeFullDescription": "Baño completo",
+  "bathLogTypeQuickDescription": "Baño rápido",
+  "bathLogNotesLabel": "Notas",
+  "bathLogNotesHint": "Añade detalles que quieras recordar",
   "stoolLogTitle": "Cambio de pañal",
   "stoolLogDateTimeLabel": "Día y hora",
   "stoolLogConsistencyLabel": "Consistencia",
