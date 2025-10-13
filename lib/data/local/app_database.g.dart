@@ -2065,6 +2065,364 @@ class BathEntriesCompanion extends UpdateCompanion<BathEntryRow> {
   }
 }
 
+class $TemperatureEntriesTable extends TemperatureEntries
+    with TableInfo<$TemperatureEntriesTable, TemperatureEntryRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TemperatureEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _timestampMeta =
+      const VerificationMeta('timestamp');
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueCelsiusMeta =
+      const VerificationMeta('valueCelsius');
+  @override
+  late final GeneratedColumn<double> valueCelsius =
+      GeneratedColumn<double>(
+    'value_celsius',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        timestamp,
+        valueCelsius,
+        notes,
+        createdAt,
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'temperature_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TemperatureEntryRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    if (data.containsKey('value_celsius')) {
+      context.handle(
+        _valueCelsiusMeta,
+        valueCelsius.isAcceptableOrUnknown(
+          data['value_celsius']!,
+          _valueCelsiusMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_valueCelsiusMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TemperatureEntryRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TemperatureEntryRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
+      valueCelsius: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}value_celsius'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $TemperatureEntriesTable createAlias(String alias) {
+    return $TemperatureEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class TemperatureEntryRow extends DataClass
+    implements Insertable<TemperatureEntryRow> {
+  final int id;
+  final DateTime timestamp;
+  final double valueCelsius;
+  final String? notes;
+  final DateTime createdAt;
+  const TemperatureEntryRow({
+    required this.id,
+    required this.timestamp,
+    required this.valueCelsius,
+    this.notes,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{
+      'id': Variable<int>(id),
+      'timestamp': Variable<DateTime>(timestamp),
+      'value_celsius': Variable<double>(valueCelsius),
+      'created_at': Variable<DateTime>(createdAt),
+    };
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    return map;
+  }
+
+  TemperatureEntriesCompanion toCompanion(bool nullToAbsent) {
+    return TemperatureEntriesCompanion(
+      id: Value(id),
+      timestamp: Value(timestamp),
+      valueCelsius: Value(valueCelsius),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory TemperatureEntryRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TemperatureEntryRow(
+      id: serializer.fromJson<int>(json['id']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+      valueCelsius: serializer.fromJson<double>(json['valueCelsius']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+      'valueCelsius': serializer.toJson<double>(valueCelsius),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  TemperatureEntryRow copyWith({
+    int? id,
+    DateTime? timestamp,
+    double? valueCelsius,
+    Value<String?> notes = const Value.absent(),
+    DateTime? createdAt,
+  }) => TemperatureEntryRow(
+        id: id ?? this.id,
+        timestamp: timestamp ?? this.timestamp,
+        valueCelsius: valueCelsius ?? this.valueCelsius,
+        notes: notes.present ? notes.value : this.notes,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  TemperatureEntryRow copyWithCompanion(TemperatureEntriesCompanion data) {
+    return TemperatureEntryRow(
+      id: data.id.present ? data.id.value : this.id,
+      timestamp:
+          data.timestamp.present ? data.timestamp.value : this.timestamp,
+      valueCelsius: data.valueCelsius.present
+          ? data.valueCelsius.value
+          : this.valueCelsius,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TemperatureEntryRow(')
+          ..write('id: $id, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('valueCelsius: $valueCelsius, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, timestamp, valueCelsius, notes, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TemperatureEntryRow &&
+          other.id == this.id &&
+          other.timestamp == this.timestamp &&
+          other.valueCelsius == this.valueCelsius &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt);
+}
+
+class TemperatureEntriesCompanion
+    extends UpdateCompanion<TemperatureEntryRow> {
+  final Value<int> id;
+  final Value<DateTime> timestamp;
+  final Value<double> valueCelsius;
+  final Value<String?> notes;
+  final Value<DateTime> createdAt;
+  const TemperatureEntriesCompanion({
+    this.id = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.valueCelsius = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  TemperatureEntriesCompanion.insert({
+    this.id = const Value.absent(),
+    required DateTime timestamp,
+    required double valueCelsius,
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  })  : timestamp = Value(timestamp),
+        valueCelsius = Value(valueCelsius);
+  static Insertable<TemperatureEntryRow> custom({
+    Expression<int>? id,
+    Expression<DateTime>? timestamp,
+    Expression<double>? valueCelsius,
+    Expression<String>? notes,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (valueCelsius != null) 'value_celsius': valueCelsius,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  TemperatureEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<DateTime>? timestamp,
+    Value<double>? valueCelsius,
+    Value<String?>? notes,
+    Value<DateTime>? createdAt,
+  }) {
+    return TemperatureEntriesCompanion(
+      id: id ?? this.id,
+      timestamp: timestamp ?? this.timestamp,
+      valueCelsius: valueCelsius ?? this.valueCelsius,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    if (valueCelsius.present) {
+      map['value_celsius'] = Variable<double>(valueCelsius.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TemperatureEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('valueCelsius: $valueCelsius, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2073,6 +2431,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $StoolEntriesTable stoolEntries = $StoolEntriesTable(this);
   late final $VomitEntriesTable vomitEntries = $VomitEntriesTable(this);
   late final $BathEntriesTable bathEntries = $BathEntriesTable(this);
+  late final $TemperatureEntriesTable temperatureEntries =
+      $TemperatureEntriesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2083,6 +2443,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     stoolEntries,
     vomitEntries,
     bathEntries,
+    temperatureEntries,
   ];
 }
 
@@ -3184,6 +3545,219 @@ typedef $$BathEntriesTableProcessedTableManager =
       PrefetchHooks Function()
     >;
 
+typedef $$TemperatureEntriesTableCreateCompanionBuilder =
+    TemperatureEntriesCompanion Function({
+      Value<int> id,
+      required DateTime timestamp,
+      required double valueCelsius,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+    });
+typedef $$TemperatureEntriesTableUpdateCompanionBuilder =
+    TemperatureEntriesCompanion Function({
+      Value<int> id,
+      Value<DateTime> timestamp,
+      Value<double> valueCelsius,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+    });
+
+class $$TemperatureEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $TemperatureEntriesTable> {
+  $$TemperatureEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+        column: $table.id,
+        builder: (column) => ColumnFilters(column),
+      );
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+        column: $table.timestamp,
+        builder: (column) => ColumnFilters(column),
+      );
+
+  ColumnFilters<double> get valueCelsius => $composableBuilder(
+        column: $table.valueCelsius,
+        builder: (column) => ColumnFilters(column),
+      );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+        column: $table.notes,
+        builder: (column) => ColumnFilters(column),
+      );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+        column: $table.createdAt,
+        builder: (column) => ColumnFilters(column),
+      );
+}
+
+class $$TemperatureEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $TemperatureEntriesTable> {
+  $$TemperatureEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+        column: $table.id,
+        builder: (column) => ColumnOrderings(column),
+      );
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+        column: $table.timestamp,
+        builder: (column) => ColumnOrderings(column),
+      );
+
+  ColumnOrderings<double> get valueCelsius => $composableBuilder(
+        column: $table.valueCelsius,
+        builder: (column) => ColumnOrderings(column),
+      );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+        column: $table.notes,
+        builder: (column) => ColumnOrderings(column),
+      );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+        column: $table.createdAt,
+        builder: (column) => ColumnOrderings(column),
+      );
+}
+
+class $$TemperatureEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TemperatureEntriesTable> {
+  $$TemperatureEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp => $composableBuilder(
+        column: $table.timestamp,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<double> get valueCelsius => $composableBuilder(
+        column: $table.valueCelsius,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt => $composableBuilder(
+        column: $table.createdAt,
+        builder: (column) => column,
+      );
+}
+
+class $$TemperatureEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TemperatureEntriesTable,
+          TemperatureEntryRow,
+          $$TemperatureEntriesTableFilterComposer,
+          $$TemperatureEntriesTableOrderingComposer,
+          $$TemperatureEntriesTableAnnotationComposer,
+          $$TemperatureEntriesTableCreateCompanionBuilder,
+          $$TemperatureEntriesTableUpdateCompanionBuilder,
+          (
+            TemperatureEntryRow,
+            BaseReferences<
+                _$AppDatabase, $TemperatureEntriesTable, TemperatureEntryRow>,
+          ),
+          TemperatureEntryRow,
+          PrefetchHooks Function()
+        > {
+  $$TemperatureEntriesTableTableManager(
+      _$AppDatabase db, $TemperatureEntriesTable table)
+      : super(
+          TableManagerState(
+            db: db,
+            table: table,
+            createFilteringComposer: () =>
+                $$TemperatureEntriesTableFilterComposer(
+                  $db: db,
+                  $table: table,
+                ),
+            createOrderingComposer: () =>
+                $$TemperatureEntriesTableOrderingComposer(
+                  $db: db,
+                  $table: table,
+                ),
+            createComputedFieldComposer: () =>
+                $$TemperatureEntriesTableAnnotationComposer(
+                  $db: db,
+                  $table: table,
+                ),
+            updateCompanionCallback:
+                ({
+                  Value<int> id = const Value.absent(),
+                  Value<DateTime> timestamp = const Value.absent(),
+                  Value<double> valueCelsius = const Value.absent(),
+                  Value<String?> notes = const Value.absent(),
+                  Value<DateTime> createdAt = const Value.absent(),
+                }) => TemperatureEntriesCompanion(
+                  id: id,
+                  timestamp: timestamp,
+                  valueCelsius: valueCelsius,
+                  notes: notes,
+                  createdAt: createdAt,
+                ),
+            createCompanionCallback:
+                ({
+                  Value<int> id = const Value.absent(),
+                  required DateTime timestamp,
+                  required double valueCelsius,
+                  Value<String?> notes = const Value.absent(),
+                  Value<DateTime> createdAt = const Value.absent(),
+                }) => TemperatureEntriesCompanion.insert(
+                  id: id,
+                  timestamp: timestamp,
+                  valueCelsius: valueCelsius,
+                  notes: notes,
+                  createdAt: createdAt,
+                ),
+            withReferenceMapper: (p0) => p0
+                .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+                .toList(),
+            prefetchHooksCallback: null,
+          ),
+        );
+}
+
+typedef $$TemperatureEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TemperatureEntriesTable,
+      TemperatureEntryRow,
+      $$TemperatureEntriesTableFilterComposer,
+      $$TemperatureEntriesTableOrderingComposer,
+      $$TemperatureEntriesTableAnnotationComposer,
+      $$TemperatureEntriesTableCreateCompanionBuilder,
+      $$TemperatureEntriesTableUpdateCompanionBuilder,
+      (
+        TemperatureEntryRow,
+        BaseReferences<
+            _$AppDatabase, $TemperatureEntriesTable, TemperatureEntryRow>,
+      ),
+      TemperatureEntryRow,
+      PrefetchHooks Function()
+    >;
+
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
@@ -3197,4 +3771,6 @@ class $AppDatabaseManager {
       $$VomitEntriesTableTableManager(_db, _db.vomitEntries);
   $$BathEntriesTableTableManager get bathEntries =>
       $$BathEntriesTableTableManager(_db, _db.bathEntries);
+  $$TemperatureEntriesTableTableManager get temperatureEntries =>
+      $$TemperatureEntriesTableTableManager(_db, _db.temperatureEntries);
 }

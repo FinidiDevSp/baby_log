@@ -8,6 +8,7 @@ import 'package:baby_log/domain/entities/baby_profile.dart';
 import 'package:baby_log/domain/entities/bath_entry.dart';
 import 'package:baby_log/domain/entities/feeding_entry.dart';
 import 'package:baby_log/domain/entities/stool_entry.dart';
+import 'package:baby_log/domain/entities/temperature_entry.dart';
 import 'package:baby_log/domain/entities/vomit_entry.dart';
 import 'package:baby_log/l10n/app_localizations.dart';
 import 'package:baby_log/presentation/features/baby_form/baby_form_page.dart';
@@ -16,15 +17,18 @@ import 'package:baby_log/presentation/widgets/baby_avatar.dart';
 import 'state/bath_entries_provider.dart';
 import 'state/feeding_entries_provider.dart';
 import 'state/stool_entries_provider.dart';
+import 'state/temperature_entries_provider.dart';
 import 'state/vomit_entries_provider.dart';
 import '../baths/bath_log_page.dart';
 import '../diapers/stool_log_page.dart';
 import '../feedings/bottle_feeding_page.dart';
+import '../temperatures/temperature_log_page.dart';
 import '../vomits/vomit_log_page.dart';
 
 const _stoolAccentColor = Color(0xFF4CAF50);
 const _bathAccentColor = Color(0xFF2D81FF);
 const _vomitAccentColor = Color(0xFF1ABC9C);
+const _temperatureAccentColor = Color(0xFFFFA726);
 
 /// Dashboard shown once a baby profile exists.
 class BabyDashboardPage extends ConsumerStatefulWidget {
@@ -238,10 +242,13 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     final stoolsAsync = ref.watch(stoolEntriesProvider);
     final vomitsAsync = ref.watch(vomitEntriesProvider);
     final bathsAsync = ref.watch(bathEntriesProvider);
+    final temperaturesAsync = ref.watch(temperatureEntriesProvider);
     final feedings = feedingsAsync.value ?? const <FeedingEntry>[];
     final stools = stoolsAsync.value ?? const <StoolEntry>[];
     final vomits = vomitsAsync.value ?? const <VomitEntry>[];
     final baths = bathsAsync.value ?? const <BathEntry>[];
+    final temperatures =
+        temperaturesAsync.value ?? const <TemperatureEntry>[];
     final selectedFeedings = feedings
         .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
         .toList();
@@ -252,6 +259,9 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
         .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
         .toList();
     final selectedBaths = baths
+        .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
+        .toList();
+    final selectedTemperatures = temperatures
         .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
         .toList();
 
@@ -277,6 +287,14 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       Navigator.of(
         context,
       ).push(MaterialPageRoute(builder: (_) => const BathLogPage()));
+    }
+
+    void openTemperatureForm() {
+      Navigator.of(
+        context,
+      ).push(
+        MaterialPageRoute(builder: (_) => const TemperatureLogPage()),
+      );
     }
 
     String? bottleStatus;
@@ -315,11 +333,24 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       bathStatus = _formatElapsedTime(l10n, latestBath.timestamp);
     }
 
+    String? temperatureStatus;
+    if (temperatures.isNotEmpty) {
+      final latestTemperature = temperatures.reduce(
+        (previous, current) =>
+            previous.timestamp.isAfter(current.timestamp) ? previous : current,
+      );
+      temperatureStatus = _formatElapsedTime(
+        l10n,
+        latestTemperature.timestamp,
+      );
+    }
+
     final hasEntries =
         selectedFeedings.isNotEmpty ||
         selectedStools.isNotEmpty ||
         selectedVomits.isNotEmpty ||
-        selectedBaths.isNotEmpty;
+        selectedBaths.isNotEmpty ||
+        selectedTemperatures.isNotEmpty;
 
     return SafeArea(
       child: ListView(
@@ -330,10 +361,12 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
             onStoolTap: openStoolForm,
             onVomitTap: openVomitForm,
             onBathTap: openBathForm,
+            onTemperatureTap: openTemperatureForm,
             bottleStatus: bottleStatus,
             stoolStatus: stoolStatus,
             vomitStatus: vomitStatus,
             bathStatus: bathStatus,
+            temperatureStatus: temperatureStatus,
           ),
           const SizedBox(height: 16),
           _TimelineCard(
@@ -342,6 +375,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
             stools: selectedStools,
             vomits: selectedVomits,
             baths: selectedBaths,
+            temperatures: selectedTemperatures,
             selectedDate: _selectedDate,
             onSelectDate: _openDayPicker,
             onImport: () {},
@@ -357,6 +391,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
               stools: selectedStools,
               vomits: selectedVomits,
               baths: selectedBaths,
+              temperatures: selectedTemperatures,
             ),
         ],
       ),
@@ -370,20 +405,24 @@ class _ShortcutCarousel extends StatelessWidget {
     required this.onStoolTap,
     required this.onVomitTap,
     required this.onBathTap,
+    required this.onTemperatureTap,
     this.bottleStatus,
     this.stoolStatus,
     this.vomitStatus,
     this.bathStatus,
+    this.temperatureStatus,
   });
 
   final VoidCallback onBottleTap;
   final VoidCallback onStoolTap;
   final VoidCallback onVomitTap;
   final VoidCallback onBathTap;
+  final VoidCallback onTemperatureTap;
   final String? bottleStatus;
   final String? stoolStatus;
   final String? vomitStatus;
   final String? bathStatus;
+  final String? temperatureStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -422,9 +461,12 @@ class _ShortcutCarousel extends StatelessWidget {
         status: bathStatus,
       ),
       _ShortcutData(
-        color: const Color(0xFFFF9800),
+        color: _temperatureAccentColor,
         icon: LucideIcons.thermometer,
         label: l10n.dashboardTemperatureLabel,
+        onTap: onTemperatureTap,
+        heroTag: 'temperature_shortcut',
+        status: temperatureStatus,
       ),
       _ShortcutData(
         color: const Color(0xFFFFC542),
@@ -542,6 +584,7 @@ class _TimelineCard extends StatelessWidget {
     required this.stools,
     required this.vomits,
     required this.baths,
+    required this.temperatures,
     required this.accentColor,
     required this.selectedDate,
     required this.onSelectDate,
@@ -553,6 +596,7 @@ class _TimelineCard extends StatelessWidget {
   final List<StoolEntry> stools;
   final List<VomitEntry> vomits;
   final List<BathEntry> baths;
+  final List<TemperatureEntry> temperatures;
   final Color accentColor;
   final DateTime selectedDate;
   final VoidCallback onSelectDate;
@@ -574,6 +618,7 @@ class _TimelineCard extends StatelessWidget {
     final stoolsByHour = _groupStools(stools);
     final vomitsByHour = _groupVomits(vomits);
     final bathsByHour = _groupBaths(baths);
+    final temperaturesByHour = _groupTemperatures(temperatures);
     final tiles = List<_TimelineTileData>.generate(12, (index) {
       final hour = index * 2;
       return _TimelineTileData(
@@ -584,6 +629,7 @@ class _TimelineCard extends StatelessWidget {
         stools: stoolsByHour[hour] ?? const [],
         vomits: vomitsByHour[hour] ?? const [],
         baths: bathsByHour[hour] ?? const [],
+        temperatures: temperaturesByHour[hour] ?? const [],
       );
     });
 
@@ -754,6 +800,7 @@ class _TimelineTileData {
     this.stools = const [],
     this.vomits = const [],
     this.baths = const [],
+    this.temperatures = const [],
   });
 
   final int hour;
@@ -763,6 +810,7 @@ class _TimelineTileData {
   final List<StoolEntry> stools;
   final List<VomitEntry> vomits;
   final List<BathEntry> baths;
+  final List<TemperatureEntry> temperatures;
 
   String get label => hour.toString().padLeft(2, '0');
 }
@@ -808,7 +856,8 @@ class _TimelineTile extends StatelessWidget {
           if (data.feedings.isNotEmpty ||
               data.stools.isNotEmpty ||
               data.vomits.isNotEmpty ||
-              data.baths.isNotEmpty)
+              data.baths.isNotEmpty ||
+              data.temperatures.isNotEmpty)
             Positioned(
               bottom: 2,
               left: 0,
@@ -841,6 +890,12 @@ class _TimelineTile extends StatelessWidget {
                       icon: LucideIcons.bath,
                       count: data.baths.length,
                       color: _bathAccentColor,
+                    ),
+                  if (data.temperatures.isNotEmpty)
+                    _TimelineEventBadge(
+                      icon: LucideIcons.thermometer,
+                      count: data.temperatures.length,
+                      color: _temperatureAccentColor,
                     ),
                 ],
               ),
@@ -924,6 +979,17 @@ Map<int, List<VomitEntry>> _groupVomits(List<VomitEntry> vomits) {
 Map<int, List<BathEntry>> _groupBaths(List<BathEntry> baths) {
   final map = <int, List<BathEntry>>{};
   for (final entry in baths) {
+    final tileHour = (entry.timestamp.hour ~/ 2) * 2;
+    map.putIfAbsent(tileHour, () => []).add(entry);
+  }
+  return map;
+}
+
+Map<int, List<TemperatureEntry>> _groupTemperatures(
+  List<TemperatureEntry> temperatures,
+) {
+  final map = <int, List<TemperatureEntry>>{};
+  for (final entry in temperatures) {
     final tileHour = (entry.timestamp.hour ~/ 2) * 2;
     map.putIfAbsent(tileHour, () => []).add(entry);
   }
@@ -1031,6 +1097,7 @@ class _DailyLogList extends StatefulWidget {
     required this.stools,
     required this.vomits,
     required this.baths,
+    required this.temperatures,
     required this.accentColor,
   });
 
@@ -1038,6 +1105,7 @@ class _DailyLogList extends StatefulWidget {
   final List<StoolEntry> stools;
   final List<VomitEntry> vomits;
   final List<BathEntry> baths;
+  final List<TemperatureEntry> temperatures;
   final Color accentColor;
 
   @override
@@ -1066,11 +1134,24 @@ class _DailyLogListState extends State<_DailyLogList>
     final stoolCount = widget.stools.length;
     final vomitCount = widget.vomits.length;
     final bathCount = widget.baths.length;
+    final temperatureCount = widget.temperatures.length;
+    final latestTemperature = widget.temperatures.isEmpty
+        ? null
+        : widget.temperatures.reduce(
+            (previous, current) =>
+                previous.timestamp.isAfter(current.timestamp)
+                    ? previous
+                    : current,
+          );
+    final temperatureSummaryValue = latestTemperature == null
+        ? '0 · ${l10n.temperatureLogValueUnit}'
+        : '$temperatureCount · ${latestTemperature.celsius.toStringAsFixed(1)} ${l10n.temperatureLogValueUnit}';
     final entries = [
       ...widget.feedings.map(_DailyLogEntry.feeding),
       ...widget.stools.map(_DailyLogEntry.stool),
       ...widget.vomits.map(_DailyLogEntry.vomit),
       ...widget.baths.map(_DailyLogEntry.bath),
+      ...widget.temperatures.map(_DailyLogEntry.temperature),
     ]..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     final summaryItems = [
       _SummaryData(
@@ -1093,6 +1174,11 @@ class _DailyLogListState extends State<_DailyLogList>
         icon: LucideIcons.triangleAlert,
         label: l10n.dashboardVomitLabel,
         value: vomitCount.toString(),
+      ),
+      _SummaryData(
+        icon: LucideIcons.thermometer,
+        label: l10n.dashboardTemperatureLabel,
+        value: temperatureSummaryValue,
       ),
     ];
 
@@ -1373,6 +1459,62 @@ class _DailyLogListState extends State<_DailyLogList>
                                 ),
                               ],
                             );
+                          case _DailyLogType.temperature:
+                            final temperature = entry.temperature!;
+                            final valueLabel =
+                                '${temperature.celsius.toStringAsFixed(1)} ${l10n.temperatureLogValueUnit}';
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: _temperatureAccentColor.withValues(
+                                      alpha: 0.18,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    LucideIcons.thermometer,
+                                    size: 18,
+                                    color: _temperatureAccentColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        timeLabel,
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        valueLabel,
+                                        style: theme.textTheme.bodyMedium,
+                                      ),
+                                      if ((temperature.notes ?? '').isNotEmpty)
+                                        ...[
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            temperature.notes!,
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                              color: Colors.white70,
+                                            ),
+                                          ),
+                                        ],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
                         }
                         return const SizedBox.shrink();
                       },
@@ -1386,7 +1528,7 @@ class _DailyLogListState extends State<_DailyLogList>
   }
 }
 
-enum _DailyLogType { feeding, stool, vomit, bath }
+enum _DailyLogType { feeding, stool, vomit, bath, temperature }
 
 class _DailyLogEntry {
   _DailyLogEntry.feeding(FeedingEntry entry)
@@ -1394,6 +1536,7 @@ class _DailyLogEntry {
       stool = null,
       vomit = null,
       bath = null,
+      temperature = null,
       type = _DailyLogType.feeding,
       timestamp = entry.timestamp;
 
@@ -1402,6 +1545,7 @@ class _DailyLogEntry {
       stool = entry,
       vomit = null,
       bath = null,
+      temperature = null,
       type = _DailyLogType.stool,
       timestamp = entry.timestamp;
 
@@ -1410,6 +1554,7 @@ class _DailyLogEntry {
       stool = null,
       vomit = entry,
       bath = null,
+      temperature = null,
       type = _DailyLogType.vomit,
       timestamp = entry.timestamp;
 
@@ -1418,13 +1563,24 @@ class _DailyLogEntry {
       stool = null,
       vomit = null,
       bath = entry,
+      temperature = null,
       type = _DailyLogType.bath,
+      timestamp = entry.timestamp;
+
+  _DailyLogEntry.temperature(TemperatureEntry entry)
+    : feeding = null,
+      stool = null,
+      vomit = null,
+      bath = null,
+      temperature = entry,
+      type = _DailyLogType.temperature,
       timestamp = entry.timestamp;
 
   final FeedingEntry? feeding;
   final StoolEntry? stool;
   final VomitEntry? vomit;
   final BathEntry? bath;
+  final TemperatureEntry? temperature;
   final _DailyLogType type;
   final DateTime timestamp;
 }

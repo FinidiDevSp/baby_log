@@ -113,6 +113,7 @@
   "dashboardImportTooltip": "Importar datos",
   "dashboardExportTooltip": "Exportar datos",
   "dashboardPediatricQuestionsLabel": "Preguntas",
+  "dashboardTemperatureLabel": "Temperatura",
   "bottleLogTitle": "Toma de biberón",
   "bottleLogDateTimeLabel": "Día y hora",
   "bottleLogAmountLabel": "Cantidad",
@@ -154,5 +155,13 @@
   "vomitLogNotesLabel": "Notas",
   "vomitLogNotesHint": "Añade detalles que quieras recordar",
   "vomitLogAmountValidation": "Selecciona una cantidad",
+  "temperatureLogTitle": "Temperatura",
+  "temperatureLogValueLabel": "Temperatura",
+  "temperatureLogValueUnit": "°C",
+  "temperatureLogDecreaseTooltip": "Restar 0,1 °C",
+  "temperatureLogIncreaseTooltip": "Sumar 0,1 °C",
+  "temperatureLogValueValidation": "Introduce una temperatura válida",
+  "temperatureLogNotesLabel": "Notas",
+  "temperatureLogNotesHint": "Añade detalles que quieras recordar",
   "bottleLogListTitle": "Últimas tomas"
 }
