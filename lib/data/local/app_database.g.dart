@@ -2963,13 +2963,10 @@ class $$VomitEntriesTableTableManager
                 notes: notes,
                 createdAt: createdAt,
               ),
-          withReferenceMapper: (results, base) => BaseReferences(
-            $db: db,
-            $table: table,
-            referencingTable: base,
-            results: results,
-          ),
-          prefetchHooksCallback: () => const PrefetchHooks(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
         ),
       );
 }
