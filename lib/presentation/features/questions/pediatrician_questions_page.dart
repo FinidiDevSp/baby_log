@@ -213,7 +213,7 @@ class _PediatricianQuestionsPageState
 
     final result = await showDialog<_SatisfactionResult>(
       context: context,
-      builder: (dialogContext) {
+      builder: (_) {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
@@ -281,13 +281,13 @@ class _PediatricianQuestionsPageState
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  onPressed: () => Navigator.of(context).pop(),
                   child: Text(l10n.questionsSatisfactionCancel),
                 ),
                 FilledButton(
                   onPressed: selection == null
                       ? null
-                      : () => Navigator.of(dialogContext).pop(
+                      : () => Navigator.of(context).pop(
                             _SatisfactionResult(
                               selection!,
                               controller.text.trim().isEmpty
