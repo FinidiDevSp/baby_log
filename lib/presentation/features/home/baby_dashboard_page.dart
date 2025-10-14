@@ -1240,12 +1240,13 @@ class _DailyLogListState extends State<_DailyLogList>
             ),
           ),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            children: summaryItems
-                .map((item) => _SummaryBadge(data: item))
-                .toList(),
+          Row(
+            children: [
+              for (var i = 0; i < summaryItems.length; i++) ...[
+                Expanded(child: _SummaryBadge(data: summaryItems[i])),
+                if (i != summaryItems.length - 1) const SizedBox(width: 12),
+              ],
+            ],
           ),
           AnimatedSize(
             duration: const Duration(milliseconds: 200),
@@ -1628,37 +1629,39 @@ class _SummaryBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(data.icon, size: 16, color: Colors.white.withValues(alpha: 0.8)),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Semantics(
+      container: true,
+      label: data.label,
+      value: data.value,
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceVariant,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        alignment: Alignment.center,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                data.label,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+              Icon(
+                data.icon,
+                size: 18,
+                color: Colors.white.withValues(alpha: 0.85),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(width: 8),
               Text(
                 data.value,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.white70,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
