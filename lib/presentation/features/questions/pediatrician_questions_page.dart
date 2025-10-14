@@ -213,12 +213,12 @@ class _PediatricianQuestionsPageState
 
     final result = await showDialog<_SatisfactionResult>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(l10n.questionsSatisfactionTitle),
-          content: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(l10n.questionsSatisfactionTitle),
+              content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -229,6 +229,8 @@ class _PediatricianQuestionsPageState
                   const SizedBox(height: 16),
                   Wrap(
                     spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
                     children: [
                       _SatisfactionOptionButton(
                         icon: LucideIcons.smile,
@@ -276,28 +278,28 @@ class _PediatricianQuestionsPageState
                     ),
                   ),
                 ],
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.questionsSatisfactionCancel),
-            ),
-            FilledButton(
-              onPressed: selection == null
-                  ? null
-                  : () => Navigator.of(context).pop(
-                        _SatisfactionResult(
-                          selection!,
-                          controller.text.trim().isEmpty
-                              ? null
-                              : controller.text.trim(),
-                        ),
-                      ),
-              child: Text(l10n.questionsSatisfactionConfirm),
-            ),
-          ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(l10n.questionsSatisfactionCancel),
+                ),
+                FilledButton(
+                  onPressed: selection == null
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(
+                            _SatisfactionResult(
+                              selection!,
+                              controller.text.trim().isEmpty
+                                  ? null
+                                  : controller.text.trim(),
+                            ),
+                          ),
+                  child: Text(l10n.questionsSatisfactionConfirm),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -798,33 +800,33 @@ class _SatisfactionOptionButton extends StatelessWidget {
     final theme = Theme.of(context);
     final foreground = isSelected ? theme.colorScheme.primary : Colors.white70;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? theme.colorScheme.primary.withValues(alpha: 0.12)
-              : AppColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? theme.colorScheme.primary
-                : Colors.white24,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: foreground, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: theme.textTheme.bodyMedium?.copyWith(color: foreground),
+    return Semantics(
+      label: label,
+      button: true,
+      selected: isSelected,
+      child: Tooltip(
+        message: label,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                  : AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: isSelected
+                    ? theme.colorScheme.primary
+                    : Colors.white24,
+              ),
             ),
-          ],
+            alignment: Alignment.center,
+            child: Icon(icon, color: foreground, size: 26),
+          ),
         ),
       ),
     );
