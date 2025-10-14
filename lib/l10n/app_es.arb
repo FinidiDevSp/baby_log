@@ -69,7 +69,7 @@
   "dashboardTemperatureLabel": "Temperatura",
   "dashboardFoodLabel": "Comida",
   "dashboardMedicalAgendaLabel": "AGENDA",
-  "dashboardQuestionsPending": "{count, plural, one {# pendiente} other {# pendientes}}",
+  "dashboardQuestionsPending": "{count, plural, one {{count} pendiente} other {{count} pendientes}}",
   "@dashboardQuestionsPending": {
     "description": "Estado mostrado en el acceso directo de preguntas cuando hay pendientes",
     "placeholders": {
@@ -219,6 +219,9 @@
   "questionsComposerTitle": "Anota tu duda",
   "questionsComposerPlaceholder": "Ej. Recordar preguntar sobre la introducción de sólidos",
   "questionsComposerAction": "Guardar pregunta",
+  "questionsComposerUpdateAction": "Actualizar pregunta",
+  "questionsComposerEditingNotice": "Editando una pregunta guardada",
+  "questionsComposerCancelEditing": "Cancelar edición",
   "questionsPendingSection": "Pendientes",
   "questionsResolvedSection": "Resueltas",
   "questionsDeleteDialogTitle": "¿Eliminar pregunta?",
@@ -235,7 +238,7 @@
   "questionsLoadError": "No se pudieron cargar tus preguntas. Intenta de nuevo.",
   "questionsAgeUnknown": "Edad no disponible",
   "questionsAgeLessThanWeek": "Menos de una semana",
-  "questionsAgeWeeks": "{count, plural, one {# semana} other {# semanas}}",
+  "questionsAgeWeeks": "{count, plural, one {{count} semana} other {{count} semanas}}",
   "@questionsAgeWeeks": {
     "description": "Edad del bebé expresada en semanas",
     "placeholders": {
@@ -245,7 +248,7 @@
       }
     }
   },
-  "questionsAgeMonths": "{count, plural, one {# mes} other {# meses}}",
+  "questionsAgeMonths": "{count, plural, one {{count} mes} other {{count} meses}}",
   "@questionsAgeMonths": {
     "description": "Edad del bebé expresada en meses",
     "placeholders": {
@@ -255,7 +258,7 @@
       }
     }
   },
-  "questionsAgeMonthsAndWeeks": "{months, plural, one {# mes} other {# meses}} y {weeks, plural, one {# semana} other {# semanas}}",
+  "questionsAgeMonthsAndWeeks": "{months, plural, one {{months} mes} other {{months} meses}} y {weeks, plural, one {{weeks} semana} other {{weeks} semanas}}",
   "@questionsAgeMonthsAndWeeks": {
     "description": "Edad combinando meses y semanas",
     "placeholders": {
@@ -268,5 +271,37 @@
         "example": "1"
       }
     }
+  },
+  "questionsSatisfactionTitle": "¿Cómo salió la consulta?",
+  "@questionsSatisfactionTitle": {
+    "description": "Título del diálogo de satisfacción"
+  },
+  "questionsSatisfactionSubtitle": "Cuéntanos qué tan conforme quedaste con la respuesta.",
+  "@questionsSatisfactionSubtitle": {
+    "description": "Texto introductorio del diálogo de satisfacción"
+  },
+  "questionsSatisfactionHappy": "Contentos",
+  "@questionsSatisfactionHappy": {
+    "description": "Opción de satisfacción alta"
+  },
+  "questionsSatisfactionNeutral": "Neutral",
+  "@questionsSatisfactionNeutral": {
+    "description": "Opción de satisfacción neutra"
+  },
+  "questionsSatisfactionSad": "Inconformes",
+  "@questionsSatisfactionSad": {
+    "description": "Opción de satisfacción baja"
+  },
+  "questionsSatisfactionNoteLabel": "Notas adicionales",
+  "@questionsSatisfactionNoteLabel": {
+    "description": "Etiqueta para el campo de comentarios tras resolver una duda"
+  },
+  "questionsSatisfactionConfirm": "Guardar",
+  "@questionsSatisfactionConfirm": {
+    "description": "Botón para confirmar la selección de satisfacción"
+  },
+  "questionsSatisfactionCancel": "Cancelar",
+  "@questionsSatisfactionCancel": {
+    "description": "Botón para cerrar el diálogo sin guardar"
   }
 }

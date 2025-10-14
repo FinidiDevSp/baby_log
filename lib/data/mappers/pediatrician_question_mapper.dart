@@ -12,6 +12,10 @@ PediatricianQuestion mapPediatricianQuestionRowToDomain(
     isResolved: row.resolved,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    satisfaction: row.satisfaction == null
+        ? null
+        : PediatricianQuestionSatisfaction.values[row.satisfaction!],
+    resolutionNote: row.resolutionNote,
   );
 }
 
@@ -24,5 +28,11 @@ PediatricianQuestionsCompanion mapPediatricianQuestionToCompanion(
     resolved: Value(question.isResolved),
     createdAt: Value(question.createdAt),
     updatedAt: Value(question.updatedAt),
+    satisfaction: question.satisfaction == null
+        ? const Value.absent()
+        : Value(question.satisfaction!.index),
+    resolutionNote: question.resolutionNote == null
+        ? const Value.absent()
+        : Value(question.resolutionNote!),
   );
 }

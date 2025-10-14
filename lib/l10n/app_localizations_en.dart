@@ -155,8 +155,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '# pending',
-      one: '# pending',
+      other: '$count pending',
+      one: '$count pending',
     );
     return '$_temp0';
   }
@@ -436,6 +436,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get questionsComposerAction => 'Save question';
 
   @override
+  String get questionsComposerUpdateAction => 'Update question';
+
+  @override
+  String get questionsComposerEditingNotice => 'Editing a saved question';
+
+  @override
+  String get questionsComposerCancelEditing => 'Cancel editing';
+
+  @override
   String get questionsPendingSection => 'Pending';
 
   @override
@@ -491,8 +500,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '# weeks',
-      one: '# week',
+      other: '$count weeks',
+      one: '$count week',
     );
     return '$_temp0';
   }
@@ -502,8 +511,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '# months',
-      one: '# month',
+      other: '$count months',
+      one: '$count month',
     );
     return '$_temp0';
   }
@@ -513,15 +522,40 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       months,
       locale: localeName,
-      other: '# months',
-      one: '# month',
+      other: '$months months',
+      one: '$months month',
     );
     String _temp1 = intl.Intl.pluralLogic(
       weeks,
       locale: localeName,
-      other: '# weeks',
-      one: '# week',
+      other: '$weeks weeks',
+      one: '$weeks week',
     );
     return '$_temp0 and $_temp1';
   }
+
+  @override
+  String get questionsSatisfactionTitle => 'How did it go?';
+
+  @override
+  String get questionsSatisfactionSubtitle =>
+      'Let us know how satisfied you feel with the answer.';
+
+  @override
+  String get questionsSatisfactionHappy => 'Satisfied';
+
+  @override
+  String get questionsSatisfactionNeutral => 'Neutral';
+
+  @override
+  String get questionsSatisfactionSad => 'Unsatisfied';
+
+  @override
+  String get questionsSatisfactionNoteLabel => 'Additional notes';
+
+  @override
+  String get questionsSatisfactionConfirm => 'Save';
+
+  @override
+  String get questionsSatisfactionCancel => 'Cancel';
 }

@@ -29,21 +29,25 @@ class PediatricianQuestionsPage extends ConsumerStatefulWidget {
 class _PediatricianQuestionsPageState
     extends ConsumerState<PediatricianQuestionsPage> {
   late final TextEditingController _questionController;
+  late final FocusNode _composerFocusNode;
   bool _isSaving = false;
   bool _isSharing = false;
   bool _canSubmit = false;
+  PediatricianQuestion? _editingQuestion;
 
   @override
   void initState() {
     super.initState();
     _questionController = TextEditingController();
     _questionController.addListener(_handleQuestionChanged);
+    _composerFocusNode = FocusNode();
   }
 
   @override
   void dispose() {
     _questionController.removeListener(_handleQuestionChanged);
     _questionController.dispose();
+    _composerFocusNode.dispose();
     super.dispose();
   }
 
@@ -56,7 +60,7 @@ class _PediatricianQuestionsPageState
     }
   }
 
-  Future<void> _saveQuestion() async {
+  Future<void> _submitQuestion() async {
     final l10n = AppLocalizations.of(context);
     final text = _questionController.text.trim();
     if (text.isEmpty) {
@@ -74,19 +78,41 @@ class _PediatricianQuestionsPageState
     });
 
     try {
-      await repository.addQuestion(
-        PediatricianQuestion(
-          content: text,
-          isResolved: false,
-          createdAt: now,
-          updatedAt: now,
-        ),
-      );
-      _questionController.clear();
+      final editing = _editingQuestion;
+      if (editing != null) {
+        await repository.updateQuestion(
+          editing.copyWith(
+            content: text,
+            updatedAt: now,
+          ),
+        );
+      } else {
+        await repository.addQuestion(
+          PediatricianQuestion(
+            content: text,
+            isResolved: false,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+      }
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _editingQuestion = null;
+        _questionController.clear();
+      });
       FocusScope.of(context).unfocus();
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.questionsSaveError('$error'))),
+        SnackBar(
+          content: Text(
+            _editingQuestion == null
+                ? l10n.questionsSaveError('$error')
+                : l10n.questionsUpdateError('$error'),
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -100,11 +126,36 @@ class _PediatricianQuestionsPageState
   Future<void> _toggleResolved(PediatricianQuestion question) async {
     final repository = ref.read(pediatricianQuestionRepositoryProvider);
     final l10n = AppLocalizations.of(context);
+    final now = DateTime.now();
+
+    PediatricianQuestion? updated;
+
+    if (!question.isResolved) {
+      final result = await _showSatisfactionDialog();
+      if (result == null) {
+        return;
+      }
+      updated = question.copyWith(
+        isResolved: true,
+        updatedAt: now,
+        satisfaction: result.level,
+        satisfactionSet: true,
+        resolutionNote: result.note,
+        resolutionNoteSet: true,
+      );
+    } else {
+      updated = question.copyWith(
+        isResolved: false,
+        updatedAt: now,
+        satisfaction: null,
+        satisfactionSet: true,
+        resolutionNote: null,
+        resolutionNoteSet: true,
+      );
+    }
 
     try {
-      await repository.updateQuestion(
-        question.copyWith(isResolved: !question.isResolved),
-      );
+      await repository.updateQuestion(updated);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.questionsUpdateError('$error'))),
@@ -129,32 +180,122 @@ class _PediatricianQuestionsPageState
     }
   }
 
-  Future<void> _editQuestion(PediatricianQuestion question) async {
-    final l10n = AppLocalizations.of(context);
-    final controller = TextEditingController(text: question.content);
+  Future<void> _beginEditingQuestion(PediatricianQuestion question) async {
+    setState(() {
+      _editingQuestion = question;
+      _questionController.text = question.content;
+      _questionController.selection = TextSelection.fromPosition(
+        TextPosition(offset: _questionController.text.length),
+      );
+    });
+    await Future<void>.delayed(Duration.zero);
+    if (mounted) {
+      _composerFocusNode.requestFocus();
+    }
+  }
 
-    final updatedText = await showDialog<String>(
+  void _cancelEditing() {
+    if (_editingQuestion == null) {
+      return;
+    }
+    setState(() {
+      _editingQuestion = null;
+      _questionController.clear();
+    });
+    FocusScope.of(context).unfocus();
+  }
+
+  Future<_SatisfactionResult?> _showSatisfactionDialog() async {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final controller = TextEditingController();
+    PediatricianQuestionSatisfaction? selection;
+
+    final result = await showDialog<_SatisfactionResult>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(l10n.questionsEditDialogTitle),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            maxLines: 4,
-            minLines: 1,
-            decoration: InputDecoration(
-              labelText: l10n.questionsEditDialogLabel,
-            ),
+          title: Text(l10n.questionsSatisfactionTitle),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.questionsSatisfactionSubtitle,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 12,
+                    children: [
+                      _SatisfactionOptionButton(
+                        icon: LucideIcons.smile,
+                        label: l10n.questionsSatisfactionHappy,
+                        isSelected:
+                            selection == PediatricianQuestionSatisfaction.satisfied,
+                        onTap: () {
+                          setState(() {
+                            selection = PediatricianQuestionSatisfaction.satisfied;
+                          });
+                        },
+                      ),
+                      _SatisfactionOptionButton(
+                        icon: LucideIcons.meh,
+                        label: l10n.questionsSatisfactionNeutral,
+                        isSelected:
+                            selection == PediatricianQuestionSatisfaction.neutral,
+                        onTap: () {
+                          setState(() {
+                            selection = PediatricianQuestionSatisfaction.neutral;
+                          });
+                        },
+                      ),
+                      _SatisfactionOptionButton(
+                        icon: LucideIcons.frown,
+                        label: l10n.questionsSatisfactionSad,
+                        isSelected: selection ==
+                            PediatricianQuestionSatisfaction.dissatisfied,
+                        onTap: () {
+                          setState(() {
+                            selection =
+                                PediatricianQuestionSatisfaction.dissatisfied;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: controller,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: l10n.questionsSatisfactionNoteLabel,
+                      border: const OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.questionsEditDialogCancel),
+              child: Text(l10n.questionsSatisfactionCancel),
             ),
             FilledButton(
-              onPressed: () => Navigator.of(context).pop(controller.text),
-              child: Text(l10n.questionsEditDialogSave),
+              onPressed: selection == null
+                  ? null
+                  : () => Navigator.of(context).pop(
+                        _SatisfactionResult(
+                          selection!,
+                          controller.text.trim().isEmpty
+                              ? null
+                              : controller.text.trim(),
+                        ),
+                      ),
+              child: Text(l10n.questionsSatisfactionConfirm),
             ),
           ],
         );
@@ -162,28 +303,7 @@ class _PediatricianQuestionsPageState
     );
 
     controller.dispose();
-
-    if (updatedText == null) {
-      return;
-    }
-
-    final trimmed = updatedText.trim();
-    if (trimmed.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.questionsValidationMessage)));
-      return;
-    }
-
-    final repository = ref.read(pediatricianQuestionRepositoryProvider);
-
-    try {
-      await repository.updateQuestion(question.copyWith(content: trimmed));
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.questionsUpdateError('$error'))),
-      );
-    }
+    return result;
   }
 
   Future<void> _sharePendingQuestions(
@@ -290,6 +410,7 @@ class _PediatricianQuestionsPageState
 
     final locale = l10n.localeName;
     final dateFormat = DateFormat('d MMM y, HH:mm', locale);
+    final isEditing = _editingQuestion != null;
 
     return Scaffold(
       appBar: AppBar(
@@ -334,9 +455,12 @@ class _PediatricianQuestionsPageState
             const SizedBox(height: 32),
             _QuestionComposer(
               controller: _questionController,
-              onSubmit: _saveQuestion,
+              focusNode: _composerFocusNode,
+              onSubmit: _submitQuestion,
               isSaving: _isSaving,
               canSubmit: _canSubmit,
+              isEditing: isEditing,
+              onCancelEditing: isEditing ? _cancelEditing : null,
             ),
             const SizedBox(height: 24),
             if (questionsAsync.isLoading && questions.isEmpty)
@@ -358,7 +482,7 @@ class _PediatricianQuestionsPageState
                     dateFormat: dateFormat,
                     baby: baby,
                     onToggle: () => _toggleResolved(question),
-                    onEdit: () => _editQuestion(question),
+                    onEdit: () => _beginEditingQuestion(question),
                     onDelete: () => _deleteQuestion(question),
                   ),
                 ),
@@ -376,7 +500,7 @@ class _PediatricianQuestionsPageState
                     dateFormat: dateFormat,
                     baby: baby,
                     onToggle: () => _toggleResolved(question),
-                    onEdit: () => _editQuestion(question),
+                    onEdit: () => _beginEditingQuestion(question),
                     onDelete: () => _deleteQuestion(question),
                   ),
                 ),
@@ -392,15 +516,21 @@ class _PediatricianQuestionsPageState
 class _QuestionComposer extends StatelessWidget {
   const _QuestionComposer({
     required this.controller,
+    required this.focusNode,
     required this.onSubmit,
     required this.isSaving,
     required this.canSubmit,
+    required this.isEditing,
+    this.onCancelEditing,
   });
 
   final TextEditingController controller;
+  final FocusNode focusNode;
   final Future<void> Function() onSubmit;
   final bool isSaving;
   final bool canSubmit;
+  final bool isEditing;
+  final VoidCallback? onCancelEditing;
 
   @override
   Widget build(BuildContext context) {
@@ -417,9 +547,40 @@ class _QuestionComposer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(l10n.questionsComposerTitle, style: theme.textTheme.titleSmall),
+          if (isEditing) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                children: [
+                  Icon(LucideIcons.pencil, size: 16, color: theme.colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.questionsComposerEditingNotice,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  if (onCancelEditing != null)
+                    TextButton(
+                      onPressed: onCancelEditing,
+                      child: Text(l10n.questionsComposerCancelEditing),
+                    ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           TextField(
             controller: controller,
+            focusNode: focusNode,
             maxLines: 4,
             minLines: 1,
             textInputAction: TextInputAction.newline,
@@ -446,8 +607,12 @@ class _QuestionComposer extends StatelessWidget {
                         ),
                       ),
                     )
-                  : const Icon(LucideIcons.plus),
-              label: Text(l10n.questionsComposerAction),
+                  : Icon(isEditing ? LucideIcons.check : LucideIcons.plus),
+              label: Text(
+                isEditing
+                    ? l10n.questionsComposerUpdateAction
+                    : l10n.questionsComposerAction,
+              ),
             ),
           ),
         ],
@@ -482,6 +647,13 @@ class _QuestionTile extends StatelessWidget {
       dateFormat.format(question.createdAt),
       ageLabel ?? l10n.questionsAgeUnknown,
     ].join(' • ');
+    final resolvedColor =
+        question.isResolved ? _colorForSatisfaction(theme) : null;
+    final hasSatisfactionColor = question.isResolved && resolvedColor != null;
+    final resolvedTextColor = question.isResolved
+        ? resolvedColor ?? theme.textTheme.bodyLarge?.color?.withOpacity(0.7)
+        : theme.textTheme.bodyLarge?.color;
+    final note = question.resolutionNote;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -538,7 +710,7 @@ class _QuestionTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             border: Border.all(
               color: question.isResolved
-                  ? AppColors.outline
+                  ? (resolvedColor?.withValues(alpha: 0.4) ?? AppColors.outline)
                   : theme.colorScheme.primary.withValues(alpha: 0.3),
             ),
           ),
@@ -558,21 +730,32 @@ class _QuestionTile extends StatelessWidget {
                     Text(
                       question.content,
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        decoration: question.isResolved
+                        decoration: question.isResolved && !hasSatisfactionColor
                             ? TextDecoration.lineThrough
                             : null,
-                        color: question.isResolved
-                            ? theme.textTheme.bodyLarge?.color?.withOpacity(0.6)
-                            : null,
+                        color: resolvedTextColor,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       metadata,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: Colors.white70,
+                        color: question.isResolved
+                            ? (resolvedColor ?? Colors.white70).withOpacity(0.8)
+                            : Colors.white70,
                       ),
                     ),
+                    if (question.isResolved && note != null && note.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          note,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: (resolvedColor ?? Colors.white70)
+                                .withOpacity(0.9),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -582,6 +765,77 @@ class _QuestionTile extends StatelessWidget {
       ),
     );
   }
+
+  Color? _colorForSatisfaction(ThemeData theme) {
+    switch (question.satisfaction) {
+      case PediatricianQuestionSatisfaction.satisfied:
+        return theme.colorScheme.primary;
+      case PediatricianQuestionSatisfaction.neutral:
+        return theme.colorScheme.secondary;
+      case PediatricianQuestionSatisfaction.dissatisfied:
+        return Colors.redAccent;
+      case null:
+        return null;
+    }
+  }
+}
+
+class _SatisfactionOptionButton extends StatelessWidget {
+  const _SatisfactionOptionButton({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final foreground = isSelected ? theme.colorScheme.primary : Colors.white70;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.colorScheme.primary.withValues(alpha: 0.12)
+              : AppColors.surfaceVariant,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? theme.colorScheme.primary
+                : Colors.white24,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: foreground, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(color: foreground),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SatisfactionResult {
+  const _SatisfactionResult(this.level, this.note);
+
+  final PediatricianQuestionSatisfaction level;
+  final String? note;
 }
 
 class _DismissBackground extends StatelessWidget {
