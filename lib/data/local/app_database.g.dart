@@ -245,24 +245,6 @@ class $BabyProfilesTable extends BabyProfiles
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
-    if (data.containsKey('satisfaction')) {
-      context.handle(
-        _satisfactionMeta,
-        satisfaction.isAcceptableOrUnknown(
-          data['satisfaction']!,
-          _satisfactionMeta,
-        ),
-      );
-    }
-    if (data.containsKey('resolution_note')) {
-      context.handle(
-        _resolutionNoteMeta,
-        resolutionNote.isAcceptableOrUnknown(
-          data['resolution_note']!,
-          _resolutionNoteMeta,
-        ),
-      );
-    }
     return context;
   }
 
@@ -316,14 +298,6 @@ class $BabyProfilesTable extends BabyProfiles
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
-      satisfaction: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}satisfaction'],
-      ),
-      resolutionNote: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}resolution_note'],
-      ),
     );
   }
 
