@@ -854,6 +854,24 @@ abstract class AppLocalizations {
   /// **'Guardar pregunta'**
   String get questionsComposerAction;
 
+  /// No description provided for @questionsComposerUpdateAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizar pregunta'**
+  String get questionsComposerUpdateAction;
+
+  /// No description provided for @questionsComposerEditingNotice.
+  ///
+  /// In es, this message translates to:
+  /// **'Editando una pregunta guardada'**
+  String get questionsComposerEditingNotice;
+
+  /// No description provided for @questionsComposerCancelEditing.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar edición'**
+  String get questionsComposerCancelEditing;
+
   /// No description provided for @questionsPendingSection.
   ///
   /// In es, this message translates to:
@@ -953,20 +971,68 @@ abstract class AppLocalizations {
   /// Edad del bebé expresada en semanas
   ///
   /// In es, this message translates to:
-  /// **'{count, plural, one {# semana} other {# semanas}}'**
+  /// **'{count, plural, one {{count} semana} other {{count} semanas}}'**
   String questionsAgeWeeks(int count);
 
   /// Edad del bebé expresada en meses
   ///
   /// In es, this message translates to:
-  /// **'{count, plural, one {# mes} other {# meses}}'**
+  /// **'{count, plural, one {{count} mes} other {{count} meses}}'**
   String questionsAgeMonths(int count);
 
   /// Edad combinando meses y semanas
   ///
   /// In es, this message translates to:
-  /// **'{months, plural, one {# mes} other {# meses}} y {weeks, plural, one {# semana} other {# semanas}}'**
+  /// **'{months, plural, one {{months} mes} other {{months} meses}} y {weeks, plural, one {{weeks} semana} other {{weeks} semanas}}'**
   String questionsAgeMonthsAndWeeks(int months, int weeks);
+
+  /// No description provided for @questionsSatisfactionTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo salió la consulta?'**
+  String get questionsSatisfactionTitle;
+
+  /// No description provided for @questionsSatisfactionSubtitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuéntanos qué tan conforme quedaste con la respuesta.'**
+  String get questionsSatisfactionSubtitle;
+
+  /// No description provided for @questionsSatisfactionHappy.
+  ///
+  /// In es, this message translates to:
+  /// **'Contentos'**
+  String get questionsSatisfactionHappy;
+
+  /// No description provided for @questionsSatisfactionNeutral.
+  ///
+  /// In es, this message translates to:
+  /// **'Neutral'**
+  String get questionsSatisfactionNeutral;
+
+  /// No description provided for @questionsSatisfactionSad.
+  ///
+  /// In es, this message translates to:
+  /// **'Inconformes'**
+  String get questionsSatisfactionSad;
+
+  /// No description provided for @questionsSatisfactionNoteLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas adicionales'**
+  String get questionsSatisfactionNoteLabel;
+
+  /// No description provided for @questionsSatisfactionConfirm.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar'**
+  String get questionsSatisfactionConfirm;
+
+  /// No description provided for @questionsSatisfactionCancel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar'**
+  String get questionsSatisfactionCancel;
 }
 
 class _AppLocalizationsDelegate

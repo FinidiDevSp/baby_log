@@ -99,6 +99,8 @@ class PediatricianQuestions extends Table {
       dateTime().clientDefault(() => DateTime.now())();
   DateTimeColumn get updatedAt =>
       dateTime().clientDefault(() => DateTime.now())();
+  IntColumn get satisfaction => integer().nullable()();
+  TextColumn get resolutionNote => text().nullable()();
 }
 
 @DriftDatabase(
@@ -117,7 +119,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -137,6 +139,16 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 5) {
         await m.createTable(temperatureEntries);
+      }
+      if (from < 7) {
+        await m.addColumn(
+          pediatricianQuestions,
+          pediatricianQuestions.satisfaction,
+        );
+        await m.addColumn(
+          pediatricianQuestions,
+          pediatricianQuestions.resolutionNote,
+        );
       }
       if (from < 6) {
         await m.createTable(pediatricianQuestions);

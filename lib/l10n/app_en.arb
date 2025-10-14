@@ -69,7 +69,7 @@
   "dashboardTemperatureLabel": "Temperature",
   "dashboardFoodLabel": "Feeding",
   "dashboardMedicalAgendaLabel": "AGENDA",
-  "dashboardQuestionsPending": "{count, plural, one {# pending} other {# pending}}",
+  "dashboardQuestionsPending": "{count, plural, one {{count} pending} other {{count} pending}}",
   "@dashboardQuestionsPending": {
     "description": "Status shown on the questions shortcut when there are pending items",
     "placeholders": {
@@ -219,6 +219,9 @@
   "questionsComposerTitle": "Write your question",
   "questionsComposerPlaceholder": "E.g. Ask about starting solid food",
   "questionsComposerAction": "Save question",
+  "questionsComposerUpdateAction": "Update question",
+  "questionsComposerEditingNotice": "Editing a saved question",
+  "questionsComposerCancelEditing": "Cancel editing",
   "questionsPendingSection": "Pending",
   "questionsResolvedSection": "Resolved",
   "questionsDeleteDialogTitle": "Delete question?",
@@ -235,7 +238,7 @@
   "questionsLoadError": "We couldn't load your questions. Please try again.",
   "questionsAgeUnknown": "Age unavailable",
   "questionsAgeLessThanWeek": "Less than a week",
-  "questionsAgeWeeks": "{count, plural, one {# week} other {# weeks}}",
+  "questionsAgeWeeks": "{count, plural, one {{count} week} other {{count} weeks}}",
   "@questionsAgeWeeks": {
     "description": "Baby age expressed in weeks",
     "placeholders": {
@@ -245,7 +248,7 @@
       }
     }
   },
-  "questionsAgeMonths": "{count, plural, one {# month} other {# months}}",
+  "questionsAgeMonths": "{count, plural, one {{count} month} other {{count} months}}",
   "@questionsAgeMonths": {
     "description": "Baby age expressed in months",
     "placeholders": {
@@ -255,7 +258,7 @@
       }
     }
   },
-  "questionsAgeMonthsAndWeeks": "{months, plural, one {# month} other {# months}} and {weeks, plural, one {# week} other {# weeks}}",
+  "questionsAgeMonthsAndWeeks": "{months, plural, one {{months} month} other {{months} months}} and {weeks, plural, one {{weeks} week} other {{weeks} weeks}}",
   "@questionsAgeMonthsAndWeeks": {
     "description": "Baby age combining months and weeks",
     "placeholders": {
@@ -268,5 +271,37 @@
         "example": "1"
       }
     }
+  },
+  "questionsSatisfactionTitle": "How did it go?",
+  "@questionsSatisfactionTitle": {
+    "description": "Title for the satisfaction dialog"
+  },
+  "questionsSatisfactionSubtitle": "Let us know how satisfied you feel with the answer.",
+  "@questionsSatisfactionSubtitle": {
+    "description": "Helper text displayed inside the satisfaction dialog"
+  },
+  "questionsSatisfactionHappy": "Satisfied",
+  "@questionsSatisfactionHappy": {
+    "description": "High satisfaction option"
+  },
+  "questionsSatisfactionNeutral": "Neutral",
+  "@questionsSatisfactionNeutral": {
+    "description": "Neutral satisfaction option"
+  },
+  "questionsSatisfactionSad": "Unsatisfied",
+  "@questionsSatisfactionSad": {
+    "description": "Low satisfaction option"
+  },
+  "questionsSatisfactionNoteLabel": "Additional notes",
+  "@questionsSatisfactionNoteLabel": {
+    "description": "Label for the optional note field in the satisfaction dialog"
+  },
+  "questionsSatisfactionConfirm": "Save",
+  "@questionsSatisfactionConfirm": {
+    "description": "Button to confirm the satisfaction selection"
+  },
+  "questionsSatisfactionCancel": "Cancel",
+  "@questionsSatisfactionCancel": {
+    "description": "Button to close the satisfaction dialog without saving"
   }
 }

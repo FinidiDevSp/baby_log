@@ -245,6 +245,24 @@ class $BabyProfilesTable extends BabyProfiles
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('satisfaction')) {
+      context.handle(
+        _satisfactionMeta,
+        satisfaction.isAcceptableOrUnknown(
+          data['satisfaction']!,
+          _satisfactionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('resolution_note')) {
+      context.handle(
+        _resolutionNoteMeta,
+        resolutionNote.isAcceptableOrUnknown(
+          data['resolution_note']!,
+          _resolutionNoteMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -298,6 +316,14 @@ class $BabyProfilesTable extends BabyProfiles
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      satisfaction: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}satisfaction'],
+      ),
+      resolutionNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}resolution_note'],
+      ),
     );
   }
 
@@ -2493,6 +2519,26 @@ class $PediatricianQuestionsTable extends PediatricianQuestions
     requiredDuringInsert: false,
     clientDefault: () => DateTime.now(),
   );
+  static const VerificationMeta _satisfactionMeta =
+      const VerificationMeta('satisfaction');
+  @override
+  late final GeneratedColumn<int> satisfaction = GeneratedColumn<int>(
+    'satisfaction',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _resolutionNoteMeta =
+      const VerificationMeta('resolutionNote');
+  @override
+  late final GeneratedColumn<String> resolutionNote = GeneratedColumn<String>(
+    'resolution_note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2500,6 +2546,8 @@ class $PediatricianQuestionsTable extends PediatricianQuestions
     resolved,
     createdAt,
     updatedAt,
+    satisfaction,
+    resolutionNote,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2590,12 +2638,16 @@ class PediatricianQuestionRow extends DataClass
   final bool resolved;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final int? satisfaction;
+  final String? resolutionNote;
   const PediatricianQuestionRow({
     required this.id,
     required this.content,
     required this.resolved,
     required this.createdAt,
     required this.updatedAt,
+    this.satisfaction,
+    this.resolutionNote,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2605,6 +2657,12 @@ class PediatricianQuestionRow extends DataClass
     map['resolved'] = Variable<bool>(resolved);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || satisfaction != null) {
+      map['satisfaction'] = Variable<int>(satisfaction);
+    }
+    if (!nullToAbsent || resolutionNote != null) {
+      map['resolution_note'] = Variable<String>(resolutionNote);
+    }
     return map;
   }
 
@@ -2615,6 +2673,12 @@ class PediatricianQuestionRow extends DataClass
       resolved: Value(resolved),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      satisfaction: satisfaction == null && nullToAbsent
+          ? const Value.absent()
+          : Value(satisfaction),
+      resolutionNote: resolutionNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resolutionNote),
     );
   }
 
@@ -2629,6 +2693,8 @@ class PediatricianQuestionRow extends DataClass
       resolved: serializer.fromJson<bool>(json['resolved']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      satisfaction: serializer.fromJson<int?>(json['satisfaction']),
+      resolutionNote: serializer.fromJson<String?>(json['resolutionNote']),
     );
   }
   @override
@@ -2640,6 +2706,8 @@ class PediatricianQuestionRow extends DataClass
       'resolved': serializer.toJson<bool>(resolved),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'satisfaction': serializer.toJson<int?>(satisfaction),
+      'resolutionNote': serializer.toJson<String?>(resolutionNote),
     };
   }
 
@@ -2649,13 +2717,20 @@ class PediatricianQuestionRow extends DataClass
     bool? resolved,
     DateTime? createdAt,
     DateTime? updatedAt,
+    Value<int?> satisfaction = const Value.absent(),
+    Value<String?> resolutionNote = const Value.absent(),
   }) => PediatricianQuestionRow(
-    id: id ?? this.id,
-    content: content ?? this.content,
-    resolved: resolved ?? this.resolved,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-  );
+        id: id ?? this.id,
+        content: content ?? this.content,
+        resolved: resolved ?? this.resolved,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        satisfaction:
+            satisfaction.present ? satisfaction.value : this.satisfaction,
+        resolutionNote: resolutionNote.present
+            ? resolutionNote.value
+            : this.resolutionNote,
+      );
   PediatricianQuestionRow copyWithCompanion(
     PediatricianQuestionsCompanion data,
   ) {
@@ -2665,6 +2740,12 @@ class PediatricianQuestionRow extends DataClass
       resolved: data.resolved.present ? data.resolved.value : this.resolved,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      satisfaction: data.satisfaction.present
+          ? data.satisfaction.value
+          : this.satisfaction,
+      resolutionNote: data.resolutionNote.present
+          ? data.resolutionNote.value
+          : this.resolutionNote,
     );
   }
 
@@ -2675,13 +2756,23 @@ class PediatricianQuestionRow extends DataClass
           ..write('content: $content, ')
           ..write('resolved: $resolved, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('satisfaction: $satisfaction, ')
+          ..write('resolutionNote: $resolutionNote')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, content, resolved, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+        id,
+        content,
+        resolved,
+        createdAt,
+        updatedAt,
+        satisfaction,
+        resolutionNote,
+      );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2690,7 +2781,9 @@ class PediatricianQuestionRow extends DataClass
           other.content == this.content &&
           other.resolved == this.resolved &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.satisfaction == this.satisfaction &&
+          other.resolutionNote == this.resolutionNote);
 }
 
 class PediatricianQuestionsCompanion
@@ -2700,12 +2793,16 @@ class PediatricianQuestionsCompanion
   final Value<bool> resolved;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<int?> satisfaction;
+  final Value<String?> resolutionNote;
   const PediatricianQuestionsCompanion({
     this.id = const Value.absent(),
     this.content = const Value.absent(),
     this.resolved = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.satisfaction = const Value.absent(),
+    this.resolutionNote = const Value.absent(),
   });
   PediatricianQuestionsCompanion.insert({
     this.id = const Value.absent(),
@@ -2713,6 +2810,8 @@ class PediatricianQuestionsCompanion
     this.resolved = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.satisfaction = const Value.absent(),
+    this.resolutionNote = const Value.absent(),
   }) : content = Value(content);
   static Insertable<PediatricianQuestionRow> custom({
     Expression<int>? id,
@@ -2720,6 +2819,8 @@ class PediatricianQuestionsCompanion
     Expression<bool>? resolved,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<int>? satisfaction,
+    Expression<String>? resolutionNote,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2727,6 +2828,8 @@ class PediatricianQuestionsCompanion
       if (resolved != null) 'resolved': resolved,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (satisfaction != null) 'satisfaction': satisfaction,
+      if (resolutionNote != null) 'resolution_note': resolutionNote,
     });
   }
 
@@ -2736,6 +2839,8 @@ class PediatricianQuestionsCompanion
     Value<bool>? resolved,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
+    Value<int?>? satisfaction,
+    Value<String?>? resolutionNote,
   }) {
     return PediatricianQuestionsCompanion(
       id: id ?? this.id,
@@ -2743,6 +2848,8 @@ class PediatricianQuestionsCompanion
       resolved: resolved ?? this.resolved,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      satisfaction: satisfaction ?? this.satisfaction,
+      resolutionNote: resolutionNote ?? this.resolutionNote,
     );
   }
 
@@ -2764,6 +2871,12 @@ class PediatricianQuestionsCompanion
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (satisfaction.present) {
+      map['satisfaction'] = Variable<int>(satisfaction.value);
+    }
+    if (resolutionNote.present) {
+      map['resolution_note'] = Variable<String>(resolutionNote.value);
+    }
     return map;
   }
 
@@ -2774,7 +2887,9 @@ class PediatricianQuestionsCompanion
           ..write('content: $content, ')
           ..write('resolved: $resolved, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('satisfaction: $satisfaction, ')
+          ..write('resolutionNote: $resolutionNote')
           ..write(')'))
         .toString();
   }
@@ -2899,6 +3014,16 @@ class $$BabyProfilesTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<int> get satisfaction => $composableBuilder(
+        column: $table.satisfaction,
+        builder: (column) => ColumnFilters(column),
+      );
+
+  ColumnFilters<String> get resolutionNote => $composableBuilder(
+        column: $table.resolutionNote,
+        builder: (column) => ColumnFilters(column),
+      );
 }
 
 class $$BabyProfilesTableOrderingComposer
@@ -3015,6 +3140,14 @@ class $$BabyProfilesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get satisfaction =>
+      $composableBuilder(column: $table.satisfaction, builder: (column) => column);
+
+  GeneratedColumn<String> get resolutionNote => $composableBuilder(
+        column: $table.resolutionNote,
+        builder: (column) => column,
+      );
 }
 
 class $$BabyProfilesTableTableManager
@@ -4117,6 +4250,8 @@ typedef $$PediatricianQuestionsTableCreateCompanionBuilder =
       Value<bool> resolved,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
+      Value<int?> satisfaction,
+      Value<String?> resolutionNote,
     });
 typedef $$PediatricianQuestionsTableUpdateCompanionBuilder =
     PediatricianQuestionsCompanion Function({
@@ -4125,6 +4260,8 @@ typedef $$PediatricianQuestionsTableUpdateCompanionBuilder =
       Value<bool> resolved,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
+      Value<int?> satisfaction,
+      Value<String?> resolutionNote,
     });
 
 class $$PediatricianQuestionsTableFilterComposer
@@ -4195,6 +4332,16 @@ class $$PediatricianQuestionsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get satisfaction => $composableBuilder(
+        column: $table.satisfaction,
+        builder: (column) => ColumnOrderings(column),
+      );
+
+  ColumnOrderings<String> get resolutionNote => $composableBuilder(
+        column: $table.resolutionNote,
+        builder: (column) => ColumnOrderings(column),
+      );
 }
 
 class $$PediatricianQuestionsTableAnnotationComposer
@@ -4273,12 +4420,16 @@ class $$PediatricianQuestionsTableTableManager
                 Value<bool> resolved = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<int?> satisfaction = const Value.absent(),
+                Value<String?> resolutionNote = const Value.absent(),
               }) => PediatricianQuestionsCompanion(
                 id: id,
                 content: content,
                 resolved: resolved,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                satisfaction: satisfaction,
+                resolutionNote: resolutionNote,
               ),
           createCompanionCallback:
               ({
@@ -4287,12 +4438,16 @@ class $$PediatricianQuestionsTableTableManager
                 Value<bool> resolved = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<int?> satisfaction = const Value.absent(),
+                Value<String?> resolutionNote = const Value.absent(),
               }) => PediatricianQuestionsCompanion.insert(
                 id: id,
                 content: content,
                 resolved: resolved,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                satisfaction: satisfaction,
+                resolutionNote: resolutionNote,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
