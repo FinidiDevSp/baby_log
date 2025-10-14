@@ -211,85 +211,97 @@ class _PediatricianQuestionsPageState
     final controller = TextEditingController();
     PediatricianQuestionSatisfaction? selection;
 
-    final navigator = Navigator.of(context);
-
     final result = await showDialog<_SatisfactionResult>(
       context: context,
-      builder: (_) {
+      builder: (dialogContext) {
         return StatefulBuilder(
-          builder: (_, dialogSetState) {
+          builder: (context, dialogSetState) {
+            final mediaQuery = MediaQuery.of(context);
+            final maxDialogHeight = mediaQuery.size.height * 0.6;
+
             return AlertDialog(
               title: Text(l10n.questionsSatisfactionTitle),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    l10n.questionsSatisfactionSubtitle,
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    alignment: WrapAlignment.center,
+              content: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: maxDialogHeight,
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _SatisfactionOptionButton(
-                        icon: LucideIcons.smile,
-                        label: l10n.questionsSatisfactionHappy,
-                        isSelected:
-                            selection == PediatricianQuestionSatisfaction.satisfied,
-                        onTap: () {
-                          dialogSetState(() {
-                            selection = PediatricianQuestionSatisfaction.satisfied;
-                          });
-                        },
+                      Text(
+                        l10n.questionsSatisfactionSubtitle,
+                        style: theme.textTheme.bodyMedium,
                       ),
-                      _SatisfactionOptionButton(
-                        icon: LucideIcons.meh,
-                        label: l10n.questionsSatisfactionNeutral,
-                        isSelected:
-                            selection == PediatricianQuestionSatisfaction.neutral,
-                        onTap: () {
-                          dialogSetState(() {
-                            selection = PediatricianQuestionSatisfaction.neutral;
-                          });
-                        },
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          _SatisfactionOptionButton(
+                            icon: LucideIcons.smile,
+                            label: l10n.questionsSatisfactionHappy,
+                            isSelected: selection ==
+                                PediatricianQuestionSatisfaction.satisfied,
+                            onTap: () {
+                              dialogSetState(() {
+                                selection =
+                                    PediatricianQuestionSatisfaction.satisfied;
+                              });
+                            },
+                          ),
+                          _SatisfactionOptionButton(
+                            icon: LucideIcons.meh,
+                            label: l10n.questionsSatisfactionNeutral,
+                            isSelected: selection ==
+                                PediatricianQuestionSatisfaction.neutral,
+                            onTap: () {
+                              dialogSetState(() {
+                                selection =
+                                    PediatricianQuestionSatisfaction.neutral;
+                              });
+                            },
+                          ),
+                          _SatisfactionOptionButton(
+                            icon: LucideIcons.frown,
+                            label: l10n.questionsSatisfactionSad,
+                            isSelected: selection ==
+                                PediatricianQuestionSatisfaction.dissatisfied,
+                            onTap: () {
+                              dialogSetState(() {
+                                selection =
+                                    PediatricianQuestionSatisfaction.dissatisfied;
+                              });
+                            },
+                          ),
+                        ],
                       ),
-                      _SatisfactionOptionButton(
-                        icon: LucideIcons.frown,
-                        label: l10n.questionsSatisfactionSad,
-                        isSelected: selection ==
-                            PediatricianQuestionSatisfaction.dissatisfied,
-                        onTap: () {
-                          dialogSetState(() {
-                            selection =
-                                PediatricianQuestionSatisfaction.dissatisfied;
-                          });
-                        },
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: controller,
+                        maxLines: 3,
+                        textInputAction: TextInputAction.done,
+                        decoration: InputDecoration(
+                          labelText: l10n.questionsSatisfactionNoteLabel,
+                          border: const OutlineInputBorder(),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: controller,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: l10n.questionsSatisfactionNoteLabel,
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                ],
+                ),
               ),
               actions: [
                 TextButton(
-                  onPressed: navigator.pop,
+                  onPressed: () => Navigator.of(dialogContext).pop(),
                   child: Text(l10n.questionsSatisfactionCancel),
                 ),
                 FilledButton(
                   onPressed: selection == null
                       ? null
-                      : () => navigator.pop(
+                      : () => Navigator.of(dialogContext).pop(
                             _SatisfactionResult(
                               selection!,
                               controller.text.trim().isEmpty
