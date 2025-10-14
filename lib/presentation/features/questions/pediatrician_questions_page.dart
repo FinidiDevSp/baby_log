@@ -29,6 +29,7 @@ class PediatricianQuestionsPage extends ConsumerStatefulWidget {
 class _PediatricianQuestionsPageState
     extends ConsumerState<PediatricianQuestionsPage> {
   late final TextEditingController _questionController;
+  late final TextEditingController _resolutionNoteController;
   late final FocusNode _composerFocusNode;
   bool _isSaving = false;
   bool _isSharing = false;
@@ -41,6 +42,7 @@ class _PediatricianQuestionsPageState
     _questionController = TextEditingController();
     _questionController.addListener(_handleQuestionChanged);
     _composerFocusNode = FocusNode();
+    _resolutionNoteController = TextEditingController();
   }
 
   @override
@@ -48,6 +50,7 @@ class _PediatricianQuestionsPageState
     _questionController.removeListener(_handleQuestionChanged);
     _questionController.dispose();
     _composerFocusNode.dispose();
+    _resolutionNoteController.dispose();
     super.dispose();
   }
 
@@ -208,7 +211,9 @@ class _PediatricianQuestionsPageState
   Future<_SatisfactionResult?> _showSatisfactionDialog() async {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final controller = TextEditingController();
+    final controller = _resolutionNoteController
+      ..text = ''
+      ..selection = const TextSelection.collapsed(offset: 0);
     PediatricianQuestionSatisfaction? selection;
 
     final result = await showDialog<_SatisfactionResult>(
@@ -318,7 +323,6 @@ class _PediatricianQuestionsPageState
       },
     );
 
-    controller.dispose();
     return result;
   }
 
