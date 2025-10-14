@@ -211,11 +211,13 @@ class _PediatricianQuestionsPageState
     final controller = TextEditingController();
     PediatricianQuestionSatisfaction? selection;
 
+    final navigator = Navigator.of(context);
+
     final result = await showDialog<_SatisfactionResult>(
       context: context,
       builder: (_) {
         return StatefulBuilder(
-          builder: (context, setState) {
+          builder: (_, dialogSetState) {
             return AlertDialog(
               title: Text(l10n.questionsSatisfactionTitle),
               content: Column(
@@ -238,7 +240,7 @@ class _PediatricianQuestionsPageState
                         isSelected:
                             selection == PediatricianQuestionSatisfaction.satisfied,
                         onTap: () {
-                          setState(() {
+                          dialogSetState(() {
                             selection = PediatricianQuestionSatisfaction.satisfied;
                           });
                         },
@@ -249,7 +251,7 @@ class _PediatricianQuestionsPageState
                         isSelected:
                             selection == PediatricianQuestionSatisfaction.neutral,
                         onTap: () {
-                          setState(() {
+                          dialogSetState(() {
                             selection = PediatricianQuestionSatisfaction.neutral;
                           });
                         },
@@ -260,7 +262,7 @@ class _PediatricianQuestionsPageState
                         isSelected: selection ==
                             PediatricianQuestionSatisfaction.dissatisfied,
                         onTap: () {
-                          setState(() {
+                          dialogSetState(() {
                             selection =
                                 PediatricianQuestionSatisfaction.dissatisfied;
                           });
@@ -281,13 +283,13 @@ class _PediatricianQuestionsPageState
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: navigator.pop,
                   child: Text(l10n.questionsSatisfactionCancel),
                 ),
                 FilledButton(
                   onPressed: selection == null
                       ? null
-                      : () => Navigator.of(context).pop(
+                      : () => navigator.pop(
                             _SatisfactionResult(
                               selection!,
                               controller.text.trim().isEmpty
