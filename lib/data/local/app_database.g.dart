@@ -2564,6 +2564,24 @@ class $PediatricianQuestionsTable extends PediatricianQuestions
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('satisfaction')) {
+      context.handle(
+        _satisfactionMeta,
+        satisfaction.isAcceptableOrUnknown(
+          data['satisfaction']!,
+          _satisfactionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('resolution_note')) {
+      context.handle(
+        _resolutionNoteMeta,
+        resolutionNote.isAcceptableOrUnknown(
+          data['resolution_note']!,
+          _resolutionNoteMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2596,6 +2614,14 @@ class $PediatricianQuestionsTable extends PediatricianQuestions
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      satisfaction: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}satisfaction'],
+      ),
+      resolutionNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}resolution_note'],
+      ),
     );
   }
 
@@ -2989,15 +3015,6 @@ class $$BabyProfilesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get satisfaction => $composableBuilder(
-        column: $table.satisfaction,
-        builder: (column) => ColumnFilters(column),
-      );
-
-  ColumnFilters<String> get resolutionNote => $composableBuilder(
-        column: $table.resolutionNote,
-        builder: (column) => ColumnFilters(column),
-      );
 }
 
 class $$BabyProfilesTableOrderingComposer
@@ -3114,14 +3131,6 @@ class $$BabyProfilesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
-  GeneratedColumn<int> get satisfaction =>
-      $composableBuilder(column: $table.satisfaction, builder: (column) => column);
-
-  GeneratedColumn<String> get resolutionNote => $composableBuilder(
-        column: $table.resolutionNote,
-        builder: (column) => column,
-      );
 }
 
 class $$BabyProfilesTableTableManager
@@ -4271,6 +4280,16 @@ class $$PediatricianQuestionsTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<int> get satisfaction => $composableBuilder(
+    column: $table.satisfaction,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get resolutionNote => $composableBuilder(
+    column: $table.resolutionNote,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$PediatricianQuestionsTableOrderingComposer
@@ -4308,14 +4327,14 @@ class $$PediatricianQuestionsTableOrderingComposer
   );
 
   ColumnOrderings<int> get satisfaction => $composableBuilder(
-        column: $table.satisfaction,
-        builder: (column) => ColumnOrderings(column),
-      );
+    column: $table.satisfaction,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get resolutionNote => $composableBuilder(
-        column: $table.resolutionNote,
-        builder: (column) => ColumnOrderings(column),
-      );
+    column: $table.resolutionNote,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PediatricianQuestionsTableAnnotationComposer
@@ -4341,6 +4360,14 @@ class $$PediatricianQuestionsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get satisfaction =>
+      $composableBuilder(column: $table.satisfaction, builder: (column) => column);
+
+  GeneratedColumn<String> get resolutionNote => $composableBuilder(
+        column: $table.resolutionNote,
+        builder: (column) => column,
+      );
 }
 
 class $$PediatricianQuestionsTableTableManager
