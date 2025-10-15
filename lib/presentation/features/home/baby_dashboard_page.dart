@@ -854,8 +854,9 @@ class _TimelineCard extends StatelessWidget {
     final showCurrentIndicator = isToday;
     final currentPositionRatio =
         (now.hour * 60 + now.minute) / (24 * 60);
-    final indicatorLeft = (totalWidth * currentPositionRatio)
-        .clamp(0.0, math.max(totalWidth - 2, 0.0));
+    final double indicatorLeft = (totalWidth * currentPositionRatio)
+        .clamp(0.0, math.max(totalWidth - 2, 0.0))
+        .toDouble();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
