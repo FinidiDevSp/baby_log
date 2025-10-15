@@ -368,6 +368,210 @@ abstract class AppLocalizations {
   /// **'AGENDA'**
   String get dashboardMedicalAgendaLabel;
 
+  /// No description provided for @agendaTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Agenda médica'**
+  String get agendaTitle;
+
+  /// No description provided for @agendaNewAppointmentTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar cita'**
+  String get agendaNewAppointmentTooltip;
+
+  /// No description provided for @agendaCreateTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Nueva cita'**
+  String get agendaCreateTitle;
+
+  /// No description provided for @agendaEditTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar cita'**
+  String get agendaEditTitle;
+
+  /// No description provided for @agendaFormTitleLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Título'**
+  String get agendaFormTitleLabel;
+
+  /// No description provided for @agendaFormTitleError.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un título corto'**
+  String get agendaFormTitleError;
+
+  /// No description provided for @agendaFormTypeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Tipo de cita'**
+  String get agendaFormTypeLabel;
+
+  /// No description provided for @agendaFormDateTimeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Fecha y hora'**
+  String get agendaFormDateTimeLabel;
+
+  /// No description provided for @agendaFormDateTimeError.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona la fecha y hora exactas'**
+  String get agendaFormDateTimeError;
+
+  /// No description provided for @agendaFormNotesLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas'**
+  String get agendaFormNotesLabel;
+
+  /// No description provided for @agendaFormCancel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar'**
+  String get agendaFormCancel;
+
+  /// No description provided for @agendaFormSaveNew.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar cita'**
+  String get agendaFormSaveNew;
+
+  /// No description provided for @agendaFormSaveChanges.
+  ///
+  /// In es, this message translates to:
+  /// **'Guardar cambios'**
+  String get agendaFormSaveChanges;
+
+  /// No description provided for @agendaSectionToday.
+  ///
+  /// In es, this message translates to:
+  /// **'Hoy'**
+  String get agendaSectionToday;
+
+  /// No description provided for @agendaSectionUpcoming.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximas'**
+  String get agendaSectionUpcoming;
+
+  /// No description provided for @agendaSectionPast.
+  ///
+  /// In es, this message translates to:
+  /// **'Pasadas'**
+  String get agendaSectionPast;
+
+  /// No description provided for @agendaPastIndicator.
+  ///
+  /// In es, this message translates to:
+  /// **'Completada'**
+  String get agendaPastIndicator;
+
+  /// No description provided for @agendaEmptyDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no registraste citas médicas.'**
+  String get agendaEmptyDescription;
+
+  /// No description provided for @agendaEditAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar'**
+  String get agendaEditAction;
+
+  /// No description provided for @agendaDeleteAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get agendaDeleteAction;
+
+  /// No description provided for @agendaDeleteConfirmTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar cita'**
+  String get agendaDeleteConfirmTitle;
+
+  /// No description provided for @agendaDeleteConfirmMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'La cita se eliminará de la agenda.'**
+  String get agendaDeleteConfirmMessage;
+
+  /// No description provided for @agendaDeleteConfirmCancel.
+  ///
+  /// In es, this message translates to:
+  /// **'Conservar'**
+  String get agendaDeleteConfirmCancel;
+
+  /// No description provided for @agendaDeleteConfirmAccept.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get agendaDeleteConfirmAccept;
+
+  /// No description provided for @agendaCreateSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Cita guardada.'**
+  String get agendaCreateSuccess;
+
+  /// No description provided for @agendaUpdateSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Cita actualizada.'**
+  String get agendaUpdateSuccess;
+
+  /// No description provided for @agendaDeleteSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Cita eliminada.'**
+  String get agendaDeleteSuccess;
+
+  /// No description provided for @agendaTypeRevision.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisión'**
+  String get agendaTypeRevision;
+
+  /// No description provided for @agendaTypePediatrics.
+  ///
+  /// In es, this message translates to:
+  /// **'Pediatría'**
+  String get agendaTypePediatrics;
+
+  /// No description provided for @agendaTypeVaccines.
+  ///
+  /// In es, this message translates to:
+  /// **'Vacunas'**
+  String get agendaTypeVaccines;
+
+  /// No description provided for @agendaTypeEmergency.
+  ///
+  /// In es, this message translates to:
+  /// **'Urgencias'**
+  String get agendaTypeEmergency;
+
+  /// No description provided for @dashboardAgendaStatusToday.
+  ///
+  /// In es, this message translates to:
+  /// **'Hoy'**
+  String get dashboardAgendaStatusToday;
+
+  /// No description provided for @dashboardAgendaStatusTomorrow.
+  ///
+  /// In es, this message translates to:
+  /// **'Mañana'**
+  String get dashboardAgendaStatusTomorrow;
+
+  /// Indicador de días restantes para la próxima cita médica
+  ///
+  /// In es, this message translates to:
+  /// **'En {count} días'**
+  String dashboardAgendaStatusInDays(int count);
+
   /// Estado mostrado en el acceso directo de preguntas cuando hay pendientes
   ///
   /// In es, this message translates to:

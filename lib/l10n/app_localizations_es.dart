@@ -152,6 +152,116 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dashboardMedicalAgendaLabel => 'AGENDA';
 
   @override
+  String get agendaTitle => 'Agenda médica';
+
+  @override
+  String get agendaNewAppointmentTooltip => 'Agregar cita';
+
+  @override
+  String get agendaCreateTitle => 'Nueva cita';
+
+  @override
+  String get agendaEditTitle => 'Editar cita';
+
+  @override
+  String get agendaFormTitleLabel => 'Título';
+
+  @override
+  String get agendaFormTitleError => 'Escribe un título corto';
+
+  @override
+  String get agendaFormTypeLabel => 'Tipo de cita';
+
+  @override
+  String get agendaFormDateTimeLabel => 'Fecha y hora';
+
+  @override
+  String get agendaFormDateTimeError => 'Selecciona la fecha y hora exactas';
+
+  @override
+  String get agendaFormNotesLabel => 'Notas';
+
+  @override
+  String get agendaFormCancel => 'Cancelar';
+
+  @override
+  String get agendaFormSaveNew => 'Guardar cita';
+
+  @override
+  String get agendaFormSaveChanges => 'Guardar cambios';
+
+  @override
+  String get agendaSectionToday => 'Hoy';
+
+  @override
+  String get agendaSectionUpcoming => 'Próximas';
+
+  @override
+  String get agendaSectionPast => 'Pasadas';
+
+  @override
+  String get agendaPastIndicator => 'Completada';
+
+  @override
+  String get agendaEmptyDescription => 'Aún no registraste citas médicas.';
+
+  @override
+  String get agendaEditAction => 'Editar';
+
+  @override
+  String get agendaDeleteAction => 'Eliminar';
+
+  @override
+  String get agendaDeleteConfirmTitle => 'Eliminar cita';
+
+  @override
+  String get agendaDeleteConfirmMessage => 'La cita se eliminará de la agenda.';
+
+  @override
+  String get agendaDeleteConfirmCancel => 'Conservar';
+
+  @override
+  String get agendaDeleteConfirmAccept => 'Eliminar';
+
+  @override
+  String get agendaCreateSuccess => 'Cita guardada.';
+
+  @override
+  String get agendaUpdateSuccess => 'Cita actualizada.';
+
+  @override
+  String get agendaDeleteSuccess => 'Cita eliminada.';
+
+  @override
+  String get agendaTypeRevision => 'Revisión';
+
+  @override
+  String get agendaTypePediatrics => 'Pediatría';
+
+  @override
+  String get agendaTypeVaccines => 'Vacunas';
+
+  @override
+  String get agendaTypeEmergency => 'Urgencias';
+
+  @override
+  String get dashboardAgendaStatusToday => 'Hoy';
+
+  @override
+  String get dashboardAgendaStatusTomorrow => 'Mañana';
+
+  @override
+  String dashboardAgendaStatusInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'En $count días',
+      one: 'En 1 día',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String dashboardQuestionsPending(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
