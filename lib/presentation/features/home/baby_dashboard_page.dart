@@ -1116,78 +1116,17 @@ class _TimelineMarker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: size,
+      height: size,
       decoration: BoxDecoration(
-        color: data.background,
-        border: Border(
-          right: BorderSide(
-            color: isLast
-                ? Colors.transparent
-                : Colors.white.withValues(alpha: 0.06),
-            width: 1,
-          ),
-        ),
+        color: color.withValues(alpha: 0.16),
+        shape: BoxShape.circle,
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
-      child: Stack(
-        children: [
-          if (data.icon != null)
-            Positioned(
-              top: 6,
-              left: 0,
-              right: 0,
-              child: Icon(
-                data.icon,
-                size: 14,
-                color: Colors.white.withValues(alpha: 0.75),
-              ),
-            ),
-          if (data.feedings.isNotEmpty ||
-              data.stools.isNotEmpty ||
-              data.vomits.isNotEmpty ||
-              data.baths.isNotEmpty ||
-              data.temperatures.isNotEmpty)
-            Positioned(
-              bottom: 2,
-              left: 0,
-              right: 0,
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 4,
-                runSpacing: 4,
-                children: [
-                  if (data.feedings.isNotEmpty)
-                    _TimelineEventBadge(
-                      icon: LucideIcons.milk,
-                      count: data.feedings.length,
-                      color: accentColor,
-                    ),
-                  if (data.stools.isNotEmpty)
-                    _TimelineEventBadge(
-                      icon: LucideIcons.toilet,
-                      count: data.stools.length,
-                      color: _stoolAccentColor,
-                    ),
-                  if (data.vomits.isNotEmpty)
-                    _TimelineEventBadge(
-                      icon: LucideIcons.triangleAlert,
-                      count: data.vomits.length,
-                      color: _vomitAccentColor,
-                    ),
-                  if (data.baths.isNotEmpty)
-                    _TimelineEventBadge(
-                      icon: LucideIcons.bath,
-                      count: data.baths.length,
-                      color: _bathAccentColor,
-                    ),
-                  if (data.temperatures.isNotEmpty)
-                    _TimelineEventBadge(
-                      icon: LucideIcons.thermometer,
-                      count: data.temperatures.length,
-                      color: _temperatureAccentColor,
-                    ),
-                ],
-              ),
-            ),
-        ],
+      child: Icon(
+        icon,
+        size: size * 0.55,
+        color: color,
       ),
     );
   }
