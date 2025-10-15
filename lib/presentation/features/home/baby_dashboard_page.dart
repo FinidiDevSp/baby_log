@@ -7,12 +7,14 @@ import 'package:baby_log/core/theme/app_colors.dart';
 import 'package:baby_log/domain/entities/baby_profile.dart';
 import 'package:baby_log/domain/entities/bath_entry.dart';
 import 'package:baby_log/domain/entities/feeding_entry.dart';
+import 'package:baby_log/domain/entities/medical_appointment.dart';
 import 'package:baby_log/domain/entities/stool_entry.dart';
 import 'package:baby_log/domain/entities/temperature_entry.dart';
 import 'package:baby_log/domain/entities/vomit_entry.dart';
 import 'package:baby_log/domain/entities/pediatrician_question.dart';
 import 'package:baby_log/l10n/app_localizations.dart';
 import 'package:baby_log/presentation/features/baby_form/baby_form_page.dart';
+import 'package:baby_log/presentation/features/agenda/medical_agenda_page.dart';
 import 'package:baby_log/presentation/features/questions/pediatrician_questions_page.dart';
 import 'package:baby_log/presentation/widgets/baby_avatar.dart';
 
@@ -21,6 +23,7 @@ import 'state/feeding_entries_provider.dart';
 import 'state/stool_entries_provider.dart';
 import 'state/temperature_entries_provider.dart';
 import 'state/vomit_entries_provider.dart';
+import '../agenda/state/medical_appointments_controller.dart';
 import '../baths/bath_log_page.dart';
 import '../diapers/stool_log_page.dart';
 import '../feedings/bottle_feeding_page.dart';
@@ -32,6 +35,7 @@ const _stoolAccentColor = Color(0xFF4CAF50);
 const _bathAccentColor = Color(0xFF2D81FF);
 const _vomitAccentColor = Color(0xFF1ABC9C);
 const _temperatureAccentColor = Color(0xFFFFA726);
+const _appointmentAccentColor = Color(0xFFAF52DE);
 
 /// Dashboard shown once a baby profile exists.
 class BabyDashboardPage extends ConsumerStatefulWidget {
@@ -262,6 +266,35 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     return l10n.dashboardElapsedDays(days);
   }
 
+  String? _resolveAgendaStatus(
+    AppLocalizations l10n,
+    List<MedicalAppointment> appointments, {
+    required DateTime reference,
+  }) {
+    if (appointments.isEmpty) {
+      return null;
+    }
+    final upcoming = appointments
+        .where((appointment) => !appointment.scheduledAt.isBefore(reference))
+        .toList()
+      ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+    if (upcoming.isEmpty) {
+      return null;
+    }
+    final next = upcoming.first;
+    final today = DateTime(reference.year, reference.month, reference.day);
+    final nextDate =
+        DateTime(next.scheduledAt.year, next.scheduledAt.month, next.scheduledAt.day);
+    final difference = nextDate.difference(today).inDays;
+    if (difference <= 0) {
+      return l10n.dashboardAgendaStatusToday;
+    }
+    if (difference == 1) {
+      return l10n.dashboardAgendaStatusTomorrow;
+    }
+    return l10n.dashboardAgendaStatusInDays(difference);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -277,6 +310,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     final baths = bathsAsync.value ?? const <BathEntry>[];
     final temperatures = temperaturesAsync.value ?? const <TemperatureEntry>[];
     final questions = questionsAsync.value ?? const <PediatricianQuestion>[];
+    final appointments = ref.watch(medicalAppointmentsProvider);
     final pendingQuestionsCount = questions
         .where((question) => !question.isResolved)
         .length;
@@ -300,6 +334,10 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
         .toList();
     final selectedTemperatures = temperatures
         .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
+        .toList();
+    final selectedAppointments = appointments
+        .where((entry) =>
+            _isSameCalendarDay(entry.scheduledAt, _selectedDate))
         .toList();
 
     void openBottleForm() {
@@ -383,12 +421,16 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       temperatureStatus = _formatElapsedTime(l10n, latestTemperature.timestamp);
     }
 
+    final agendaStatus =
+        _resolveAgendaStatus(l10n, appointments, reference: DateTime.now());
+
     final hasEntries =
         selectedFeedings.isNotEmpty ||
         selectedStools.isNotEmpty ||
         selectedVomits.isNotEmpty ||
         selectedBaths.isNotEmpty ||
-        selectedTemperatures.isNotEmpty;
+        selectedTemperatures.isNotEmpty ||
+        selectedAppointments.isNotEmpty;
 
     return SafeArea(
       child: ListView(
@@ -400,12 +442,18 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
             onVomitTap: openVomitForm,
             onBathTap: openBathForm,
             onTemperatureTap: openTemperatureForm,
+            onAgendaTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const MedicalAgendaPage()),
+              );
+            },
             onQuestionsTap: openQuestionsPage,
             bottleStatus: bottleStatus,
             stoolStatus: stoolStatus,
             vomitStatus: vomitStatus,
             bathStatus: bathStatus,
             temperatureStatus: temperatureStatus,
+            agendaStatus: agendaStatus,
             questionsStatus: questionsStatus,
           ),
           const SizedBox(height: 16),
@@ -433,6 +481,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
               vomits: selectedVomits,
               baths: selectedBaths,
               temperatures: selectedTemperatures,
+              appointments: selectedAppointments,
             ),
         ],
       ),
@@ -447,12 +496,14 @@ class _ShortcutCarousel extends StatelessWidget {
     required this.onVomitTap,
     required this.onBathTap,
     required this.onTemperatureTap,
+    required this.onAgendaTap,
     required this.onQuestionsTap,
     this.bottleStatus,
     this.stoolStatus,
     this.vomitStatus,
     this.bathStatus,
     this.temperatureStatus,
+    this.agendaStatus,
     this.questionsStatus,
   });
 
@@ -461,12 +512,14 @@ class _ShortcutCarousel extends StatelessWidget {
   final VoidCallback onVomitTap;
   final VoidCallback onBathTap;
   final VoidCallback onTemperatureTap;
+  final VoidCallback onAgendaTap;
   final VoidCallback onQuestionsTap;
   final String? bottleStatus;
   final String? stoolStatus;
   final String? vomitStatus;
   final String? bathStatus;
   final String? temperatureStatus;
+  final String? agendaStatus;
   final String? questionsStatus;
 
   @override
@@ -519,9 +572,12 @@ class _ShortcutCarousel extends StatelessWidget {
         label: l10n.dashboardFoodLabel,
       ),
       _ShortcutData(
-        color: const Color(0xFFAF52DE),
+        color: _appointmentAccentColor,
         icon: LucideIcons.calendarCheck,
         label: l10n.dashboardMedicalAgendaLabel,
+        onTap: onAgendaTap,
+        heroTag: 'agenda_shortcut',
+        status: agendaStatus,
       ),
       _ShortcutData(
         color: const Color(0xFF8E8CD8),
@@ -633,6 +689,7 @@ class _TimelineCard extends StatelessWidget {
     required this.vomits,
     required this.baths,
     required this.temperatures,
+    required this.appointments,
     required this.accentColor,
     required this.selectedDate,
     required this.onSelectDate,
@@ -646,6 +703,7 @@ class _TimelineCard extends StatelessWidget {
   final List<VomitEntry> vomits;
   final List<BathEntry> baths;
   final List<TemperatureEntry> temperatures;
+  final List<MedicalAppointment> appointments;
   final Color accentColor;
   final DateTime selectedDate;
   final VoidCallback onSelectDate;
@@ -669,6 +727,7 @@ class _TimelineCard extends StatelessWidget {
     final vomitsByHour = _groupVomits(vomits);
     final bathsByHour = _groupBaths(baths);
     final temperaturesByHour = _groupTemperatures(temperatures);
+    final appointmentsByHour = _groupAppointments(appointments);
     final tiles = List<_TimelineTileData>.generate(12, (index) {
       final hour = index * 2;
       final feedingsForHour = feedingsByHour[hour] ?? const <FeedingEntry>[];
@@ -677,6 +736,8 @@ class _TimelineCard extends StatelessWidget {
       final bathsForHour = bathsByHour[hour] ?? const <BathEntry>[];
       final temperaturesForHour =
           temperaturesByHour[hour] ?? const <TemperatureEntry>[];
+      final appointmentsForHour =
+          appointmentsByHour[hour] ?? const <MedicalAppointment>[];
       return _TimelineTileData(
         hour: hour,
         background: _backgroundForHour(hour),
@@ -686,6 +747,7 @@ class _TimelineCard extends StatelessWidget {
         vomits: vomitsForHour,
         baths: bathsForHour,
         temperatures: temperaturesForHour,
+        appointments: appointmentsForHour,
         markers: _buildMarkersForHour(
           hour: hour,
           feedings: feedingsForHour,
@@ -693,6 +755,7 @@ class _TimelineCard extends StatelessWidget {
           vomits: vomitsForHour,
           baths: bathsForHour,
           temperatures: temperaturesForHour,
+          appointments: appointmentsForHour,
         ),
       );
     });
@@ -846,6 +909,7 @@ class _TimelineCard extends StatelessWidget {
     required List<VomitEntry> vomits,
     required List<BathEntry> baths,
     required List<TemperatureEntry> temperatures,
+    required List<MedicalAppointment> appointments,
   }) {
     final markers = <_TimelineEventMarker>[];
 
@@ -876,6 +940,9 @@ class _TimelineCard extends StatelessWidget {
     }
     for (final entry in temperatures) {
       addMarker(entry.timestamp, LucideIcons.thermometer, _temperatureAccentColor);
+    }
+    for (final entry in appointments) {
+      addMarker(entry.scheduledAt, LucideIcons.calendarCheck, _appointmentAccentColor);
     }
 
     markers.sort((a, b) => a.position.compareTo(b.position));
@@ -919,6 +986,7 @@ class _TimelineTileData {
     this.vomits = const [],
     this.baths = const [],
     this.temperatures = const [],
+    this.appointments = const [],
     this.markers = const [],
   });
 
@@ -930,6 +998,7 @@ class _TimelineTileData {
   final List<VomitEntry> vomits;
   final List<BathEntry> baths;
   final List<TemperatureEntry> temperatures;
+  final List<MedicalAppointment> appointments;
   final List<_TimelineEventMarker> markers;
 
   String get label => hour.toString().padLeft(2, '0');
@@ -1001,7 +1070,8 @@ class _TimelineTile extends StatelessWidget {
                   data.stools.isNotEmpty ||
                   data.vomits.isNotEmpty ||
                   data.baths.isNotEmpty ||
-                  data.temperatures.isNotEmpty)
+                  data.temperatures.isNotEmpty ||
+                  data.appointments.isNotEmpty)
                 Positioned(
                   bottom: 2,
                   left: 0,
@@ -1040,6 +1110,12 @@ class _TimelineTile extends StatelessWidget {
                           icon: LucideIcons.thermometer,
                           count: data.temperatures.length,
                           color: _temperatureAccentColor,
+                        ),
+                      if (data.appointments.isNotEmpty)
+                        _TimelineEventBadge(
+                          icon: LucideIcons.calendarCheck,
+                          count: data.appointments.length,
+                          color: _appointmentAccentColor,
                         ),
                     ],
                   ),
@@ -1184,6 +1260,17 @@ Map<int, List<TemperatureEntry>> _groupTemperatures(
   return map;
 }
 
+Map<int, List<MedicalAppointment>> _groupAppointments(
+  List<MedicalAppointment> appointments,
+) {
+  final map = <int, List<MedicalAppointment>>{};
+  for (final entry in appointments) {
+    final tileHour = (entry.scheduledAt.hour ~/ 2) * 2;
+    map.putIfAbsent(tileHour, () => []).add(entry);
+  }
+  return map;
+}
+
 String _stoolDescription(AppLocalizations l10n, StoolConsistency consistency) {
   switch (consistency) {
     case StoolConsistency.liquid:
@@ -1212,6 +1299,22 @@ String _bathDescription(AppLocalizations l10n, BathType type) {
       return l10n.bathLogTypeFullDescription;
     case BathType.quick:
       return l10n.bathLogTypeQuickDescription;
+  }
+}
+
+String _appointmentTypeLabel(
+  AppLocalizations l10n,
+  MedicalAppointmentType type,
+) {
+  switch (type) {
+    case MedicalAppointmentType.revision:
+      return l10n.agendaTypeRevision;
+    case MedicalAppointmentType.pediatrics:
+      return l10n.agendaTypePediatrics;
+    case MedicalAppointmentType.vaccines:
+      return l10n.agendaTypeVaccines;
+    case MedicalAppointmentType.emergency:
+      return l10n.agendaTypeEmergency;
   }
 }
 
@@ -1286,6 +1389,7 @@ class _DailyLogList extends StatefulWidget {
     required this.vomits,
     required this.baths,
     required this.temperatures,
+    required this.appointments,
     required this.accentColor,
   });
 
@@ -1294,6 +1398,7 @@ class _DailyLogList extends StatefulWidget {
   final List<VomitEntry> vomits;
   final List<BathEntry> baths;
   final List<TemperatureEntry> temperatures;
+  final List<MedicalAppointment> appointments;
   final Color accentColor;
 
   @override
@@ -1339,6 +1444,7 @@ class _DailyLogListState extends State<_DailyLogList>
       ...widget.vomits.map(_DailyLogEntry.vomit),
       ...widget.baths.map(_DailyLogEntry.bath),
       ...widget.temperatures.map(_DailyLogEntry.temperature),
+      ...widget.appointments.map(_DailyLogEntry.appointment),
     ]..sort((a, b) => b.timestamp.compareTo(a.timestamp));
     final summaryItems = [
       _SummaryData(
@@ -1697,6 +1803,72 @@ class _DailyLogListState extends State<_DailyLogList>
                                 ),
                               ],
                             );
+                          case _DailyLogType.appointment:
+                            final appointment = entry.appointment!;
+                            final typeLabel =
+                                _appointmentTypeLabel(l10n, appointment.type);
+                            final notes = appointment.notes ?? '';
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: _appointmentAccentColor.withValues(
+                                      alpha: 0.18,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    LucideIcons.calendarCheck,
+                                    size: 18,
+                                    color: _appointmentAccentColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        timeLabel,
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        appointment.title,
+                                        style: theme.textTheme.bodyMedium,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        typeLabel,
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                        ),
+                                      ),
+                                      if (notes.isNotEmpty) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          notes,
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                            color: Colors.white70,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
                         }
                         return const SizedBox.shrink();
                       },
@@ -1710,7 +1882,7 @@ class _DailyLogListState extends State<_DailyLogList>
   }
 }
 
-enum _DailyLogType { feeding, stool, vomit, bath, temperature }
+enum _DailyLogType { feeding, stool, vomit, bath, temperature, appointment }
 
 class _DailyLogEntry {
   _DailyLogEntry.feeding(FeedingEntry entry)
@@ -1719,6 +1891,7 @@ class _DailyLogEntry {
       vomit = null,
       bath = null,
       temperature = null,
+      appointment = null,
       type = _DailyLogType.feeding,
       timestamp = entry.timestamp;
 
@@ -1728,6 +1901,7 @@ class _DailyLogEntry {
       vomit = null,
       bath = null,
       temperature = null,
+      appointment = null,
       type = _DailyLogType.stool,
       timestamp = entry.timestamp;
 
@@ -1737,6 +1911,7 @@ class _DailyLogEntry {
       vomit = entry,
       bath = null,
       temperature = null,
+      appointment = null,
       type = _DailyLogType.vomit,
       timestamp = entry.timestamp;
 
@@ -1746,6 +1921,7 @@ class _DailyLogEntry {
       vomit = null,
       bath = entry,
       temperature = null,
+      appointment = null,
       type = _DailyLogType.bath,
       timestamp = entry.timestamp;
 
@@ -1755,14 +1931,26 @@ class _DailyLogEntry {
       vomit = null,
       bath = null,
       temperature = entry,
+      appointment = null,
       type = _DailyLogType.temperature,
       timestamp = entry.timestamp;
+
+  _DailyLogEntry.appointment(MedicalAppointment entry)
+    : feeding = null,
+      stool = null,
+      vomit = null,
+      bath = null,
+      temperature = null,
+      appointment = entry,
+      type = _DailyLogType.appointment,
+      timestamp = entry.scheduledAt;
 
   final FeedingEntry? feeding;
   final StoolEntry? stool;
   final VomitEntry? vomit;
   final BathEntry? bath;
   final TemperatureEntry? temperature;
+  final MedicalAppointment? appointment;
   final _DailyLogType type;
   final DateTime timestamp;
 }
