@@ -664,7 +664,7 @@ class _TimelineCard extends StatelessWidget {
     required this.vomits,
     required this.baths,
     required this.temperatures,
-    required this.appointments,
+    this.appointments = const <MedicalAppointment>[],
     required this.accentColor,
     required this.selectedDate,
     required this.onSelectDate,
@@ -1412,7 +1412,7 @@ class _DailyLogList extends StatefulWidget {
     required this.vomits,
     required this.baths,
     required this.temperatures,
-    required this.appointments,
+    this.appointments = const <MedicalAppointment>[],
     required this.accentColor,
   });
 

@@ -8,7 +8,7 @@ import '../../../../domain/entities/medical_appointment.dart';
 /// being defined in later iterations.
 class MedicalAppointmentsController
     extends StateNotifier<List<MedicalAppointment>> {
-  MedicalAppointmentsController() : super(const []);
+  MedicalAppointmentsController() : super(const <MedicalAppointment>[]);
 
   final _random = Random();
 

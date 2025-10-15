@@ -43,7 +43,7 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
     final theme = Theme.of(context);
     final appointments = ref.watch(medicalAppointmentsProvider);
     final locale = l10n.localeName;
-    final sortedAppointments = [...appointments]
+    final sortedAppointments = List<MedicalAppointment>.from(appointments)
       ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
 
     final today = DateTime.now();
