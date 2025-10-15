@@ -715,12 +715,6 @@ class _TimelineCard extends StatelessWidget {
         hour: hour,
         background: _backgroundForHour(hour),
         icon: _iconForHour(hour),
-        feedings: feedingsForHour,
-        stools: stoolsForHour,
-        vomits: vomitsForHour,
-        baths: bathsForHour,
-        temperatures: temperaturesForHour,
-        appointments: appointmentsForHour,
         markers: _buildMarkersForHour(
           hour: hour,
           feedings: feedingsForHour,
@@ -943,24 +937,12 @@ class _TimelineTileData {
     required this.hour,
     required this.background,
     this.icon,
-    this.feedings = const [],
-    this.stools = const [],
-    this.vomits = const [],
-    this.baths = const [],
-    this.temperatures = const [],
-    this.appointments = const [],
     this.markers = const [],
   });
 
   final int hour;
   final Color background;
   final IconData? icon;
-  final List<FeedingEntry> feedings;
-  final List<StoolEntry> stools;
-  final List<VomitEntry> vomits;
-  final List<BathEntry> baths;
-  final List<TemperatureEntry> temperatures;
-  final List<MedicalAppointment> appointments;
   final List<_TimelineEventMarker> markers;
 
   String get label => hour.toString().padLeft(2, '0');
@@ -1028,60 +1010,6 @@ class _TimelineTile extends StatelessWidget {
                     size: markerSize,
                   ),
                 ),
-              if (data.feedings.isNotEmpty ||
-                  data.stools.isNotEmpty ||
-                  data.vomits.isNotEmpty ||
-                  data.baths.isNotEmpty ||
-                  data.temperatures.isNotEmpty ||
-                  data.appointments.isNotEmpty)
-                Positioned(
-                  bottom: 2,
-                  left: 0,
-                  right: 0,
-                  child: Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 4,
-                    runSpacing: 4,
-                    children: [
-                      if (data.feedings.isNotEmpty)
-                        _TimelineEventBadge(
-                          icon: LucideIcons.milk,
-                          count: data.feedings.length,
-                          color: accentColor,
-                        ),
-                      if (data.stools.isNotEmpty)
-                        _TimelineEventBadge(
-                          icon: LucideIcons.toilet,
-                          count: data.stools.length,
-                          color: _stoolAccentColor,
-                        ),
-                      if (data.vomits.isNotEmpty)
-                        _TimelineEventBadge(
-                          icon: LucideIcons.triangleAlert,
-                          count: data.vomits.length,
-                          color: _vomitAccentColor,
-                        ),
-                      if (data.baths.isNotEmpty)
-                        _TimelineEventBadge(
-                          icon: LucideIcons.bath,
-                          count: data.baths.length,
-                          color: _bathAccentColor,
-                        ),
-                      if (data.temperatures.isNotEmpty)
-                        _TimelineEventBadge(
-                          icon: LucideIcons.thermometer,
-                          count: data.temperatures.length,
-                          color: _temperatureAccentColor,
-                        ),
-                      if (data.appointments.isNotEmpty)
-                        _TimelineEventBadge(
-                          icon: LucideIcons.calendarCheck,
-                          count: data.appointments.length,
-                          color: _appointmentAccentColor,
-                        ),
-                    ],
-                  ),
-                ),
             ],
           ),
         );
@@ -1127,45 +1055,6 @@ class _TimelineMarker extends StatelessWidget {
         icon,
         size: size * 0.55,
         color: color,
-      ),
-    );
-  }
-}
-
-class _TimelineEventBadge extends StatelessWidget {
-  const _TimelineEventBadge({
-    required this.icon,
-    required this.count,
-    required this.color,
-  });
-
-  final IconData icon;
-  final int count;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final showCount = count > 1;
-
-    return Container(
-      constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-      padding: EdgeInsets.symmetric(horizontal: showCount ? 6 : 0),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Center(
-        child: showCount
-            ? Text(
-                '$count',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
-              )
-            : Icon(icon, size: 10, color: color),
       ),
     );
   }
