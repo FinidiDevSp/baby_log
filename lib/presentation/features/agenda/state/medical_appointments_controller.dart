@@ -6,10 +6,10 @@ import '../../../../domain/entities/medical_appointment.dart';
 
 /// Controls the in-memory list of medical appointments while persistence is
 /// being defined in later iterations.
-class MedicalAppointmentsController
-    extends StateNotifier<List<MedicalAppointment>> {
-  MedicalAppointmentsController() {
-    state = const <MedicalAppointment>[];
+class MedicalAppointmentsController extends Notifier<List<MedicalAppointment>> {
+  @override
+  List<MedicalAppointment> build() {
+    return const <MedicalAppointment>[];
   }
 
   final _random = Random();
@@ -42,6 +42,6 @@ class MedicalAppointmentsController
 
 /// Provides access to the agenda controller.
 final medicalAppointmentsProvider =
-    StateNotifierProvider<MedicalAppointmentsController, List<MedicalAppointment>>(
-  (ref) => MedicalAppointmentsController(),
+    NotifierProvider<MedicalAppointmentsController, List<MedicalAppointment>>(
+  MedicalAppointmentsController.new,
 );
