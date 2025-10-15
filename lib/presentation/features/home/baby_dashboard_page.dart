@@ -1179,8 +1179,7 @@ class _DailyLogListState extends State<_DailyLogList>
       _SummaryData(
         icon: LucideIcons.milk,
         label: l10n.dashboardBottleLabel,
-        value:
-            '${widget.feedings.length} · $totalMl ${l10n.bottleLogAmountUnit}',
+        value: '$totalMl',
       ),
       _SummaryData(
         icon: LucideIcons.toilet,
@@ -1196,11 +1195,6 @@ class _DailyLogListState extends State<_DailyLogList>
         icon: LucideIcons.triangleAlert,
         label: l10n.dashboardVomitLabel,
         value: vomitCount.toString(),
-      ),
-      _SummaryData(
-        icon: LucideIcons.thermometer,
-        label: l10n.dashboardTemperatureLabel,
-        value: temperatureSummaryValue,
       ),
     ];
 
@@ -1244,7 +1238,7 @@ class _DailyLogListState extends State<_DailyLogList>
             children: [
               for (var i = 0; i < summaryItems.length; i++) ...[
                 Expanded(child: _SummaryBadge(data: summaryItems[i])),
-                if (i != summaryItems.length - 1) const SizedBox(width: 12),
+                if (i != summaryItems.length - 1) const SizedBox(width: 6),
               ],
             ],
           ),
@@ -1259,7 +1253,7 @@ class _DailyLogListState extends State<_DailyLogList>
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       separatorBuilder: (_, __) => Divider(
-                        height: 16,
+                        height: 14,
                         thickness: 1,
                         color: Colors.white.withValues(alpha: 0.06),
                       ),

@@ -442,8 +442,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get questionsComposerUpdateAction => 'Actualizar pregunta';
 
   @override
-  String get questionsComposerEditingNotice =>
-      'Editando una pregunta guardada';
+  String get questionsComposerEditingNotice => 'Editando una pregunta guardada';
 
   @override
   String get questionsComposerCancelEditing => 'Cancelar edición';

@@ -371,7 +371,7 @@ abstract class AppLocalizations {
   /// Estado mostrado en el acceso directo de preguntas cuando hay pendientes
   ///
   /// In es, this message translates to:
-  /// **'{count, plural, one {# pendiente} other {# pendientes}}'**
+  /// **'{count, plural, one {{count} pendiente} other {{count} pendientes}}'**
   String dashboardQuestionsPending(int count);
 
   /// No description provided for @dashboardQuestionsAllClear.
@@ -986,49 +986,49 @@ abstract class AppLocalizations {
   /// **'{months, plural, one {{months} mes} other {{months} meses}} y {weeks, plural, one {{weeks} semana} other {{weeks} semanas}}'**
   String questionsAgeMonthsAndWeeks(int months, int weeks);
 
-  /// No description provided for @questionsSatisfactionTitle.
+  /// Título del diálogo de satisfacción
   ///
   /// In es, this message translates to:
   /// **'¿Cómo salió la consulta?'**
   String get questionsSatisfactionTitle;
 
-  /// No description provided for @questionsSatisfactionSubtitle.
+  /// Texto introductorio del diálogo de satisfacción
   ///
   /// In es, this message translates to:
   /// **'Cuéntanos qué tan conforme quedaste con la respuesta.'**
   String get questionsSatisfactionSubtitle;
 
-  /// No description provided for @questionsSatisfactionHappy.
+  /// Opción de satisfacción alta
   ///
   /// In es, this message translates to:
   /// **'Contentos'**
   String get questionsSatisfactionHappy;
 
-  /// No description provided for @questionsSatisfactionNeutral.
+  /// Opción de satisfacción neutra
   ///
   /// In es, this message translates to:
   /// **'Neutral'**
   String get questionsSatisfactionNeutral;
 
-  /// No description provided for @questionsSatisfactionSad.
+  /// Opción de satisfacción baja
   ///
   /// In es, this message translates to:
   /// **'Inconformes'**
   String get questionsSatisfactionSad;
 
-  /// No description provided for @questionsSatisfactionNoteLabel.
+  /// Etiqueta para el campo de comentarios tras resolver una duda
   ///
   /// In es, this message translates to:
   /// **'Notas adicionales'**
   String get questionsSatisfactionNoteLabel;
 
-  /// No description provided for @questionsSatisfactionConfirm.
+  /// Botón para confirmar la selección de satisfacción
   ///
   /// In es, this message translates to:
   /// **'Guardar'**
   String get questionsSatisfactionConfirm;
 
-  /// No description provided for @questionsSatisfactionCancel.
+  /// Botón para cerrar el diálogo sin guardar
   ///
   /// In es, this message translates to:
   /// **'Cancelar'**
