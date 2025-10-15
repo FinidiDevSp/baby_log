@@ -198,6 +198,30 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     _selectedDate = DateTime(now.year, now.month, now.day);
   }
 
+  void _shiftSelectedDate(int days) {
+    if (days == 0) {
+      return;
+    }
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final lowerBound = today.subtract(const Duration(days: 365));
+    final candidate = _selectedDate.add(Duration(days: days));
+    final clampedDate = candidate.isAfter(today)
+        ? today
+        : (candidate.isBefore(lowerBound) ? lowerBound : candidate);
+
+    if (!_isSameCalendarDay(clampedDate, _selectedDate)) {
+      setState(() {
+        _selectedDate = DateTime(
+          clampedDate.year,
+          clampedDate.month,
+          clampedDate.day,
+        );
+      });
+    }
+  }
+
   Future<void> _openDayPicker() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -394,6 +418,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
             temperatures: selectedTemperatures,
             selectedDate: _selectedDate,
             onSelectDate: _openDayPicker,
+            onDayDelta: _shiftSelectedDate,
             onImport: () {},
             onExport: () {},
           ),
@@ -611,6 +636,7 @@ class _TimelineCard extends StatelessWidget {
     required this.accentColor,
     required this.selectedDate,
     required this.onSelectDate,
+    this.onDayDelta,
     this.onImport,
     this.onExport,
   });
@@ -623,6 +649,7 @@ class _TimelineCard extends StatelessWidget {
   final Color accentColor;
   final DateTime selectedDate;
   final VoidCallback onSelectDate;
+  final ValueChanged<int>? onDayDelta;
   final VoidCallback? onImport;
   final VoidCallback? onExport;
 
@@ -644,30 +671,55 @@ class _TimelineCard extends StatelessWidget {
     final temperaturesByHour = _groupTemperatures(temperatures);
     final tiles = List<_TimelineTileData>.generate(12, (index) {
       final hour = index * 2;
+      final feedingsForHour = feedingsByHour[hour] ?? const <FeedingEntry>[];
+      final stoolsForHour = stoolsByHour[hour] ?? const <StoolEntry>[];
+      final vomitsForHour = vomitsByHour[hour] ?? const <VomitEntry>[];
+      final bathsForHour = bathsByHour[hour] ?? const <BathEntry>[];
+      final temperaturesForHour =
+          temperaturesByHour[hour] ?? const <TemperatureEntry>[];
       return _TimelineTileData(
         hour: hour,
         background: _backgroundForHour(hour),
         icon: _iconForHour(hour),
-        feedings: feedingsByHour[hour] ?? const [],
-        stools: stoolsByHour[hour] ?? const [],
-        vomits: vomitsByHour[hour] ?? const [],
-        baths: bathsByHour[hour] ?? const [],
-        temperatures: temperaturesByHour[hour] ?? const [],
+        feedings: feedingsForHour,
+        stools: stoolsForHour,
+        vomits: vomitsForHour,
+        baths: bathsForHour,
+        temperatures: temperaturesForHour,
+        markers: _buildMarkersForHour(
+          hour: hour,
+          feedings: feedingsForHour,
+          stools: stoolsForHour,
+          vomits: vomitsForHour,
+          baths: bathsForHour,
+          temperatures: temperaturesForHour,
+        ),
       );
     });
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
+    return GestureDetector(
+      onHorizontalDragEnd: onDayDelta == null
+          ? null
+          : (details) {
+              final velocity = details.primaryVelocity ?? 0;
+              if (velocity > 200) {
+                onDayDelta!.call(-1);
+              } else if (velocity < -200) {
+                onDayDelta!.call(1);
+              }
+            },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
                 child: Tooltip(
                   message: l10n.dashboardChangeDayTooltip,
                   child: TextButton(
@@ -786,6 +838,49 @@ class _TimelineCard extends StatelessWidget {
   bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
+
+  List<_TimelineEventMarker> _buildMarkersForHour({
+    required int hour,
+    required List<FeedingEntry> feedings,
+    required List<StoolEntry> stools,
+    required List<VomitEntry> vomits,
+    required List<BathEntry> baths,
+    required List<TemperatureEntry> temperatures,
+  }) {
+    final markers = <_TimelineEventMarker>[];
+
+    void addMarker(DateTime timestamp, IconData icon, Color color) {
+      final minutes = ((timestamp.hour - hour) * 60 + timestamp.minute)
+          .clamp(0, 119);
+      final position = minutes / 120;
+      markers.add(
+        _TimelineEventMarker(
+          icon: icon,
+          color: color,
+          position: position,
+        ),
+      );
+    }
+
+    for (final entry in feedings) {
+      addMarker(entry.timestamp, LucideIcons.milk, accentColor);
+    }
+    for (final entry in stools) {
+      addMarker(entry.timestamp, LucideIcons.toilet, _stoolAccentColor);
+    }
+    for (final entry in vomits) {
+      addMarker(entry.timestamp, LucideIcons.triangleAlert, _vomitAccentColor);
+    }
+    for (final entry in baths) {
+      addMarker(entry.timestamp, LucideIcons.bath, _bathAccentColor);
+    }
+    for (final entry in temperatures) {
+      addMarker(entry.timestamp, LucideIcons.thermometer, _temperatureAccentColor);
+    }
+
+    markers.sort((a, b) => a.position.compareTo(b.position));
+    return markers;
+  }
 }
 
 class _TimelineActionButton extends StatelessWidget {
@@ -824,6 +919,7 @@ class _TimelineTileData {
     this.vomits = const [],
     this.baths = const [],
     this.temperatures = const [],
+    this.markers = const [],
   });
 
   final int hour;
@@ -834,6 +930,7 @@ class _TimelineTileData {
   final List<VomitEntry> vomits;
   final List<BathEntry> baths;
   final List<TemperatureEntry> temperatures;
+  final List<_TimelineEventMarker> markers;
 
   String get label => hour.toString().padLeft(2, '0');
 }
@@ -851,79 +948,147 @@ class _TimelineTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: data.background,
-        border: Border(
-          right: BorderSide(
-            color: isLast
-                ? Colors.transparent
-                : Colors.white.withValues(alpha: 0.06),
-            width: 1,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const markerSize = 18.0;
+
+        double _horizontalPosition(double position) {
+          final raw = position * constraints.maxWidth - markerSize / 2;
+          const min = 2.0;
+          final max = (constraints.maxWidth - markerSize - 2.0);
+          final clampedMax = max < min ? min : max;
+          final clamped = raw.clamp(min, clampedMax);
+          return clamped.toDouble();
+        }
+
+        return Container(
+          decoration: BoxDecoration(
+            color: data.background,
+            border: Border(
+              right: BorderSide(
+                color: isLast
+                    ? Colors.transparent
+                    : Colors.white.withValues(alpha: 0.06),
+                width: 1,
+              ),
+            ),
           ),
-        ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              if (data.icon != null)
+                Positioned(
+                  top: 6,
+                  left: 0,
+                  right: 0,
+                  child: Icon(
+                    data.icon,
+                    size: 14,
+                    color: Colors.white.withValues(alpha: 0.75),
+                  ),
+                ),
+              for (final marker in data.markers)
+                Positioned(
+                  top: 24,
+                  left: _horizontalPosition(marker.position),
+                  child: _TimelineMarker(
+                    icon: marker.icon,
+                    color: marker.color,
+                    size: markerSize,
+                  ),
+                ),
+              if (data.feedings.isNotEmpty ||
+                  data.stools.isNotEmpty ||
+                  data.vomits.isNotEmpty ||
+                  data.baths.isNotEmpty ||
+                  data.temperatures.isNotEmpty)
+                Positioned(
+                  bottom: 2,
+                  left: 0,
+                  right: 0,
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: [
+                      if (data.feedings.isNotEmpty)
+                        _TimelineEventBadge(
+                          icon: LucideIcons.milk,
+                          count: data.feedings.length,
+                          color: accentColor,
+                        ),
+                      if (data.stools.isNotEmpty)
+                        _TimelineEventBadge(
+                          icon: LucideIcons.toilet,
+                          count: data.stools.length,
+                          color: _stoolAccentColor,
+                        ),
+                      if (data.vomits.isNotEmpty)
+                        _TimelineEventBadge(
+                          icon: LucideIcons.triangleAlert,
+                          count: data.vomits.length,
+                          color: _vomitAccentColor,
+                        ),
+                      if (data.baths.isNotEmpty)
+                        _TimelineEventBadge(
+                          icon: LucideIcons.bath,
+                          count: data.baths.length,
+                          color: _bathAccentColor,
+                        ),
+                      if (data.temperatures.isNotEmpty)
+                        _TimelineEventBadge(
+                          icon: LucideIcons.thermometer,
+                          count: data.temperatures.length,
+                          color: _temperatureAccentColor,
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _TimelineEventMarker {
+  const _TimelineEventMarker({
+    required this.icon,
+    required this.color,
+    required this.position,
+  });
+
+  final IconData icon;
+  final Color color;
+  final double position;
+}
+
+class _TimelineMarker extends StatelessWidget {
+  const _TimelineMarker({
+    required this.icon,
+    required this.color,
+    required this.size,
+  });
+
+  final IconData icon;
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(size / 2),
+        border: Border.all(color: color.withValues(alpha: 0.45)),
       ),
-      child: Stack(
-        children: [
-          if (data.icon != null)
-            Positioned(
-              top: 6,
-              left: 0,
-              right: 0,
-              child: Icon(
-                data.icon,
-                size: 14,
-                color: Colors.white.withValues(alpha: 0.75),
-              ),
-            ),
-          if (data.feedings.isNotEmpty ||
-              data.stools.isNotEmpty ||
-              data.vomits.isNotEmpty ||
-              data.baths.isNotEmpty ||
-              data.temperatures.isNotEmpty)
-            Positioned(
-              bottom: 2,
-              left: 0,
-              right: 0,
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 4,
-                runSpacing: 4,
-                children: [
-                  if (data.feedings.isNotEmpty)
-                    _TimelineEventBadge(
-                      icon: LucideIcons.milk,
-                      count: data.feedings.length,
-                      color: accentColor,
-                    ),
-                  if (data.stools.isNotEmpty)
-                    _TimelineEventBadge(
-                      icon: LucideIcons.toilet,
-                      count: data.stools.length,
-                      color: _stoolAccentColor,
-                    ),
-                  if (data.vomits.isNotEmpty)
-                    _TimelineEventBadge(
-                      icon: LucideIcons.triangleAlert,
-                      count: data.vomits.length,
-                      color: _vomitAccentColor,
-                    ),
-                  if (data.baths.isNotEmpty)
-                    _TimelineEventBadge(
-                      icon: LucideIcons.bath,
-                      count: data.baths.length,
-                      color: _bathAccentColor,
-                    ),
-                  if (data.temperatures.isNotEmpty)
-                    _TimelineEventBadge(
-                      icon: LucideIcons.thermometer,
-                      count: data.temperatures.length,
-                      color: _temperatureAccentColor,
-                    ),
-                ],
-              ),
-            ),
-        ],
+      child: Icon(
+        icon,
+        size: size * 0.55,
+        color: color,
       ),
     );
   }
