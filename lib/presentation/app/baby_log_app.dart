@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../l10n/app_localizations.dart';
-
 import '../../core/providers.dart';
 import '../../core/theme/theme_controller.dart';
+import '../../core/localization/locale_controller.dart';
+import '../../l10n/app_localizations.dart';
 import '../../domain/entities/baby_profile.dart';
 import '../features/baby_form/baby_form_page.dart';
 import '../features/home/baby_dashboard_page.dart';
@@ -16,11 +16,13 @@ class BabyLogApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeControllerProvider);
+    final locale = ref.watch(localeControllerProvider);
 
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
       theme: theme,
+      locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

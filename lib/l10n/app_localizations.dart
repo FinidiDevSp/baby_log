@@ -1255,6 +1255,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cancelar'**
   String get questionsSatisfactionCancel;
+
+  /// Título general de la sección de cuenta
+  ///
+  /// In es, this message translates to:
+  /// **'Mi cuenta'**
+  String get accountSettingsTitle;
+
+  /// Descripción breve para la sección de cuenta
+  ///
+  /// In es, this message translates to:
+  /// **'Gestiona tus preferencias personales.'**
+  String get accountSettingsSubtitle;
+
+  /// Título del bloque para cambiar de idioma
+  ///
+  /// In es, this message translates to:
+  /// **'Idioma de la aplicación'**
+  String get accountLanguageTitle;
+
+  /// Descripción del bloque para cambiar de idioma
+  ///
+  /// In es, this message translates to:
+  /// **'Elige el idioma que prefieres para BabyLog.'**
+  String get accountLanguageSubtitle;
+
+  /// Opción para idioma español
+  ///
+  /// In es, this message translates to:
+  /// **'Español'**
+  String get accountLanguageOptionSpanish;
+
+  /// Opción para idioma inglés
+  ///
+  /// In es, this message translates to:
+  /// **'Inglés'**
+  String get accountLanguageOptionEnglish;
+
+  /// Nota informativa sobre la persistencia del idioma
+  ///
+  /// In es, this message translates to:
+  /// **'El cambio se aplica al instante y se recuerda para futuras sesiones.'**
+  String get accountLanguageApplyHint;
 }
 
 class _AppLocalizationsDelegate
