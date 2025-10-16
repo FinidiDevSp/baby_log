@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
@@ -40,11 +39,10 @@ const _bathAccentColor = Color(0xFF2D81FF);
 const _vomitAccentColor = Color(0xFF1ABC9C);
 const _temperatureAccentColor = Color(0xFFFFA726);
 const _appointmentAccentColor = Color(0xFFAF52DE);
-const double _timelineTileWidth = 110.0;
-const double _timelineTileBaseHeight = 64.0;
+const double _timelineTileBaseHeight = 88.0;
 const double _timelineMarkerSize = 18.0;
-const double _timelineMarkerTop = 28.0;
-const double _timelineMarkerSpacing = 24.0;
+const double _timelineMarkerTop = 32.0;
+const double _timelineMarkerSpacing = 28.0;
 
 /// Dashboard shown once a baby profile exists.
 class BabyDashboardPage extends ConsumerStatefulWidget {
@@ -203,25 +201,15 @@ class _BabyHomeView extends ConsumerStatefulWidget {
 
 class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
   late DateTime _selectedDate;
-  final _timelineKey = GlobalKey();
-  final ScrollController _timelineScrollController = ScrollController();
-  int? _activePointer;
-  double _pointerDeltaX = 0;
-  double _pointerDeltaY = 0;
-  bool _pointerStartedOnTimeline = false;
-  double _timelineInitialOffset = 0;
+  double _dayDragDelta = 0;
+  bool _isDraggingDay = false;
+  int _lastDayAnimationDirection = 0;
 
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
     _selectedDate = DateTime(now.year, now.month, now.day);
-  }
-
-  @override
-  void dispose() {
-    _timelineScrollController.dispose();
-    super.dispose();
   }
 
   Future<void> _openDayPicker() async {
@@ -236,6 +224,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     if (picked != null && !_isSameCalendarDay(picked, _selectedDate)) {
       setState(() {
         _selectedDate = DateTime(picked.year, picked.month, picked.day);
+        _lastDayAnimationDirection = 0;
       });
     }
   }
@@ -296,82 +285,64 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
   void _changeDay(int delta) {
     setState(() {
       _selectedDate = _selectedDate.add(Duration(days: delta));
+      _lastDayAnimationDirection = delta;
     });
   }
 
-  void _handlePointerDown(PointerDownEvent event) {
-    if (_activePointer != null) {
+  void _handleDayDragStart(DragStartDetails details) {
+    _isDraggingDay = true;
+    _dayDragDelta = 0;
+  }
+
+  void _handleDayDragUpdate(DragUpdateDetails details) {
+    if (!_isDraggingDay) {
       return;
     }
-    _activePointer = event.pointer;
-    _pointerDeltaX = 0;
-    _pointerDeltaY = 0;
-    _pointerStartedOnTimeline = _isPointInsideTimeline(event.position);
-    _timelineInitialOffset = _timelineScrollController.hasClients
-        ? _timelineScrollController.position.pixels
-        : 0;
+    _dayDragDelta += details.primaryDelta ?? 0;
   }
 
-  void _handlePointerMove(PointerMoveEvent event) {
-    if (_activePointer != event.pointer) {
+  void _handleDayDragEnd(DragEndDetails details) {
+    if (!_isDraggingDay) {
       return;
     }
-    _pointerDeltaX += event.delta.dx;
-    _pointerDeltaY += event.delta.dy;
+    final threshold = 60.0;
+    if (_dayDragDelta.abs() > threshold) {
+      _changeDay(_dayDragDelta < 0 ? 1 : -1);
+    }
+    _isDraggingDay = false;
+    _dayDragDelta = 0;
   }
 
-  void _handlePointerUp(PointerUpEvent event) {
-    if (_activePointer != event.pointer) {
-      return;
-    }
-    _evaluatePointerGesture();
+  void _handleDayDragCancel() {
+    _isDraggingDay = false;
+    _dayDragDelta = 0;
   }
 
-  void _handlePointerCancel(PointerCancelEvent event) {
-    if (_activePointer != event.pointer) {
-      return;
+  Widget _buildDayTransition(
+    Widget child,
+    Animation<double> animation,
+    ValueKey<DateTime> currentKey,
+  ) {
+    final direction = _lastDayAnimationDirection;
+    if (direction == 0) {
+      return FadeTransition(opacity: animation, child: child);
     }
-    _resetPointerTracking();
-  }
-
-  void _evaluatePointerGesture() {
-    final dx = _pointerDeltaX;
-    final dy = _pointerDeltaY;
-    final hasHorizontalIntent = dx.abs() > 60 && dx.abs() > dy.abs();
-    final timelineScrolled = _pointerStartedOnTimeline &&
-        _timelineScrollController.hasClients &&
-        (_timelineScrollController.position.pixels - _timelineInitialOffset)
-                .abs() >
-            1;
-    if (hasHorizontalIntent && !timelineScrolled) {
-      _changeDay(dx < 0 ? 1 : -1);
-    }
-    _resetPointerTracking();
-  }
-
-  void _resetPointerTracking() {
-    _activePointer = null;
-    _pointerDeltaX = 0;
-    _pointerDeltaY = 0;
-    _pointerStartedOnTimeline = false;
-    _timelineInitialOffset = 0;
-  }
-
-  bool _isPointInsideTimeline(Offset globalPosition) {
-    final context = _timelineKey.currentContext;
-    if (context == null) {
-      return false;
-    }
-    final renderObject = context.findRenderObject();
-    if (renderObject is! RenderBox) {
-      return false;
-    }
-    final local = renderObject.globalToLocal(globalPosition);
-    final size = renderObject.size;
-    return local.dx >= 0 &&
-        local.dx <= size.width &&
-        local.dy >= 0 &&
-        local.dy <= size.height;
+    final isIncoming = child.key == currentKey;
+    final horizontalOffset = direction > 0
+        ? (isIncoming ? 1.0 : -1.0)
+        : (isIncoming ? -1.0 : 1.0);
+    final curvedAnimation = animation.drive(
+      CurveTween(curve: Curves.easeInOutCubic),
+    );
+    final slideAnimation = Tween<Offset>(
+      begin: Offset(horizontalOffset, 0),
+      end: Offset.zero,
+    ).animate(curvedAnimation);
+    final fadeAnimation = Tween<double>(begin: 0.7, end: 1.0).animate(curvedAnimation);
+    return SlideTransition(
+      position: slideAnimation,
+      child: FadeTransition(opacity: fadeAnimation, child: child),
+    );
   }
 
   @override
@@ -511,16 +482,44 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
         selectedTemperatures.isNotEmpty ||
         selectedAppointments.isNotEmpty;
 
+    final daySectionKey = ValueKey(_selectedDate);
+
+    final dayContent = Column(
+      key: daySectionKey,
+      children: [
+        _TimelineCard(
+          accentColor: widget.accentColor,
+          feedings: selectedFeedings,
+          stools: selectedStools,
+          vomits: selectedVomits,
+          baths: selectedBaths,
+          temperatures: selectedTemperatures,
+          selectedDate: _selectedDate,
+          onSelectDate: _openDayPicker,
+          onImport: () {},
+          onExport: () {},
+        ),
+        const SizedBox(height: 16),
+        if (!hasEntries)
+          _EventsPlaceholder(description: l10n.homeEmptyDescription)
+        else
+          _DailyLogList(
+            accentColor: widget.accentColor,
+            feedings: selectedFeedings,
+            stools: selectedStools,
+            vomits: selectedVomits,
+            baths: selectedBaths,
+            temperatures: selectedTemperatures,
+            appointments: selectedAppointments,
+          ),
+      ],
+    );
+
     return SafeArea(
-      child: Listener(
-        onPointerDown: _handlePointerDown,
-        onPointerMove: _handlePointerMove,
-        onPointerUp: _handlePointerUp,
-        onPointerCancel: _handlePointerCancel,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-          children: [
-            _ShortcutCarousel(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+        children: [
+          _ShortcutCarousel(
               onBottleTap: openBottleForm,
               onStoolTap: openStoolForm,
               onVomitTap: openVomitForm,
@@ -541,35 +540,22 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
             questionsStatus: questionsStatus,
           ),
           const SizedBox(height: 16),
-            _TimelineCard(
-              accentColor: widget.accentColor,
-              feedings: selectedFeedings,
-              stools: selectedStools,
-              vomits: selectedVomits,
-              baths: selectedBaths,
-              temperatures: selectedTemperatures,
-              selectedDate: _selectedDate,
-              onSelectDate: _openDayPicker,
-              onImport: () {},
-              onExport: () {},
-              timelineKey: _timelineKey,
-              scrollController: _timelineScrollController,
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onHorizontalDragStart: _handleDayDragStart,
+            onHorizontalDragUpdate: _handleDayDragUpdate,
+            onHorizontalDragEnd: _handleDayDragEnd,
+            onHorizontalDragCancel: _handleDayDragCancel,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 280),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (child, animation) =>
+                  _buildDayTransition(child, animation, daySectionKey),
+              child: dayContent,
             ),
-          const SizedBox(height: 16),
-          if (!hasEntries)
-            _EventsPlaceholder(description: l10n.homeEmptyDescription)
-          else
-            _DailyLogList(
-              accentColor: widget.accentColor,
-              feedings: selectedFeedings,
-              stools: selectedStools,
-              vomits: selectedVomits,
-              baths: selectedBaths,
-              temperatures: selectedTemperatures,
-              appointments: selectedAppointments,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -781,8 +767,6 @@ class _TimelineCard extends StatelessWidget {
     required this.onSelectDate,
     this.onImport,
     this.onExport,
-    this.timelineKey,
-    this.scrollController,
   });
 
   final List<FeedingEntry> feedings;
@@ -796,8 +780,6 @@ class _TimelineCard extends StatelessWidget {
   final VoidCallback onSelectDate;
   final VoidCallback? onImport;
   final VoidCallback? onExport;
-  final Key? timelineKey;
-  final ScrollController? scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -816,8 +798,8 @@ class _TimelineCard extends StatelessWidget {
     final bathsByHour = _groupBaths(baths);
     final temperaturesByHour = _groupTemperatures(temperatures);
     final appointmentsByHour = _groupAppointments(appointments);
-    final tiles = List<_TimelineTileData>.generate(12, (index) {
-      final hour = index * 2;
+    final tiles = List<_TimelineTileData>.generate(24, (index) {
+      final hour = index;
       final feedingsForHour = feedingsByHour[hour] ?? const <FeedingEntry>[];
       final stoolsForHour = stoolsByHour[hour] ?? const <StoolEntry>[];
       final vomitsForHour = vomitsByHour[hour] ?? const <VomitEntry>[];
@@ -844,7 +826,6 @@ class _TimelineCard extends StatelessWidget {
       );
     });
 
-    final totalWidth = _timelineTileWidth * tiles.length;
     final maxStackDepth = tiles.fold<int>(1, (value, tile) {
       final depth = math.max(tile.stackDepth, 1);
       return math.max(value, depth);
@@ -854,9 +835,6 @@ class _TimelineCard extends StatelessWidget {
     final showCurrentIndicator = isToday;
     final currentPositionRatio =
         (now.hour * 60 + now.minute) / (24 * 60);
-    final double indicatorLeft = (totalWidth * currentPositionRatio)
-        .clamp(0.0, math.max(totalWidth - 2, 0.0))
-        .toDouble();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
@@ -867,13 +845,17 @@ class _TimelineCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Tooltip(
-                  message: l10n.dashboardChangeDayTooltip,
-                  child: TextButton(
-                    onPressed: onSelectDate,
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onHorizontalDragStart: (_) {},
+            onHorizontalDragUpdate: (_) {},
+            child: Row(
+              children: [
+                Expanded(
+                  child: Tooltip(
+                      message: l10n.dashboardChangeDayTooltip,
+                      child: TextButton(
+                        onPressed: onSelectDate,
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -913,36 +895,39 @@ class _TimelineCard extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              _TimelineActionButton(
-                icon: LucideIcons.import,
-                tooltip: l10n.dashboardImportTooltip,
-                onPressed: onImport,
-              ),
-              const SizedBox(width: 4),
-              _TimelineActionButton(
-                icon: LucideIcons.upload,
-                tooltip: l10n.dashboardExportTooltip,
-                onPressed: onExport,
-              ),
-            ],
+                ),
+                const SizedBox(width: 8),
+                _TimelineActionButton(
+                  icon: LucideIcons.import,
+                  tooltip: l10n.dashboardImportTooltip,
+                  onPressed: onImport,
+                ),
+                const SizedBox(width: 4),
+                _TimelineActionButton(
+                  icon: LucideIcons.upload,
+                  tooltip: l10n.dashboardExportTooltip,
+                  onPressed: onExport,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 14),
           ClipRRect(
-            key: timelineKey,
             borderRadius: BorderRadius.circular(4),
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.surfaceVariant,
                 border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
               ),
-              child: SingleChildScrollView(
-                controller: scrollController,
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  width: totalWidth,
-                  child: Column(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final totalWidth = constraints.maxWidth;
+                  final tileWidth = totalWidth / tiles.length;
+                  final indicatorLeft = (totalWidth * currentPositionRatio)
+                      .clamp(0.0, math.max(totalWidth - 2, 0.0))
+                      .toDouble();
+
+                  return Column(
                     children: [
                       SizedBox(
                         height: timelineHeight,
@@ -953,7 +938,7 @@ class _TimelineCard extends StatelessWidget {
                               children: [
                                 for (var i = 0; i < tiles.length; i++)
                                   SizedBox(
-                                    width: _timelineTileWidth,
+                                    width: tileWidth,
                                     child: _TimelineTile(
                                       data: tiles[i],
                                       isLast: i == tiles.length - 1,
@@ -985,7 +970,7 @@ class _TimelineCard extends StatelessWidget {
                           children: [
                             for (var i = 0; i < tiles.length; i++)
                               SizedBox(
-                                width: _timelineTileWidth,
+                                width: tileWidth,
                                 child: Center(
                                   child: Text(
                                     tiles[i].label,
@@ -999,8 +984,8 @@ class _TimelineCard extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ),
@@ -1026,8 +1011,8 @@ class _TimelineCard extends StatelessWidget {
 
     void addMarker(DateTime timestamp, IconData icon, Color color) {
       final minutes = ((timestamp.hour - hour) * 60 + timestamp.minute)
-          .clamp(0, 119);
-      final position = minutes / 120;
+          .clamp(0, 59);
+      final position = minutes / 60;
       markers.add(
         _TimelineEventMarker(
           icon: icon,
@@ -1261,7 +1246,7 @@ bool _isSameCalendarDay(DateTime a, DateTime b) {
 Map<int, List<FeedingEntry>> _groupFeedings(List<FeedingEntry> feedings) {
   final map = <int, List<FeedingEntry>>{};
   for (final entry in feedings) {
-    final tileHour = (entry.timestamp.hour ~/ 2) * 2;
+    final tileHour = entry.timestamp.hour;
     map.putIfAbsent(tileHour, () => []).add(entry);
   }
   return map;
@@ -1270,7 +1255,7 @@ Map<int, List<FeedingEntry>> _groupFeedings(List<FeedingEntry> feedings) {
 Map<int, List<StoolEntry>> _groupStools(List<StoolEntry> stools) {
   final map = <int, List<StoolEntry>>{};
   for (final entry in stools) {
-    final tileHour = (entry.timestamp.hour ~/ 2) * 2;
+    final tileHour = entry.timestamp.hour;
     map.putIfAbsent(tileHour, () => []).add(entry);
   }
   return map;
@@ -1279,7 +1264,7 @@ Map<int, List<StoolEntry>> _groupStools(List<StoolEntry> stools) {
 Map<int, List<VomitEntry>> _groupVomits(List<VomitEntry> vomits) {
   final map = <int, List<VomitEntry>>{};
   for (final entry in vomits) {
-    final tileHour = (entry.timestamp.hour ~/ 2) * 2;
+    final tileHour = entry.timestamp.hour;
     map.putIfAbsent(tileHour, () => []).add(entry);
   }
   return map;
@@ -1288,7 +1273,7 @@ Map<int, List<VomitEntry>> _groupVomits(List<VomitEntry> vomits) {
 Map<int, List<BathEntry>> _groupBaths(List<BathEntry> baths) {
   final map = <int, List<BathEntry>>{};
   for (final entry in baths) {
-    final tileHour = (entry.timestamp.hour ~/ 2) * 2;
+    final tileHour = entry.timestamp.hour;
     map.putIfAbsent(tileHour, () => []).add(entry);
   }
   return map;
@@ -1299,7 +1284,7 @@ Map<int, List<TemperatureEntry>> _groupTemperatures(
 ) {
   final map = <int, List<TemperatureEntry>>{};
   for (final entry in temperatures) {
-    final tileHour = (entry.timestamp.hour ~/ 2) * 2;
+    final tileHour = entry.timestamp.hour;
     map.putIfAbsent(tileHour, () => []).add(entry);
   }
   return map;
@@ -1310,7 +1295,7 @@ Map<int, List<MedicalAppointment>> _groupAppointments(
 ) {
   final map = <int, List<MedicalAppointment>>{};
   for (final entry in appointments) {
-    final tileHour = (entry.scheduledAt.hour ~/ 2) * 2;
+    final tileHour = entry.scheduledAt.hour;
     map.putIfAbsent(tileHour, () => []).add(entry);
   }
   return map;
@@ -1539,9 +1524,12 @@ class _DailyLogListState extends State<_DailyLogList>
             ),
           ),
           const SizedBox(width: 12),
-          _LogActionIcons(
+          _LogActionsMenu(
             editColor: widget.accentColor,
             deleteColor: theme.colorScheme.error,
+            editLabel: l10n.homeLogEditAction,
+            deleteLabel: l10n.homeLogDeleteAction,
+            tooltip: l10n.homeLogActionsTooltip,
           ),
         ],
       );
@@ -1883,49 +1871,67 @@ class _DailyLogEntry {
   final DateTime timestamp;
 }
 
-class _LogActionIcons extends StatelessWidget {
-  const _LogActionIcons({
+enum _LogActionMenuOption { edit, delete }
+
+class _LogActionsMenu extends StatelessWidget {
+  const _LogActionsMenu({
     required this.editColor,
     required this.deleteColor,
+    required this.editLabel,
+    required this.deleteLabel,
+    required this.tooltip,
   });
 
   final Color editColor;
   final Color deleteColor;
+  final String editLabel;
+  final String deleteLabel;
+  final String tooltip;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _CircularActionIcon(icon: LucideIcons.pencil, color: editColor),
-        const SizedBox(width: 8),
-        _CircularActionIcon(icon: LucideIcons.trash2, color: deleteColor),
+    return PopupMenuButton<_LogActionMenuOption>(
+      tooltip: tooltip,
+      offset: const Offset(0, 4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      onSelected: (_) {},
+      itemBuilder: (context) => [
+        PopupMenuItem<_LogActionMenuOption>(
+          value: _LogActionMenuOption.edit,
+          child: Row(
+            children: [
+              Icon(LucideIcons.pencil, size: 16, color: editColor),
+              const SizedBox(width: 12),
+              Text(editLabel),
+            ],
+          ),
+        ),
+        PopupMenuItem<_LogActionMenuOption>(
+          value: _LogActionMenuOption.delete,
+          child: Row(
+            children: [
+              Icon(LucideIcons.trash2, size: 16, color: deleteColor),
+              const SizedBox(width: 12),
+              Text(deleteLabel),
+            ],
+          ),
+        ),
       ],
-    );
-  }
-}
-
-class _CircularActionIcon extends StatelessWidget {
-  const _CircularActionIcon({
-    required this.icon,
-    required this.color,
-  });
-
-  final IconData icon;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        shape: BoxShape.circle,
-        border: Border.all(color: color.withValues(alpha: 0.4)),
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceVariant,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        ),
+        alignment: Alignment.center,
+        child: Icon(
+          LucideIcons.moreVertical,
+          size: 18,
+          color: Colors.white.withValues(alpha: 0.7),
+        ),
       ),
-      alignment: Alignment.center,
-      child: Icon(icon, size: 16, color: color),
     );
   }
 }

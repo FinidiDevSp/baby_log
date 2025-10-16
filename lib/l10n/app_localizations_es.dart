@@ -19,6 +19,15 @@ class AppLocalizationsEs extends AppLocalizations {
       'Aquí aparecerán las métricas y registros de tu bebé.';
 
   @override
+  String get homeLogActionsTooltip => 'Acciones del registro';
+
+  @override
+  String get homeLogEditAction => 'Modificar registro';
+
+  @override
+  String get homeLogDeleteAction => 'Eliminar registro';
+
+  @override
   String homeLoadError(Object error) {
     return 'No se pudo cargar la información del bebé.\n$error';
   }

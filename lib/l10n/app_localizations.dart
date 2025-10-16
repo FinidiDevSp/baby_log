@@ -116,6 +116,24 @@ abstract class AppLocalizations {
   /// **'Aquí aparecerán las métricas y registros de tu bebé.'**
   String get homeEmptyDescription;
 
+  /// No description provided for @homeLogActionsTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Acciones del registro'**
+  String get homeLogActionsTooltip;
+
+  /// No description provided for @homeLogEditAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Modificar registro'**
+  String get homeLogEditAction;
+
+  /// No description provided for @homeLogDeleteAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar registro'**
+  String get homeLogDeleteAction;
+
   /// Mensaje de error cuando la pantalla inicial no puede cargar los datos del bebé
   ///
   /// In es, this message translates to:

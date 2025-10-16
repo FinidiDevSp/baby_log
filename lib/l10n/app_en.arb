@@ -3,6 +3,9 @@
   "appTitle": "Baby Log",
   "homeEditBabyTooltip": "Edit baby",
   "homeEmptyDescription": "Your baby's metrics and logs will appear here.",
+  "homeLogActionsTooltip": "Manage entry",
+  "homeLogEditAction": "Edit entry",
+  "homeLogDeleteAction": "Delete entry",
   "homeLoadError": "We couldn't load the baby's information.\n{error}",
   "@homeLoadError": {
     "description": "Error message when the home screen cannot load baby data",
