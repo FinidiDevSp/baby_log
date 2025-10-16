@@ -3,6 +3,9 @@
   "appTitle": "Baby Log",
   "homeEditBabyTooltip": "Editar bebé",
   "homeEmptyDescription": "Aquí aparecerán las métricas y registros de tu bebé.",
+  "homeLogActionsTooltip": "Acciones del registro",
+  "homeLogEditAction": "Modificar registro",
+  "homeLogDeleteAction": "Eliminar registro",
   "homeLoadError": "No se pudo cargar la información del bebé.\n{error}",
   "@homeLoadError": {
     "description": "Mensaje de error cuando la pantalla inicial no puede cargar los datos del bebé",

@@ -19,6 +19,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your baby\'s metrics and logs will appear here.';
 
   @override
+  String get homeLogActionsTooltip => 'Manage entry';
+
+  @override
+  String get homeLogEditAction => 'Edit entry';
+
+  @override
+  String get homeLogDeleteAction => 'Delete entry';
+
+  @override
   String homeLoadError(Object error) {
     return 'We couldn\'t load the baby\'s information.\n$error';
   }
