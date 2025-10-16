@@ -256,27 +256,15 @@ class _StatsHeader extends StatelessWidget {
               }).toList(),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.statsWeekLabel(rangeText),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.statsWeekSubtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  l10n.statsWeekLabel(rangeText),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               Row(
@@ -295,69 +283,8 @@ class _StatsHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          _WeekdayStrip(accentColor: accentColor, weekStart: weekStart),
         ],
       ),
-    );
-  }
-}
-
-class _WeekdayStrip extends StatelessWidget {
-  const _WeekdayStrip({required this.accentColor, required this.weekStart});
-
-  final Color accentColor;
-  final DateTime weekStart;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final locale = l10n.localeName;
-    final today = DateTime.now();
-    final days =
-        List.generate(7, (index) => weekStart.add(Duration(days: index)));
-
-    return Row(
-      children: days.map((day) {
-        final isToday = _isSameDay(day, today);
-        final dayName = DateFormat('EEE', locale).format(day);
-        final displayName = dayName.substring(0, 1).toUpperCase() + dayName.substring(1);
-        return Expanded(
-          child: Column(
-            children: [
-              Text(
-                displayName,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w500,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 6),
-              Container(
-                height: 32,
-                width: 32,
-                decoration: BoxDecoration(
-                  color: isToday ? accentColor.withValues(alpha: 0.18) : AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isToday ? accentColor : AppColors.outline,
-                    width: 1.2,
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '${day.day}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
     );
   }
 }
@@ -724,23 +651,26 @@ class _StatsContentState extends State<_StatsContent> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
       children: [
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: metrics.map((metric) {
-            final isSelected = metric.id == selectedId;
-            return _MetricCard(
-              metric: metric,
-              isSelected: isSelected,
-              accentColor: widget.accentColor,
-              onTap: () {
-                widget.onMetricSelected(metric.id);
-                setState(() {
-                  _localSelection = metric.id;
-                });
-              },
-            );
-          }).toList(),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var i = 0; i < metrics.length; i++) ...[
+              Expanded(
+                child: _MetricCard(
+                  metric: metrics[i],
+                  isSelected: metrics[i].id == selectedId,
+                  accentColor: widget.accentColor,
+                  onTap: () {
+                    widget.onMetricSelected(metrics[i].id);
+                    setState(() {
+                      _localSelection = metrics[i].id;
+                    });
+                  },
+                ),
+              ),
+              if (i < metrics.length - 1) const SizedBox(width: 12),
+            ],
+          ],
         ),
         const SizedBox(height: 24),
         _MetricDetail(
@@ -769,74 +699,95 @@ class _MetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final borderColor =
-        isSelected ? accentColor : AppColors.surface.withValues(alpha: 0.2);
+        isSelected ? accentColor : AppColors.surface.withValues(alpha: 0.25);
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: 200,
-        padding: const EdgeInsets.all(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: borderColor,
-            width: 1.4,
+            width: isSelected ? 1.6 : 1,
           ),
+          boxShadow: [
+            if (isSelected)
+              BoxShadow(
+                color: accentColor.withValues(alpha: 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Icon(
-                  metric.icon,
-                  color: isSelected ? accentColor : Colors.white60,
+                Container(
+                  height: 32,
+                  width: 32,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? accentColor.withValues(alpha: 0.18)
+                        : AppColors.surface.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    metric.icon,
+                    color: isSelected ? accentColor : Colors.white70,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    metric.title,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
                 Icon(
-                  isSelected ? LucideIcons.circleCheck : LucideIcons.circle,
+                  isSelected ? LucideIcons.check : LucideIcons.plus,
                   size: 18,
-                  color: isSelected ? accentColor : Colors.white24,
+                  color: isSelected ? accentColor : Colors.white38,
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              metric.title,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: metric.summaries.map((summary) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
+            const SizedBox(height: 12),
+            ...metric.summaries.map((summary) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
                         summary.label,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: Colors.white54,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        summary.value,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      summary.value,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
+                    ),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
       ),
