@@ -65,10 +65,10 @@
       }
     }
   },
-  "dashboardBottleLabel": "Biber?n",
+  "dashboardBottleLabel": "Biberón",
   "dashboardDiaperLabel": "Caca",
-  "dashboardVomitLabel": "V?mito",
-  "dashboardBathLabel": "Ba?o",
+  "dashboardVomitLabel": "Vómito",
+  "dashboardBathLabel": "Baño",
   "dashboardTemperatureLabel": "Temperatura",
   "dashboardFoodLabel": "Comida",
   "dashboardMedicalAgendaLabel": "AGENDA",
@@ -157,10 +157,10 @@
       }
     }
   },
-  "dashboardEventsEmptyTitle": "No se encontr? informaci?n",
+  "dashboardEventsEmptyTitle": "No se encontró información",
   "dashboardNavHome": "Inicio",
-  "dashboardNavStats": "Estad?sticas",
-  "dashboardNavTimeline": "L?nea temporal",
+  "dashboardNavStats": "Estadísticas",
+  "dashboardNavTimeline": "Línea temporal",
   "dashboardNavDevelopment": "Desarrollo",
   "dashboardNavAccount": "Cuenta",
   "dashboardSearchTooltip": "Buscar",

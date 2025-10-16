@@ -347,7 +347,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardBottleLabel.
   ///
   /// In es, this message translates to:
-  /// **'Biber?n'**
+  /// **'Biberón'**
   String get dashboardBottleLabel;
 
   /// No description provided for @dashboardDiaperLabel.
@@ -359,13 +359,13 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardVomitLabel.
   ///
   /// In es, this message translates to:
-  /// **'V?mito'**
+  /// **'Vómito'**
   String get dashboardVomitLabel;
 
   /// No description provided for @dashboardBathLabel.
   ///
   /// In es, this message translates to:
-  /// **'Ba?o'**
+  /// **'Baño'**
   String get dashboardBathLabel;
 
   /// No description provided for @dashboardTemperatureLabel.
@@ -629,7 +629,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardEventsEmptyTitle.
   ///
   /// In es, this message translates to:
-  /// **'No se encontr? informaci?n'**
+  /// **'No se encontró información'**
   String get dashboardEventsEmptyTitle;
 
   /// No description provided for @dashboardNavHome.
@@ -641,13 +641,13 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardNavStats.
   ///
   /// In es, this message translates to:
-  /// **'Estad?sticas'**
+  /// **'Estadísticas'**
   String get dashboardNavStats;
 
   /// No description provided for @dashboardNavTimeline.
   ///
   /// In es, this message translates to:
-  /// **'L?nea temporal'**
+  /// **'Línea temporal'**
   String get dashboardNavTimeline;
 
   /// No description provided for @dashboardNavDevelopment.
