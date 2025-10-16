@@ -140,16 +140,16 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get dashboardBottleLabel => 'Biber?n';
+  String get dashboardBottleLabel => 'Biberón';
 
   @override
   String get dashboardDiaperLabel => 'Caca';
 
   @override
-  String get dashboardVomitLabel => 'V?mito';
+  String get dashboardVomitLabel => 'Vómito';
 
   @override
-  String get dashboardBathLabel => 'Ba?o';
+  String get dashboardBathLabel => 'Baño';
 
   @override
   String get dashboardTemperatureLabel => 'Temperatura';
@@ -321,16 +321,16 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get dashboardEventsEmptyTitle => 'No se encontr? informaci?n';
+  String get dashboardEventsEmptyTitle => 'No se encontró información';
 
   @override
   String get dashboardNavHome => 'Inicio';
 
   @override
-  String get dashboardNavStats => 'Estad?sticas';
+  String get dashboardNavStats => 'Estadísticas';
 
   @override
-  String get dashboardNavTimeline => 'L?nea temporal';
+  String get dashboardNavTimeline => 'Línea temporal';
 
   @override
   String get dashboardNavDevelopment => 'Desarrollo';
