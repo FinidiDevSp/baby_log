@@ -262,17 +262,23 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     if (appointments.isEmpty) {
       return null;
     }
-    final upcoming = appointments
-        .where((appointment) => !appointment.scheduledAt.isBefore(reference))
-        .toList()
-      ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+    final upcoming =
+        appointments
+            .where(
+              (appointment) => !appointment.scheduledAt.isBefore(reference),
+            )
+            .toList()
+          ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
     if (upcoming.isEmpty) {
       return null;
     }
     final next = upcoming.first;
     final today = DateTime(reference.year, reference.month, reference.day);
-    final nextDate =
-        DateTime(next.scheduledAt.year, next.scheduledAt.month, next.scheduledAt.day);
+    final nextDate = DateTime(
+      next.scheduledAt.year,
+      next.scheduledAt.month,
+      next.scheduledAt.day,
+    );
     final difference = nextDate.difference(today).inDays;
     if (difference <= 0) {
       return l10n.dashboardAgendaStatusToday;
@@ -339,7 +345,10 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       begin: Offset(horizontalOffset, 0),
       end: Offset.zero,
     ).animate(curvedAnimation);
-    final fadeAnimation = Tween<double>(begin: 0.7, end: 1.0).animate(curvedAnimation);
+    final fadeAnimation = Tween<double>(
+      begin: 0.7,
+      end: 1.0,
+    ).animate(curvedAnimation);
     return SlideTransition(
       position: slideAnimation,
       child: FadeTransition(opacity: fadeAnimation, child: child),
@@ -387,8 +396,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
         .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
         .toList();
     final selectedAppointments = appointments
-        .where((entry) =>
-            _isSameCalendarDay(entry.scheduledAt, _selectedDate))
+        .where((entry) => _isSameCalendarDay(entry.scheduledAt, _selectedDate))
         .toList();
 
     void openBottleForm() {
@@ -472,8 +480,11 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       temperatureStatus = _formatElapsedTime(l10n, latestTemperature.timestamp);
     }
 
-    final agendaStatus =
-        _resolveAgendaStatus(l10n, appointments, reference: DateTime.now());
+    final agendaStatus = _resolveAgendaStatus(
+      l10n,
+      appointments,
+      reference: DateTime.now(),
+    );
 
     final hasEntries =
         selectedFeedings.isNotEmpty ||
@@ -521,11 +532,11 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         children: [
           _ShortcutCarousel(
-              onBottleTap: openBottleForm,
-              onStoolTap: openStoolForm,
-              onVomitTap: openVomitForm,
-              onBathTap: openBathForm,
-              onTemperatureTap: openTemperatureForm,
+            onBottleTap: openBottleForm,
+            onStoolTap: openStoolForm,
+            onVomitTap: openVomitForm,
+            onBathTap: openBathForm,
+            onTemperatureTap: openTemperatureForm,
             onAgendaTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const MedicalAgendaPage()),
@@ -834,8 +845,7 @@ class _TimelineCard extends StatelessWidget {
     final timelineHeight =
         _timelineTileBaseHeight + (maxStackDepth - 1) * _timelineMarkerSpacing;
     final showCurrentIndicator = isToday;
-    final currentPositionRatio =
-        (now.hour * 60 + now.minute) / (24 * 60);
+    final currentPositionRatio = (now.hour * 60 + now.minute) / (24 * 60);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -947,17 +957,14 @@ class _TimelineCard extends StatelessWidget {
                                     isLast: i == tiles.length - 1,
                                     accentColor: accentColor,
                                   ),
-                                ),
-                            ],
-                          ),
-                          if (showCurrentIndicator)
-                            Positioned(
-                              left: indicatorLeft,
-                              top: 0,
-                              bottom: 0,
-                              child: Container(
-                                width: 2,
-                                color: accentColor,
+                              ],
+                            ),
+                            if (showCurrentIndicator)
+                              Positioned(
+                                left: indicatorLeft,
+                                top: 0,
+                                bottom: 0,
+                                child: Container(width: 2, color: accentColor),
                               ),
                             ),
                         ],
@@ -989,15 +996,13 @@ class _TimelineCard extends StatelessWidget {
     final markers = <_TimelineEventMarker>[];
 
     void addMarker(DateTime timestamp, IconData icon, Color color) {
-      final minutes = ((timestamp.hour - hour) * 60 + timestamp.minute)
-          .clamp(0, 59);
+      final minutes = ((timestamp.hour - hour) * 60 + timestamp.minute).clamp(
+        0,
+        59,
+      );
       final position = minutes / 60;
       markers.add(
-        _TimelineEventMarker(
-          icon: icon,
-          color: color,
-          position: position,
-        ),
+        _TimelineEventMarker(icon: icon, color: color, position: position),
       );
     }
 
@@ -1014,10 +1019,18 @@ class _TimelineCard extends StatelessWidget {
       addMarker(entry.timestamp, LucideIcons.bath, _bathAccentColor);
     }
     for (final entry in temperatures) {
-      addMarker(entry.timestamp, LucideIcons.thermometer, _temperatureAccentColor);
+      addMarker(
+        entry.timestamp,
+        LucideIcons.thermometer,
+        _temperatureAccentColor,
+      );
     }
     for (final entry in appointments) {
-      addMarker(entry.scheduledAt, LucideIcons.calendarCheck, _appointmentAccentColor);
+      addMarker(
+        entry.scheduledAt,
+        LucideIcons.calendarCheck,
+        _appointmentAccentColor,
+      );
     }
 
     markers.sort((a, b) => a.position.compareTo(b.position));
@@ -1141,7 +1154,8 @@ class _TimelineTile extends StatelessWidget {
               for (final placement in placements)
                 Positioned(
                   top:
-                      _timelineMarkerTop + placement.level * _timelineMarkerSpacing,
+                      _timelineMarkerTop +
+                      placement.level * _timelineMarkerSpacing,
                   left: horizontalPosition(placement.marker.position),
                   child: _TimelineMarker(
                     icon: placement.marker.icon,
@@ -1158,10 +1172,7 @@ class _TimelineTile extends StatelessWidget {
 }
 
 class _MarkerLayoutEntry {
-  const _MarkerLayoutEntry({
-    required this.marker,
-    required this.level,
-  });
+  const _MarkerLayoutEntry({required this.marker, required this.level});
 
   final _TimelineEventMarker marker;
   final int level;
@@ -1200,11 +1211,7 @@ class _TimelineMarker extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
-      child: Icon(
-        icon,
-        size: size * 0.55,
-        color: color,
-      ),
+      child: Icon(icon, size: size * 0.55, color: color),
     );
   }
 }
@@ -1222,7 +1229,9 @@ int _calculateStackDepth(List<_TimelineEventMarker> markers) {
   return grouped.values.fold<int>(1, math.max);
 }
 
-List<_MarkerLayoutEntry> _assignMarkerLevels(List<_TimelineEventMarker> markers) {
+List<_MarkerLayoutEntry> _assignMarkerLevels(
+  List<_TimelineEventMarker> markers,
+) {
   const precision = 1000;
   final counters = <int, int>{};
   final placements = <_MarkerLayoutEntry>[];
@@ -1616,8 +1625,9 @@ class _DailyLogListState extends State<_DailyLogList>
                                   const SizedBox(height: 4),
                                   Text(
                                     feeding.notes!,
-                                    style: theme.textTheme.bodySmall
-                                        ?.copyWith(color: Colors.white70),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.white70,
+                                    ),
                                   ),
                                 ],
                               ],
@@ -1647,8 +1657,9 @@ class _DailyLogListState extends State<_DailyLogList>
                                   const SizedBox(height: 4),
                                   Text(
                                     stool.notes!,
-                                    style: theme.textTheme.bodySmall
-                                        ?.copyWith(color: Colors.white70),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.white70,
+                                    ),
                                   ),
                                 ],
                               ],
@@ -1678,8 +1689,9 @@ class _DailyLogListState extends State<_DailyLogList>
                                   const SizedBox(height: 4),
                                   Text(
                                     vomit.notes!,
-                                    style: theme.textTheme.bodySmall
-                                        ?.copyWith(color: Colors.white70),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.white70,
+                                    ),
                                   ),
                                 ],
                               ],
@@ -1709,8 +1721,9 @@ class _DailyLogListState extends State<_DailyLogList>
                                   const SizedBox(height: 4),
                                   Text(
                                     bath.notes!,
-                                    style: theme.textTheme.bodySmall
-                                        ?.copyWith(color: Colors.white70),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.white70,
+                                    ),
                                   ),
                                 ],
                               ],
@@ -1738,16 +1751,19 @@ class _DailyLogListState extends State<_DailyLogList>
                                   const SizedBox(height: 4),
                                   Text(
                                     temperature.notes!,
-                                    style: theme.textTheme.bodySmall
-                                        ?.copyWith(color: Colors.white70),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.white70,
+                                    ),
                                   ),
                                 ],
                               ],
                             );
                           case _DailyLogType.appointment:
                             final appointment = entry.appointment!;
-                            final typeLabel =
-                                _appointmentTypeLabel(l10n, appointment.type);
+                            final typeLabel = _appointmentTypeLabel(
+                              l10n,
+                              appointment.type,
+                            );
                             final notes = appointment.notes ?? '';
                             return buildEntryRow(
                               icon: LucideIcons.calendarCheck,
@@ -1775,8 +1791,9 @@ class _DailyLogListState extends State<_DailyLogList>
                                   const SizedBox(height: 4),
                                   Text(
                                     notes,
-                                    style: theme.textTheme.bodySmall
-                                        ?.copyWith(color: Colors.white70),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.white70,
+                                    ),
                                   ),
                                 ],
                               ],
@@ -1923,7 +1940,7 @@ class _LogActionsMenu extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: Icon(
-          LucideIcons.moreVertical,
+          LucideIcons.flipHorizontal,
           size: 18,
           color: Colors.white.withValues(alpha: 0.7),
         ),

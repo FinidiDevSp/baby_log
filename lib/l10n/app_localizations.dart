@@ -587,7 +587,7 @@ abstract class AppLocalizations {
   /// Indicador de días restantes para la próxima cita médica
   ///
   /// In es, this message translates to:
-  /// **'En {count} días'**
+  /// **'{count, plural, =1 {En 1 día} other {En {count} días}}'**
   String dashboardAgendaStatusInDays(int count);
 
   /// Estado mostrado en el acceso directo de preguntas cuando hay pendientes
