@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -39,9 +40,9 @@ const _bathAccentColor = Color(0xFF2D81FF);
 const _vomitAccentColor = Color(0xFF1ABC9C);
 const _temperatureAccentColor = Color(0xFFFFA726);
 const _appointmentAccentColor = Color(0xFFAF52DE);
-const double _timelineTileBaseHeight = 88.0;
+const double _timelineTileBaseHeight = 80.0;
 const double _timelineMarkerSize = 18.0;
-const double _timelineMarkerTop = 32.0;
+const double _timelineMarkerTop = 38.0;
 const double _timelineMarkerSpacing = 28.0;
 
 /// Dashboard shown once a baby profile exists.
@@ -836,16 +837,12 @@ class _TimelineCard extends StatelessWidget {
     final currentPositionRatio =
         (now.hour * 60 + now.minute) / (24 * 60);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GestureDetector(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onHorizontalDragStart: (_) {},
             onHorizontalDragUpdate: (_) {},
@@ -853,48 +850,48 @@ class _TimelineCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Tooltip(
-                      message: l10n.dashboardChangeDayTooltip,
-                      child: TextButton(
-                        onPressed: onSelectDate,
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      backgroundColor: AppColors.surfaceVariant,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          LucideIcons.calendar,
-                          size: 18,
-                          color: Colors.white.withValues(alpha: 0.75),
+                    message: l10n.dashboardChangeDayTooltip,
+                    child: TextButton(
+                      onPressed: onSelectDate,
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
                         ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            headerText,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
+                        backgroundColor: AppColors.surfaceVariant,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            LucideIcons.calendar,
+                            size: 18,
+                            color: Colors.white.withValues(alpha: 0.75),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              headerText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          LucideIcons.chevronDown,
-                          size: 16,
-                          color: Colors.white.withValues(alpha: 0.6),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          Icon(
+                            LucideIcons.chevronDown,
+                            size: 16,
+                            color: Colors.white.withValues(alpha: 0.6),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
                 ),
                 const SizedBox(width: 8),
                 _TimelineActionButton(
@@ -911,86 +908,68 @@ class _TimelineCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 14),
-          ClipRRect(
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(4),
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-              ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final totalWidth = constraints.maxWidth;
-                  final tileWidth = totalWidth / tiles.length;
-                  final indicatorLeft = (totalWidth * currentPositionRatio)
-                      .clamp(0.0, math.max(totalWidth - 2, 0.0))
-                      .toDouble();
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final totalWidth = constraints.maxWidth;
+                    final tileWidth = totalWidth / tiles.length;
+                    final indicatorLeft = (totalWidth * currentPositionRatio)
+                        .clamp(0.0, math.max(totalWidth - 2, 0.0))
+                        .toDouble();
 
-                  return Column(
-                    children: [
-                      SizedBox(
-                        height: timelineHeight,
-                        child: Stack(
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                for (var i = 0; i < tiles.length; i++)
-                                  SizedBox(
-                                    width: tileWidth,
-                                    child: _TimelineTile(
-                                      data: tiles[i],
-                                      isLast: i == tiles.length - 1,
-                                      accentColor: accentColor,
-                                    ),
+                    return SizedBox(
+                      height: timelineHeight,
+                      child: Stack(
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (var i = 0; i < tiles.length; i++)
+                                SizedBox(
+                                  width: tileWidth,
+                                  child: _TimelineTile(
+                                    data: tiles[i],
+                                    isLast: i == tiles.length - 1,
+                                    accentColor: accentColor,
                                   ),
-                              ],
+                                ),
+                            ],
+                          ),
+                          if (showCurrentIndicator)
+                            Positioned(
+                              left: indicatorLeft,
+                              top: 0,
+                              bottom: 0,
+                              child: Container(
+                                width: 2,
+                                color: accentColor,
+                              ),
                             ),
-                            if (showCurrentIndicator)
-                              Positioned(
-                                left: indicatorLeft,
-                                top: 0,
-                                bottom: 0,
-                                child: Container(
-                                  width: 2,
-                                  color: accentColor,
-                                ),
-                              ),
-                          ],
-                        ),
+                        ],
                       ),
-                      Container(
-                        height: 1,
-                        color: Colors.white.withValues(alpha: 0.08),
-                      ),
-                      SizedBox(
-                        height: 32,
-                        child: Row(
-                          children: [
-                            for (var i = 0; i < tiles.length; i++)
-                              SizedBox(
-                                width: tileWidth,
-                                child: Center(
-                                  child: Text(
-                                    tiles[i].label,
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -1088,6 +1067,7 @@ class _TimelineTileData {
   final int stackDepth;
 
   String get label => hour.toString().padLeft(2, '0');
+  bool get hasLabel => hour.isEven;
 }
 
 class _TimelineTile extends StatelessWidget {
@@ -1103,6 +1083,7 @@ class _TimelineTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         double horizontalPosition(double position) {
@@ -1115,6 +1096,7 @@ class _TimelineTile extends StatelessWidget {
         }
 
         final placements = _assignMarkerLevels(data.markers);
+        final iconTop = data.hasLabel ? 26.0 : 10.0;
 
         return Container(
           decoration: BoxDecoration(
@@ -1131,9 +1113,23 @@ class _TimelineTile extends StatelessWidget {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              if (data.icon != null)
+              if (data.hasLabel)
                 Positioned(
                   top: 6,
+                  left: 0,
+                  right: 0,
+                  child: Text(
+                    data.label,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: Colors.white70,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+              if (data.icon != null)
+                Positioned(
+                  top: iconTop,
                   left: 0,
                   right: 0,
                   child: Icon(
