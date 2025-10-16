@@ -40,10 +40,10 @@ const _bathAccentColor = Color(0xFF2D81FF);
 const _vomitAccentColor = Color(0xFF1ABC9C);
 const _temperatureAccentColor = Color(0xFFFFA726);
 const _appointmentAccentColor = Color(0xFFAF52DE);
-const double _timelineTileBaseHeight = 80.0;
+const double _timelineTileBaseHeight = 70.0;
 const double _timelineMarkerSize = 18.0;
 const double _timelineMarkerTop = 38.0;
-const double _timelineMarkerSpacing = 28.0;
+const double _timelineMarkerSpacing = 20.0;
 
 /// Dashboard shown once a baby profile exists.
 class BabyDashboardPage extends ConsumerStatefulWidget {
@@ -709,7 +709,7 @@ class _ShortcutButton extends StatelessWidget {
             child: _ShortcutCircle(data: data),
           ),
         ),
-        const SizedBox(height: 3),
+        const SizedBox(height: 2),
         SizedBox(
           width: 75,
           child: Column(
@@ -926,13 +926,15 @@ class _TimelineCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: Container(
                 decoration: BoxDecoration(
                   color: AppColors.surfaceVariant,
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.05),
+                  ),
                 ),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
@@ -957,8 +959,9 @@ class _TimelineCard extends StatelessWidget {
                                     isLast: i == tiles.length - 1,
                                     accentColor: accentColor,
                                   ),
-                              ],
-                            ),
+                                ),
+                            ],
+                          ),
                           if (showCurrentIndicator)
                             Positioned(
                               left: indicatorLeft,
