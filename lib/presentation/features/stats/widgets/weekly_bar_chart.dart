@@ -185,7 +185,7 @@ class _WeeklyBarChartPainter extends CustomPainter {
         );
         final painter = TextPainter(
           text: textSpan,
-          textDirection: TextDirection.ltr,
+          textDirection: ui.TextDirection.ltr,
         )
           ..layout(maxWidth: step);
         final labelOffset = Offset(
@@ -204,7 +204,7 @@ class _WeeklyBarChartPainter extends CustomPainter {
         );
         final painter = TextPainter(
           text: textSpan,
-          textDirection: TextDirection.ltr,
+          textDirection: ui.TextDirection.ltr,
         )
           ..layout();
         painter.paint(
@@ -255,7 +255,7 @@ class _WeeklyBarChartPainter extends CustomPainter {
           ),
         ),
         textAlign: TextAlign.center,
-        textDirection: TextDirection.ltr,
+        textDirection: ui.TextDirection.ltr,
       )
         ..layout(maxWidth: step);
       final xCenter = _horizontalPadding + (step * index) + (step / 2);
