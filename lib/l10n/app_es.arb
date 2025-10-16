@@ -349,5 +349,33 @@
   "questionsSatisfactionCancel": "Cancelar",
   "@questionsSatisfactionCancel": {
     "description": "Botón para cerrar el diálogo sin guardar"
+  },
+  "accountSettingsTitle": "Mi cuenta",
+  "@accountSettingsTitle": {
+    "description": "Título general de la sección de cuenta"
+  },
+  "accountSettingsSubtitle": "Gestiona tus preferencias personales.",
+  "@accountSettingsSubtitle": {
+    "description": "Descripción breve para la sección de cuenta"
+  },
+  "accountLanguageTitle": "Idioma de la aplicación",
+  "@accountLanguageTitle": {
+    "description": "Título del bloque para cambiar de idioma"
+  },
+  "accountLanguageSubtitle": "Elige el idioma que prefieres para BabyLog.",
+  "@accountLanguageSubtitle": {
+    "description": "Descripción del bloque para cambiar de idioma"
+  },
+  "accountLanguageOptionSpanish": "Español",
+  "@accountLanguageOptionSpanish": {
+    "description": "Opción para idioma español"
+  },
+  "accountLanguageOptionEnglish": "Inglés",
+  "@accountLanguageOptionEnglish": {
+    "description": "Opción para idioma inglés"
+  },
+  "accountLanguageApplyHint": "El cambio se aplica al instante y se recuerda para futuras sesiones.",
+  "@accountLanguageApplyHint": {
+    "description": "Nota informativa sobre la persistencia del idioma"
   }
 }

@@ -680,4 +680,28 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get questionsSatisfactionCancel => 'Cancelar';
+
+  @override
+  String get accountSettingsTitle => 'Mi cuenta';
+
+  @override
+  String get accountSettingsSubtitle =>
+      'Gestiona tus preferencias personales.';
+
+  @override
+  String get accountLanguageTitle => 'Idioma de la aplicación';
+
+  @override
+  String get accountLanguageSubtitle =>
+      'Elige el idioma que prefieres para BabyLog.';
+
+  @override
+  String get accountLanguageOptionSpanish => 'Español';
+
+  @override
+  String get accountLanguageOptionEnglish => 'Inglés';
+
+  @override
+  String get accountLanguageApplyHint =>
+      'El cambio se aplica al instante y se recuerda para futuras sesiones.';
 }

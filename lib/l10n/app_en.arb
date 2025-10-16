@@ -349,5 +349,33 @@
   "questionsSatisfactionCancel": "Cancel",
   "@questionsSatisfactionCancel": {
     "description": "Button to close the satisfaction dialog without saving"
+  },
+  "accountSettingsTitle": "My account",
+  "@accountSettingsTitle": {
+    "description": "Section title for the account preferences"
+  },
+  "accountSettingsSubtitle": "Manage your personal preferences.",
+  "@accountSettingsSubtitle": {
+    "description": "Short description for the account preferences section"
+  },
+  "accountLanguageTitle": "App language",
+  "@accountLanguageTitle": {
+    "description": "Title of the block that allows changing the language"
+  },
+  "accountLanguageSubtitle": "Choose the language you prefer for BabyLog.",
+  "@accountLanguageSubtitle": {
+    "description": "Subtitle explaining the language switcher"
+  },
+  "accountLanguageOptionSpanish": "Spanish",
+  "@accountLanguageOptionSpanish": {
+    "description": "Option label for Spanish language"
+  },
+  "accountLanguageOptionEnglish": "English",
+  "@accountLanguageOptionEnglish": {
+    "description": "Option label for English language"
+  },
+  "accountLanguageApplyHint": "Changes apply immediately and are remembered for next time.",
+  "@accountLanguageApplyHint": {
+    "description": "Hint describing how the language preference persists"
   }
 }

@@ -19,6 +19,7 @@ import 'package:baby_log/domain/entities/pediatrician_question.dart';
 import 'package:baby_log/l10n/app_localizations.dart';
 import 'package:baby_log/presentation/features/baby_form/baby_form_page.dart';
 import 'package:baby_log/presentation/features/agenda/medical_agenda_page.dart';
+import 'package:baby_log/presentation/features/account/account_settings_view.dart';
 import 'package:baby_log/presentation/features/questions/pediatrician_questions_page.dart';
 import 'package:baby_log/presentation/widgets/baby_avatar.dart';
 
@@ -91,10 +92,7 @@ class _BabyDashboardPageState extends ConsumerState<BabyDashboardPage> {
         icon: LucideIcons.ruler,
         labelKey: 'dashboardNavDevelopment',
       ),
-      const _PlaceholderView(
-        icon: LucideIcons.userRound,
-        labelKey: 'dashboardNavAccount',
-      ),
+      AccountSettingsView(accentColor: accentColor),
     ];
 
     final destinations = [
