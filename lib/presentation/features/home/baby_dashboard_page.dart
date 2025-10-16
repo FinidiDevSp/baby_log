@@ -45,6 +45,10 @@ const double _timelineMarkerSize = 18.0;
 const double _timelineMarkerTop = 38.0;
 const double _timelineMarkerSpacing = 20.0;
 
+bool _isSameDay(DateTime a, DateTime b) {
+  return a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
 /// Dashboard shown once a baby profile exists.
 class BabyDashboardPage extends ConsumerStatefulWidget {
   const BabyDashboardPage({super.key, required this.baby});
@@ -903,10 +907,6 @@ class _TimelineCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   List<_TimelineEventMarker> _buildMarkersForHour({
