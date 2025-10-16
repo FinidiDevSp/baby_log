@@ -32,6 +32,7 @@ import '../agenda/state/medical_appointments_controller.dart';
 import '../baths/bath_log_page.dart';
 import '../diapers/stool_log_page.dart';
 import '../feedings/bottle_feeding_page.dart';
+import '../stats/baby_stats_page.dart';
 import '../questions/state/pediatrician_questions_provider.dart';
 import '../temperatures/temperature_log_page.dart';
 import '../vomits/vomit_log_page.dart';
@@ -80,10 +81,7 @@ class _BabyDashboardPageState extends ConsumerState<BabyDashboardPage> {
 
     final pages = <Widget>[
       _BabyHomeView(accentColor: accentColor),
-      const _PlaceholderView(
-        icon: LucideIcons.chartBar,
-        labelKey: 'dashboardNavStats',
-      ),
+      BabyStatsPage(accentColor: accentColor),
       const _PlaceholderView(
         icon: LucideIcons.history,
         labelKey: 'dashboardNavTimeline',

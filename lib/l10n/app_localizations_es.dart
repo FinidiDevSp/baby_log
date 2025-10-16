@@ -704,4 +704,75 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get accountLanguageApplyHint =>
       'El cambio se aplica al instante y se recuerda para futuras sesiones.';
+
+  @override
+  String get statsCategoryFeeding => 'Biberón';
+
+  @override
+  String get statsCategoryDiapers => 'Pañal';
+
+  @override
+  String statsWeekLabel(String range) {
+    return range;
+  }
+
+  @override
+  String get statsWeekSubtitle => 'Datos de lunes a domingo';
+
+  @override
+  String get statsWeekPreviousTooltip => 'Semana anterior';
+
+  @override
+  String get statsWeekNextTooltip => 'Semana siguiente';
+
+  @override
+  String get statsMetricTotalLabel => 'Total';
+
+  @override
+  String get statsMetricDailyAverageLabel => 'Día';
+
+  @override
+  String get statsMetricDominantLabel => 'Predomina';
+
+  @override
+  String get statsMetricEmptyValue => '—';
+
+  @override
+  String get statsFeedingCountTitle => 'Número de tomas';
+
+  @override
+  String get statsFeedingVolumeTitle => 'Volumen diario';
+
+  @override
+  String get statsDiaperCountTitle => 'Cambios de pañal';
+
+  @override
+  String get statsDiaperConsistencyTitle => 'Consistencia promedio';
+
+  @override
+  String get statsConsistencyLiquid => 'Líquida';
+
+  @override
+  String get statsConsistencySoft => 'Blanda';
+
+  @override
+  String get statsConsistencyFirm => 'Firme';
+
+  @override
+  String get statsChartYAxisTimes => 'Veces';
+
+  @override
+  String get statsChartYAxisVolume => 'Mililitros';
+
+  @override
+  String get statsChartYAxisConsistency => 'Consistencia';
+
+  @override
+  String get statsChartLegendSelected => 'Período seleccionado';
+
+  @override
+  String get statsChartLegendTrend => 'Línea de tendencia';
+
+  @override
+  String get statsEmptyState => 'Aún no hay registros en esta semana.';
 }

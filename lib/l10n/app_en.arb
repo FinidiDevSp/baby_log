@@ -377,5 +377,102 @@
   "accountLanguageApplyHint": "Changes apply immediately and are remembered for next time.",
   "@accountLanguageApplyHint": {
     "description": "Hint describing how the language preference persists"
+  },
+  "statsCategoryFeeding": "Bottle",
+  "@statsCategoryFeeding": {
+    "description": "Label for the bottle statistics category"
+  },
+  "statsCategoryDiapers": "Diaper",
+  "@statsCategoryDiapers": {
+    "description": "Label for the diaper statistics category"
+  },
+  "statsWeekLabel": "{range}",
+  "@statsWeekLabel": {
+    "description": "Displays the selected weekly range",
+    "placeholders": {
+      "range": {
+        "example": "Oct 10 - Oct 16"
+      }
+    }
+  },
+  "statsWeekSubtitle": "Data from Monday to Sunday",
+  "@statsWeekSubtitle": {
+    "description": "Helper text below the week range"
+  },
+  "statsWeekPreviousTooltip": "Previous week",
+  "@statsWeekPreviousTooltip": {
+    "description": "Tooltip for navigating to the previous week"
+  },
+  "statsWeekNextTooltip": "Next week",
+  "@statsWeekNextTooltip": {
+    "description": "Tooltip for navigating to the next week"
+  },
+  "statsMetricTotalLabel": "Total",
+  "@statsMetricTotalLabel": {
+    "description": "Label for total summary"
+  },
+  "statsMetricDailyAverageLabel": "Day",
+  "@statsMetricDailyAverageLabel": {
+    "description": "Label for daily average"
+  },
+  "statsMetricDominantLabel": "Dominant",
+  "@statsMetricDominantLabel": {
+    "description": "Label describing the dominant value"
+  },
+  "statsMetricEmptyValue": "—",
+  "@statsMetricEmptyValue": {
+    "description": "Placeholder when no data is available"
+  },
+  "statsFeedingCountTitle": "Feeding count",
+  "@statsFeedingCountTitle": {
+    "description": "Title for the feeding count metric"
+  },
+  "statsFeedingVolumeTitle": "Daily volume",
+  "@statsFeedingVolumeTitle": {
+    "description": "Title for the feeding volume metric"
+  },
+  "statsDiaperCountTitle": "Diaper changes",
+  "@statsDiaperCountTitle": {
+    "description": "Title for the diaper changes metric"
+  },
+  "statsDiaperConsistencyTitle": "Average consistency",
+  "@statsDiaperConsistencyTitle": {
+    "description": "Title for the stool consistency metric"
+  },
+  "statsConsistencyLiquid": "Liquid",
+  "@statsConsistencyLiquid": {
+    "description": "Label for liquid stools"
+  },
+  "statsConsistencySoft": "Soft",
+  "@statsConsistencySoft": {
+    "description": "Label for soft stools"
+  },
+  "statsConsistencyFirm": "Firm",
+  "@statsConsistencyFirm": {
+    "description": "Label for firm stools"
+  },
+  "statsChartYAxisTimes": "Times",
+  "@statsChartYAxisTimes": {
+    "description": "Y axis label for counts"
+  },
+  "statsChartYAxisVolume": "Milliliters",
+  "@statsChartYAxisVolume": {
+    "description": "Y axis label for volume"
+  },
+  "statsChartYAxisConsistency": "Consistency",
+  "@statsChartYAxisConsistency": {
+    "description": "Y axis label for consistency"
+  },
+  "statsChartLegendSelected": "Selected period",
+  "@statsChartLegendSelected": {
+    "description": "Legend label for the bars"
+  },
+  "statsChartLegendTrend": "Trend line",
+  "@statsChartLegendTrend": {
+    "description": "Legend label for the trend line"
+  },
+  "statsEmptyState": "No records for this week yet.",
+  "@statsEmptyState": {
+    "description": "Message displayed when the week has no entries"
   }
 }

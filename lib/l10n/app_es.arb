@@ -377,5 +377,102 @@
   "accountLanguageApplyHint": "El cambio se aplica al instante y se recuerda para futuras sesiones.",
   "@accountLanguageApplyHint": {
     "description": "Nota informativa sobre la persistencia del idioma"
+  },
+  "statsCategoryFeeding": "Biberón",
+  "@statsCategoryFeeding": {
+    "description": "Etiqueta para la categoría de estadísticas de biberón"
+  },
+  "statsCategoryDiapers": "Pañal",
+  "@statsCategoryDiapers": {
+    "description": "Etiqueta para la categoría de estadísticas de pañales"
+  },
+  "statsWeekLabel": "{range}",
+  "@statsWeekLabel": {
+    "description": "Etiqueta que muestra el rango semanal",
+    "placeholders": {
+      "range": {
+        "example": "10 oct - 16 oct"
+      }
+    }
+  },
+  "statsWeekSubtitle": "Datos de lunes a domingo",
+  "@statsWeekSubtitle": {
+    "description": "Texto explicativo bajo el rango semanal"
+  },
+  "statsWeekPreviousTooltip": "Semana anterior",
+  "@statsWeekPreviousTooltip": {
+    "description": "Tooltip del botón para ir a la semana anterior"
+  },
+  "statsWeekNextTooltip": "Semana siguiente",
+  "@statsWeekNextTooltip": {
+    "description": "Tooltip del botón para ir a la semana siguiente"
+  },
+  "statsMetricTotalLabel": "Total",
+  "@statsMetricTotalLabel": {
+    "description": "Etiqueta para indicar el total semanal"
+  },
+  "statsMetricDailyAverageLabel": "Día",
+  "@statsMetricDailyAverageLabel": {
+    "description": "Etiqueta para el promedio diario"
+  },
+  "statsMetricDominantLabel": "Predomina",
+  "@statsMetricDominantLabel": {
+    "description": "Etiqueta que indica el valor predominante"
+  },
+  "statsMetricEmptyValue": "—",
+  "@statsMetricEmptyValue": {
+    "description": "Texto que se muestra cuando no hay datos"
+  },
+  "statsFeedingCountTitle": "Número de tomas",
+  "@statsFeedingCountTitle": {
+    "description": "Título de la métrica de conteo de tomas de biberón"
+  },
+  "statsFeedingVolumeTitle": "Volumen diario",
+  "@statsFeedingVolumeTitle": {
+    "description": "Título de la métrica de volumen de biberón"
+  },
+  "statsDiaperCountTitle": "Cambios de pañal",
+  "@statsDiaperCountTitle": {
+    "description": "Título de la métrica de conteo de pañales"
+  },
+  "statsDiaperConsistencyTitle": "Consistencia promedio",
+  "@statsDiaperConsistencyTitle": {
+    "description": "Título de la métrica de consistencia promedio"
+  },
+  "statsConsistencyLiquid": "Líquida",
+  "@statsConsistencyLiquid": {
+    "description": "Etiqueta para caca líquida"
+  },
+  "statsConsistencySoft": "Blanda",
+  "@statsConsistencySoft": {
+    "description": "Etiqueta para caca blanda"
+  },
+  "statsConsistencyFirm": "Firme",
+  "@statsConsistencyFirm": {
+    "description": "Etiqueta para caca firme"
+  },
+  "statsChartYAxisTimes": "Veces",
+  "@statsChartYAxisTimes": {
+    "description": "Etiqueta del eje Y para número de veces"
+  },
+  "statsChartYAxisVolume": "Mililitros",
+  "@statsChartYAxisVolume": {
+    "description": "Etiqueta del eje Y para volumen"
+  },
+  "statsChartYAxisConsistency": "Consistencia",
+  "@statsChartYAxisConsistency": {
+    "description": "Etiqueta del eje Y para consistencia"
+  },
+  "statsChartLegendSelected": "Período seleccionado",
+  "@statsChartLegendSelected": {
+    "description": "Texto de la leyenda para las barras"
+  },
+  "statsChartLegendTrend": "Línea de tendencia",
+  "@statsChartLegendTrend": {
+    "description": "Texto de la leyenda para la línea de tendencia"
+  },
+  "statsEmptyState": "Aún no hay registros en esta semana.",
+  "@statsEmptyState": {
+    "description": "Mensaje cuando no existen datos en la semana seleccionada"
   }
 }
