@@ -959,13 +959,12 @@ class _TimelineCard extends StatelessWidget {
                                   ),
                               ],
                             ),
-                            if (showCurrentIndicator)
-                              Positioned(
-                                left: indicatorLeft,
-                                top: 0,
-                                bottom: 0,
-                                child: Container(width: 2, color: accentColor),
-                              ),
+                          if (showCurrentIndicator)
+                            Positioned(
+                              left: indicatorLeft,
+                              top: 0,
+                              bottom: 0,
+                              child: Container(width: 2, color: accentColor),
                             ),
                         ],
                       ),
