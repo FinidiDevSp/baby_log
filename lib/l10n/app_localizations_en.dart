@@ -701,4 +701,75 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get accountLanguageApplyHint =>
       'Changes apply immediately and are remembered for next time.';
+
+  @override
+  String get statsCategoryFeeding => 'Bottle';
+
+  @override
+  String get statsCategoryDiapers => 'Diaper';
+
+  @override
+  String statsWeekLabel(String range) {
+    return range;
+  }
+
+  @override
+  String get statsWeekSubtitle => 'Data from Monday to Sunday';
+
+  @override
+  String get statsWeekPreviousTooltip => 'Previous week';
+
+  @override
+  String get statsWeekNextTooltip => 'Next week';
+
+  @override
+  String get statsMetricTotalLabel => 'Total';
+
+  @override
+  String get statsMetricDailyAverageLabel => 'Day';
+
+  @override
+  String get statsMetricDominantLabel => 'Dominant';
+
+  @override
+  String get statsMetricEmptyValue => '—';
+
+  @override
+  String get statsFeedingCountTitle => 'Feeding count';
+
+  @override
+  String get statsFeedingVolumeTitle => 'Daily volume';
+
+  @override
+  String get statsDiaperCountTitle => 'Diaper changes';
+
+  @override
+  String get statsDiaperConsistencyTitle => 'Average consistency';
+
+  @override
+  String get statsConsistencyLiquid => 'Liquid';
+
+  @override
+  String get statsConsistencySoft => 'Soft';
+
+  @override
+  String get statsConsistencyFirm => 'Firm';
+
+  @override
+  String get statsChartYAxisTimes => 'Times';
+
+  @override
+  String get statsChartYAxisVolume => 'Milliliters';
+
+  @override
+  String get statsChartYAxisConsistency => 'Consistency';
+
+  @override
+  String get statsChartLegendSelected => 'Selected period';
+
+  @override
+  String get statsChartLegendTrend => 'Trend line';
+
+  @override
+  String get statsEmptyState => 'No records for this week yet.';
 }

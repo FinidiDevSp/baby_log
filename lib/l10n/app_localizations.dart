@@ -1297,6 +1297,144 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'El cambio se aplica al instante y se recuerda para futuras sesiones.'**
   String get accountLanguageApplyHint;
+
+  /// Etiqueta para la categoría de estadísticas de biberón
+  ///
+  /// In es, this message translates to:
+  /// **'Biberón'**
+  String get statsCategoryFeeding;
+
+  /// Etiqueta para la categoría de estadísticas de pañales
+  ///
+  /// In es, this message translates to:
+  /// **'Pañal'**
+  String get statsCategoryDiapers;
+
+  /// Etiqueta que muestra el rango semanal
+  ///
+  /// In es, this message translates to:
+  /// **'{range}'**
+  String statsWeekLabel(String range);
+
+  /// Texto explicativo bajo el rango semanal
+  ///
+  /// In es, this message translates to:
+  /// **'Datos de lunes a domingo'**
+  String get statsWeekSubtitle;
+
+  /// Tooltip del botón para ir a la semana anterior
+  ///
+  /// In es, this message translates to:
+  /// **'Semana anterior'**
+  String get statsWeekPreviousTooltip;
+
+  /// Tooltip del botón para ir a la semana siguiente
+  ///
+  /// In es, this message translates to:
+  /// **'Semana siguiente'**
+  String get statsWeekNextTooltip;
+
+  /// Etiqueta para indicar el total semanal
+  ///
+  /// In es, this message translates to:
+  /// **'Total'**
+  String get statsMetricTotalLabel;
+
+  /// Etiqueta para el promedio diario
+  ///
+  /// In es, this message translates to:
+  /// **'Día'**
+  String get statsMetricDailyAverageLabel;
+
+  /// Etiqueta que indica el valor predominante
+  ///
+  /// In es, this message translates to:
+  /// **'Predomina'**
+  String get statsMetricDominantLabel;
+
+  /// Texto que se muestra cuando no hay datos
+  ///
+  /// In es, this message translates to:
+  /// **'—'**
+  String get statsMetricEmptyValue;
+
+  /// Título de la métrica de conteo de tomas de biberón
+  ///
+  /// In es, this message translates to:
+  /// **'Número de tomas'**
+  String get statsFeedingCountTitle;
+
+  /// Título de la métrica de volumen de biberón
+  ///
+  /// In es, this message translates to:
+  /// **'Volumen diario'**
+  String get statsFeedingVolumeTitle;
+
+  /// Título de la métrica de conteo de pañales
+  ///
+  /// In es, this message translates to:
+  /// **'Cambios de pañal'**
+  String get statsDiaperCountTitle;
+
+  /// Título de la métrica de consistencia promedio
+  ///
+  /// In es, this message translates to:
+  /// **'Consistencia promedio'**
+  String get statsDiaperConsistencyTitle;
+
+  /// Etiqueta para caca líquida
+  ///
+  /// In es, this message translates to:
+  /// **'Líquida'**
+  String get statsConsistencyLiquid;
+
+  /// Etiqueta para caca blanda
+  ///
+  /// In es, this message translates to:
+  /// **'Blanda'**
+  String get statsConsistencySoft;
+
+  /// Etiqueta para caca firme
+  ///
+  /// In es, this message translates to:
+  /// **'Firme'**
+  String get statsConsistencyFirm;
+
+  /// Etiqueta del eje Y para número de veces
+  ///
+  /// In es, this message translates to:
+  /// **'Veces'**
+  String get statsChartYAxisTimes;
+
+  /// Etiqueta del eje Y para volumen
+  ///
+  /// In es, this message translates to:
+  /// **'Mililitros'**
+  String get statsChartYAxisVolume;
+
+  /// Etiqueta del eje Y para consistencia
+  ///
+  /// In es, this message translates to:
+  /// **'Consistencia'**
+  String get statsChartYAxisConsistency;
+
+  /// Texto de la leyenda para las barras
+  ///
+  /// In es, this message translates to:
+  /// **'Período seleccionado'**
+  String get statsChartLegendSelected;
+
+  /// Texto de la leyenda para la línea de tendencia
+  ///
+  /// In es, this message translates to:
+  /// **'Línea de tendencia'**
+  String get statsChartLegendTrend;
+
+  /// Mensaje cuando no existen datos en la semana seleccionada
+  ///
+  /// In es, this message translates to:
+  /// **'Aún no hay registros en esta semana.'**
+  String get statsEmptyState;
 }
 
 class _AppLocalizationsDelegate
