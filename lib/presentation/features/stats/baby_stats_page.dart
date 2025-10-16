@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -578,7 +579,7 @@ class _CategoryContent extends ConsumerWidget {
       WeeklyMetric(
         id: 'diapers_consistency',
         title: l10n.statsDiaperConsistencyTitle,
-        icon: LucideIcons.gaugeCircle,
+        icon: LucideIcons.gauge,
         unitSuffix: '',
         points: consistencyValues,
         summaries: [
@@ -795,7 +796,7 @@ class _MetricCard extends StatelessWidget {
                   color: isSelected ? accentColor : Colors.white60,
                 ),
                 Icon(
-                  isSelected ? LucideIcons.checkCircle : LucideIcons.circle,
+                  isSelected ? LucideIcons.circleCheck : LucideIcons.circle,
                   size: 18,
                   color: isSelected ? accentColor : Colors.white24,
                 ),
