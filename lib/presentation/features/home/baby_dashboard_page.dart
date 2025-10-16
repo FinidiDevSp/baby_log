@@ -507,9 +507,6 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
           baths: selectedBaths,
           temperatures: selectedTemperatures,
           selectedDate: _selectedDate,
-          onSelectDate: _openDayPicker,
-          onImport: () {},
-          onExport: () {},
         ),
         const SizedBox(height: 16),
         if (!hasEntries)
@@ -551,7 +548,14 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
             agendaStatus: agendaStatus,
             questionsStatus: questionsStatus,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+          _TimelineHeader(
+            selectedDate: _selectedDate,
+            onSelectDate: _openDayPicker,
+            onImport: () {},
+            onExport: () {},
+          ),
+          const SizedBox(height: 12),
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onHorizontalDragStart: _handleDayDragStart,
@@ -564,6 +568,15 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
               switchOutCurve: Curves.easeInCubic,
               transitionBuilder: (child, animation) =>
                   _buildDayTransition(child, animation, daySectionKey),
+              layoutBuilder: (currentChild, previousChildren) {
+                return Stack(
+                  alignment: Alignment.topLeft,
+                  children: <Widget>[
+                    for (final child in previousChildren) child,
+                    if (currentChild != null) currentChild,
+                  ],
+                );
+              },
               child: dayContent,
             ),
           ),
@@ -776,9 +789,6 @@ class _TimelineCard extends StatelessWidget {
     this.appointments = const <MedicalAppointment>[],
     required this.accentColor,
     required this.selectedDate,
-    required this.onSelectDate,
-    this.onImport,
-    this.onExport,
   });
 
   final List<FeedingEntry> feedings;
@@ -789,21 +799,10 @@ class _TimelineCard extends StatelessWidget {
   final List<MedicalAppointment> appointments;
   final Color accentColor;
   final DateTime selectedDate;
-  final VoidCallback onSelectDate;
-  final VoidCallback? onImport;
-  final VoidCallback? onExport;
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-    final localeName = l10n.localeName;
     final now = DateTime.now();
     final isToday = _isSameDay(now, selectedDate);
-    final dateLabel = DateFormat('EEE, d MMM', localeName).format(selectedDate);
-    final headerText = isToday
-        ? '${l10n.dashboardTodayLabel}, $dateLabel'
-        : dateLabel;
     final feedingsByHour = _groupFeedings(feedings);
     final stoolsByHour = _groupStools(stools);
     final vomitsByHour = _groupVomits(vomits);
@@ -847,138 +846,62 @@ class _TimelineCard extends StatelessWidget {
     final showCurrentIndicator = isToday;
     final currentPositionRatio = (now.hour * 60 + now.minute) / (24 * 60);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onHorizontalDragStart: (_) {},
-            onHorizontalDragUpdate: (_) {},
-            child: Row(
-              children: [
-                Expanded(
-                  child: Tooltip(
-                    message: l10n.dashboardChangeDayTooltip,
-                    child: TextButton(
-                      onPressed: onSelectDate,
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        backgroundColor: AppColors.surfaceVariant,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            LucideIcons.calendar,
-                            size: 18,
-                            color: Colors.white.withValues(alpha: 0.75),
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              headerText,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            LucideIcons.chevronDown,
-                            size: 16,
-                            color: Colors.white.withValues(alpha: 0.6),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                _TimelineActionButton(
-                  icon: LucideIcons.import,
-                  tooltip: l10n.dashboardImportTooltip,
-                  onPressed: onImport,
-                ),
-                const SizedBox(width: 4),
-                _TimelineActionButton(
-                  icon: LucideIcons.upload,
-                  tooltip: l10n.dashboardExportTooltip,
-                  onPressed: onExport,
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.05),
-                  ),
-                ),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final totalWidth = constraints.maxWidth;
-                    final tileWidth = totalWidth / tiles.length;
-                    final indicatorLeft = (totalWidth * currentPositionRatio)
-                        .clamp(0.0, math.max(totalWidth - 2, 0.0))
-                        .toDouble();
-
-                    return SizedBox(
-                      height: timelineHeight,
-                      child: Stack(
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              for (var i = 0; i < tiles.length; i++)
-                                SizedBox(
-                                  width: tileWidth,
-                                  child: _TimelineTile(
-                                    data: tiles[i],
-                                    isLast: i == tiles.length - 1,
-                                    accentColor: accentColor,
-                                  ),
-                                ),
-                            ],
-                          ),
-                          if (showCurrentIndicator)
-                            Positioned(
-                              left: indicatorLeft,
-                              top: 0,
-                              bottom: 0,
-                              child: Container(width: 2, color: accentColor),
-                            ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant,
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.05),
               ),
             ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final totalWidth = constraints.maxWidth;
+                final tileWidth = totalWidth / tiles.length;
+                final indicatorLeft = (totalWidth * currentPositionRatio)
+                    .clamp(0.0, math.max(totalWidth - 2, 0.0))
+                    .toDouble();
+
+                return SizedBox(
+                  height: timelineHeight,
+                  child: Stack(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (var i = 0; i < tiles.length; i++)
+                            SizedBox(
+                              width: tileWidth,
+                              child: _TimelineTile(
+                                data: tiles[i],
+                                isLast: i == tiles.length - 1,
+                              ),
+                            ),
+                        ],
+                      ),
+                      if (showCurrentIndicator)
+                        Positioned(
+                          left: indicatorLeft,
+                          top: 0,
+                          bottom: 0,
+                          child: Container(width: 2, color: accentColor),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -1040,6 +963,98 @@ class _TimelineCard extends StatelessWidget {
   }
 }
 
+class _TimelineHeader extends StatelessWidget {
+  const _TimelineHeader({
+    required this.selectedDate,
+    required this.onSelectDate,
+    this.onImport,
+    this.onExport,
+  });
+
+  final DateTime selectedDate;
+  final VoidCallback onSelectDate;
+  final VoidCallback? onImport;
+  final VoidCallback? onExport;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final localeName = l10n.localeName;
+    final now = DateTime.now();
+    final isToday = _isSameDay(now, selectedDate);
+    final dateLabel = DateFormat('EEE, d MMM', localeName).format(selectedDate);
+    final headerText = isToday
+        ? '${l10n.dashboardTodayLabel}, $dateLabel'
+        : dateLabel;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          Expanded(
+            child: Tooltip(
+              message: l10n.dashboardChangeDayTooltip,
+              child: TextButton(
+                onPressed: onSelectDate,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  backgroundColor: AppColors.surfaceVariant,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      LucideIcons.calendar,
+                      size: 18,
+                      color: Colors.white.withValues(alpha: 0.75),
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        headerText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      LucideIcons.chevronDown,
+                      size: 16,
+                      color: Colors.white.withValues(alpha: 0.6),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          _TimelineActionButton(
+            icon: LucideIcons.import,
+            tooltip: l10n.dashboardImportTooltip,
+            onPressed: onImport,
+          ),
+          const SizedBox(width: 4),
+          _TimelineActionButton(
+            icon: LucideIcons.upload,
+            tooltip: l10n.dashboardExportTooltip,
+            onPressed: onExport,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TimelineActionButton extends StatelessWidget {
   const _TimelineActionButton({
     required this.icon,
@@ -1089,12 +1104,10 @@ class _TimelineTile extends StatelessWidget {
   const _TimelineTile({
     required this.data,
     required this.isLast,
-    required this.accentColor,
   });
 
   final _TimelineTileData data;
   final bool isLast;
-  final Color accentColor;
 
   @override
   Widget build(BuildContext context) {
@@ -1114,20 +1127,20 @@ class _TimelineTile extends StatelessWidget {
         final iconTop = data.hasLabel ? 26.0 : 10.0;
 
         return Container(
-          decoration: BoxDecoration(
-            color: data.background,
-            border: Border(
-              right: BorderSide(
-                color: isLast
-                    ? Colors.transparent
-                    : Colors.white.withValues(alpha: 0.06),
-                width: 1,
-              ),
-            ),
-          ),
+          color: data.background,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
+              if (!isLast)
+                Positioned(
+                  top: 0,
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    width: 1,
+                    color: Colors.white.withValues(alpha: 0.06),
+                  ),
+                ),
               if (data.hasLabel)
                 Positioned(
                   top: 6,
@@ -1394,6 +1407,7 @@ class _EventsPlaceholder extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
       decoration: BoxDecoration(
         color: AppColors.surfaceVariant,
