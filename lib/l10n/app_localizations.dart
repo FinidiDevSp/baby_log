@@ -692,6 +692,24 @@ abstract class AppLocalizations {
   /// **'Importar datos'**
   String get dashboardImportTooltip;
 
+  /// No description provided for @dashboardImportSummary.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0 {No se importaron registros.} =1 {Se importó 1 registro correctamente.} other {Se importaron {count} registros correctamente.}}'**
+  String dashboardImportSummary(int count);
+
+  /// No description provided for @dashboardImportError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo importar el archivo: {reason}'**
+  String dashboardImportError(String reason);
+
+  /// No description provided for @dashboardImportReadError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo leer el archivo seleccionado.'**
+  String get dashboardImportReadError;
+
   /// No description provided for @dashboardExportTooltip.
   ///
   /// In es, this message translates to:
