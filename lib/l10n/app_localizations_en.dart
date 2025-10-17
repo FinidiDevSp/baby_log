@@ -728,6 +728,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsCategoryDiapers => 'Diaper';
 
   @override
+  String get statsCategoryBath => 'Bath';
+
+  @override
+  String get statsCategoryVomit => 'Vomit';
+
+  @override
   String statsWeekLabel(String range) {
     return range;
   }
@@ -740,6 +746,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statsWeekNextTooltip => 'Next week';
+
+  @override
+  String get statsRangePickerTitle => 'Select a date range';
+
+  @override
+  String get statsRangeTooLongMessage => 'Please choose 30 days or fewer.';
 
   @override
   String get statsMetricTotalLabel => 'Total';
@@ -766,6 +778,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsDiaperConsistencyTitle => 'Average consistency';
 
   @override
+  String get statsBathCountTitle => 'Bath sessions';
+
+  @override
+  String get statsVomitCountTitle => 'Vomit events';
+
+  @override
+  String get statsVomitIntensityTitle => 'Average intensity';
+
+  @override
   String get statsConsistencyLiquid => 'Liquid';
 
   @override
@@ -782,6 +803,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statsChartYAxisConsistency => 'Consistency';
+
+  @override
+  String get statsChartYAxisIntensity => 'Intensity';
 
   @override
   String get statsChartLegendSelected => 'Selected period';

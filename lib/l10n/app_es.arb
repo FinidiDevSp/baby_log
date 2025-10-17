@@ -407,6 +407,14 @@
   "@statsCategoryDiapers": {
     "description": "Etiqueta para la categoría de estadísticas de pañales"
   },
+  "statsCategoryBath": "Baño",
+  "@statsCategoryBath": {
+    "description": "Etiqueta para la categoría de estadísticas de baño"
+  },
+  "statsCategoryVomit": "Vómito",
+  "@statsCategoryVomit": {
+    "description": "Etiqueta para la categoría de estadísticas de vómito"
+  },
   "statsWeekLabel": "{range}",
   "@statsWeekLabel": {
     "description": "Etiqueta que muestra el rango semanal",
@@ -427,6 +435,14 @@
   "statsWeekNextTooltip": "Semana siguiente",
   "@statsWeekNextTooltip": {
     "description": "Tooltip del botón para ir a la semana siguiente"
+  },
+  "statsRangePickerTitle": "Selecciona un rango de fechas",
+  "@statsRangePickerTitle": {
+    "description": "Título que aparece en el selector de rango de fechas"
+  },
+  "statsRangeTooLongMessage": "Selecciona un máximo de 30 días.",
+  "@statsRangeTooLongMessage": {
+    "description": "Mensaje de error cuando el rango supera los 30 días"
   },
   "statsMetricTotalLabel": "Total",
   "@statsMetricTotalLabel": {
@@ -460,6 +476,18 @@
   "@statsDiaperConsistencyTitle": {
     "description": "Título de la métrica de consistencia promedio"
   },
+  "statsBathCountTitle": "Sesiones de baño",
+  "@statsBathCountTitle": {
+    "description": "Título de la métrica de conteo de baños"
+  },
+  "statsVomitCountTitle": "Episodios de vómito",
+  "@statsVomitCountTitle": {
+    "description": "Título de la métrica de conteo de vómitos"
+  },
+  "statsVomitIntensityTitle": "Intensidad promedio",
+  "@statsVomitIntensityTitle": {
+    "description": "Título de la métrica de intensidad de vómitos"
+  },
   "statsConsistencyLiquid": "Líquida",
   "@statsConsistencyLiquid": {
     "description": "Etiqueta para caca líquida"
@@ -483,6 +511,10 @@
   "statsChartYAxisConsistency": "Consistencia",
   "@statsChartYAxisConsistency": {
     "description": "Etiqueta del eje Y para consistencia"
+  },
+  "statsChartYAxisIntensity": "Intensidad",
+  "@statsChartYAxisIntensity": {
+    "description": "Etiqueta del eje Y para la intensidad del vómito"
   },
   "statsChartLegendSelected": "Período seleccionado",
   "@statsChartLegendSelected": {
