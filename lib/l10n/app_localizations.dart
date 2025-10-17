@@ -692,13 +692,13 @@ abstract class AppLocalizations {
   /// **'Importar datos'**
   String get dashboardImportTooltip;
 
-  /// No description provided for @dashboardImportSummary.
+  /// Mensaje que resume el resultado de la importación desde CSV
   ///
   /// In es, this message translates to:
   /// **'{count, plural, =0 {No se importaron registros.} =1 {Se importó 1 registro correctamente.} other {Se importaron {count} registros correctamente.}}'**
   String dashboardImportSummary(int count);
 
-  /// No description provided for @dashboardImportError.
+  /// Error mostrado cuando falla la importación CSV
   ///
   /// In es, this message translates to:
   /// **'No se pudo importar el archivo: {reason}'**
@@ -1344,7 +1344,7 @@ abstract class AppLocalizations {
   ///
   /// In es, this message translates to:
   /// **'{range}'**
-  String statsWeekLabel(String range);
+  String statsWeekLabel(Object range);
 
   /// Texto explicativo bajo el rango semanal
   ///

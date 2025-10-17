@@ -25,7 +25,9 @@ bool _isSameDay(DateTime a, DateTime b) {
 
 DateTime _startOfWeek(DateTime reference) {
   final normalized = DateTime(reference.year, reference.month, reference.day);
-  return normalized.subtract(Duration(days: normalized.weekday - DateTime.monday));
+  return normalized.subtract(
+    Duration(days: normalized.weekday - DateTime.monday),
+  );
 }
 
 DateTime _endOfWeek(DateTime reference) {
@@ -33,12 +35,7 @@ DateTime _endOfWeek(DateTime reference) {
   return start.add(const Duration(days: 6));
 }
 
-enum StatsCategory {
-  feeding,
-  diapers,
-  bath,
-  vomit,
-}
+enum StatsCategory { feeding, diapers, bath, vomit }
 
 extension StatsCategoryX on StatsCategory {
   IconData get icon {
@@ -128,9 +125,9 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
       _selectedRange.end.difference(_selectedRange.start).inDays + 1;
 
   List<DateTime> get _rangeDays => List.generate(
-        _rangeLengthInDays,
-        (index) => _selectedRange.start.add(Duration(days: index)),
-      );
+    _rangeLengthInDays,
+    (index) => _selectedRange.start.add(Duration(days: index)),
+  );
 
   DateTime _normalizedDate(DateTime value) {
     return DateTime(value.year, value.month, value.day);
@@ -140,10 +137,12 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
     final length = _rangeLengthInDays;
     setState(() {
       _selectedRange = DateTimeRange(
-        start:
-            _normalizedDate(_selectedRange.start.subtract(Duration(days: length))),
+        start: _normalizedDate(
+          _selectedRange.start.subtract(Duration(days: length)),
+        ),
         end: _normalizedDate(
-            _selectedRange.end.subtract(Duration(days: length))),
+          _selectedRange.end.subtract(Duration(days: length)),
+        ),
       );
     });
   }
@@ -151,8 +150,7 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
   void _goToNextRange() {
     final length = _rangeLengthInDays;
     final today = _today;
-    final proposedStart =
-        _selectedRange.start.add(Duration(days: length));
+    final proposedStart = _selectedRange.start.add(Duration(days: length));
     final proposedEnd = _selectedRange.end.add(Duration(days: length));
     if (proposedStart.isAfter(today)) {
       return;
@@ -194,11 +192,9 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.statsRangeTooLongMessage),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.statsRangeTooLongMessage)));
       return;
     }
 
@@ -338,9 +334,11 @@ class _StatsHeader extends StatelessWidget {
                     label: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(item.icon,
-                            size: 18,
-                            color: isSelected ? accentColor : Colors.white70),
+                        Icon(
+                          item.icon,
+                          size: 18,
+                          color: isSelected ? accentColor : Colors.white70,
+                        ),
                         const SizedBox(width: 8),
                         Text(label),
                       ],
@@ -558,8 +556,14 @@ class _CategoryContent extends ConsumerWidget {
       return DailyMetricPoint(date: day, value: total);
     }).toList();
 
-    final totalFeedings = counts.fold<double>(0, (sum, item) => sum + item.value);
-    final totalVolume = volumes.fold<double>(0, (sum, item) => sum + item.value);
+    final totalFeedings = counts.fold<double>(
+      0,
+      (sum, item) => sum + item.value,
+    );
+    final totalVolume = volumes.fold<double>(
+      0,
+      (sum, item) => sum + item.value,
+    );
 
     final metrics = <WeeklyMetric>[
       WeeklyMetric(
@@ -633,25 +637,31 @@ class _CategoryContent extends ConsumerWidget {
     }).toList();
 
     final consistencyValues = days.map((day) {
-      final dayEntries =
-          weekEntries.where((entry) => _isSameDay(entry.timestamp, day)).toList();
+      final dayEntries = weekEntries
+          .where((entry) => _isSameDay(entry.timestamp, day))
+          .toList();
       if (dayEntries.isEmpty) {
         return DailyMetricPoint(date: day, value: 0, hasValue: false);
       }
-      final averageValue = dayEntries
+      final averageValue =
+          dayEntries
               .map((entry) => _consistencyScore(entry.consistency))
               .fold<double>(0, (sum, value) => sum + value) /
           dayEntries.length;
       return DailyMetricPoint(date: day, value: averageValue);
     }).toList();
 
-    final totalChanges = counts.fold<double>(0, (sum, item) => sum + item.value);
+    final totalChanges = counts.fold<double>(
+      0,
+      (sum, item) => sum + item.value,
+    );
     final allConsistencyValues = weekEntries
         .map((entry) => _consistencyScore(entry.consistency))
         .toList();
     final double weeklyAverage = allConsistencyValues.isEmpty
         ? 0
-        : allConsistencyValues.reduce((a, b) => a + b) / allConsistencyValues.length;
+        : allConsistencyValues.reduce((a, b) => a + b) /
+              allConsistencyValues.length;
 
     final dominantConsistency = _dominantConsistency(weekEntries);
 
@@ -805,12 +815,14 @@ class _CategoryContent extends ConsumerWidget {
     }).toList();
 
     final intensityValues = days.map((day) {
-      final dayEntries =
-          rangeEntries.where((entry) => _isSameDay(entry.timestamp, day)).toList();
+      final dayEntries = rangeEntries
+          .where((entry) => _isSameDay(entry.timestamp, day))
+          .toList();
       if (dayEntries.isEmpty) {
         return DailyMetricPoint(date: day, value: 0, hasValue: false);
       }
-      final averageValue = dayEntries
+      final averageValue =
+          dayEntries
               .map((entry) => _vomitScore(entry.amount))
               .fold<double>(0, (sum, value) => sum + value) /
           dayEntries.length;
@@ -830,10 +842,11 @@ class _CategoryContent extends ConsumerWidget {
         .where((entry) => entry.amount == VomitAmount.high)
         .length
         .toDouble();
-    final allScores =
-        rangeEntries.map((entry) => _vomitScore(entry.amount)).toList();
+    final allScores = rangeEntries
+        .map((entry) => _vomitScore(entry.amount))
+        .toList();
     final averageScore = allScores.isEmpty
-        ? 0
+        ? 0.0
         : allScores.reduce((a, b) => a + b) / allScores.length;
     final dominantAmount = _dominantVomitAmount(rangeEntries);
 
@@ -923,7 +936,10 @@ class _CategoryContent extends ConsumerWidget {
     return counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
   }
 
-  String _consistencyLabel(StoolConsistency consistency, AppLocalizations l10n) {
+  String _consistencyLabel(
+    StoolConsistency consistency,
+    AppLocalizations l10n,
+  ) {
     switch (consistency) {
       case StoolConsistency.liquid:
         return l10n.statsConsistencyLiquid;
@@ -1039,15 +1055,16 @@ class _StatsContentState extends State<_StatsContent> {
       return Center(
         child: Text(
           l10n.statsEmptyState,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white70,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
           textAlign: TextAlign.center,
         ),
       );
     }
 
-    final selectedId = widget.selectedMetricId ??
+    final selectedId =
+        widget.selectedMetricId ??
         _localSelection ??
         (metrics.isNotEmpty ? metrics.first.id : null);
     _localSelection = selectedId;
@@ -1082,10 +1099,7 @@ class _StatsContentState extends State<_StatsContent> {
           ],
         ),
         const SizedBox(height: 24),
-        _MetricDetail(
-          metric: selectedMetric,
-          accentColor: widget.accentColor,
-        ),
+        _MetricDetail(metric: selectedMetric, accentColor: widget.accentColor),
       ],
     );
   }
@@ -1107,8 +1121,9 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final borderColor =
-        isSelected ? accentColor : AppColors.surface.withValues(alpha: 0.25);
+    final borderColor = isSelected
+        ? accentColor
+        : AppColors.surface.withValues(alpha: 0.25);
 
     return GestureDetector(
       onTap: onTap,
@@ -1118,10 +1133,7 @@ class _MetricCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: borderColor,
-            width: isSelected ? 1.6 : 1,
-          ),
+          border: Border.all(color: borderColor, width: isSelected ? 1.6 : 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1357,9 +1369,9 @@ class _StatsError extends StatelessWidget {
     return Center(
       child: Text(
         message,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.redAccent,
-            ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: Colors.redAccent),
         textAlign: TextAlign.center,
       ),
     );

@@ -355,13 +355,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String dashboardImportSummary(int count) {
-    return intl.Intl.pluralLogic(
+    String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      zero: 'No se importaron registros.',
-      one: 'Se importó 1 registro correctamente.',
       other: 'Se importaron $count registros correctamente.',
+      one: 'Se importó 1 registro correctamente.',
+      zero: 'No se importaron registros.',
     );
+    return '$_temp0';
   }
 
   @override
@@ -370,7 +371,8 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get dashboardImportReadError => 'No se pudo leer el archivo seleccionado.';
+  String get dashboardImportReadError =>
+      'No se pudo leer el archivo seleccionado.';
 
   @override
   String get dashboardExportTooltip => 'Exportar datos';
@@ -704,8 +706,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get accountSettingsTitle => 'Mi cuenta';
 
   @override
-  String get accountSettingsSubtitle =>
-      'Gestiona tus preferencias personales.';
+  String get accountSettingsSubtitle => 'Gestiona tus preferencias personales.';
 
   @override
   String get accountLanguageTitle => 'Idioma de la aplicación';
@@ -737,8 +738,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get statsCategoryVomit => 'Vómito';
 
   @override
-  String statsWeekLabel(String range) {
-    return range;
+  String statsWeekLabel(Object range) {
+    return '$range';
   }
 
   @override

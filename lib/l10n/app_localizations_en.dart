@@ -355,13 +355,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String dashboardImportSummary(int count) {
-    return intl.Intl.pluralLogic(
+    String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      zero: 'No entries were imported.',
-      one: '1 entry imported successfully.',
       other: '$count entries imported successfully.',
+      one: '1 entry imported successfully.',
+      zero: 'No entries were imported.',
     );
+    return '$_temp0';
   }
 
   @override
@@ -734,8 +735,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsCategoryVomit => 'Vomit';
 
   @override
-  String statsWeekLabel(String range) {
-    return range;
+  String statsWeekLabel(Object range) {
+    return '$range';
   }
 
   @override
