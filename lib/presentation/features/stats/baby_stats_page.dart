@@ -113,9 +113,11 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
   void initState() {
     super.initState();
     final today = _normalizedDate(DateTime.now());
+    final start = _startOfWeek(today);
+    final end = _endOfWeek(today);
     _selectedRange = DateTimeRange(
-      start: _startOfWeek(today),
-      end: _endOfWeek(today),
+      start: start,
+      end: end.isAfter(today) ? today : end,
     );
   }
 
