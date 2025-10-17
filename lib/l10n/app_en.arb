@@ -407,6 +407,14 @@
   "@statsCategoryDiapers": {
     "description": "Label for the diaper statistics category"
   },
+  "statsCategoryBath": "Bath",
+  "@statsCategoryBath": {
+    "description": "Label for the bath statistics category"
+  },
+  "statsCategoryVomit": "Vomit",
+  "@statsCategoryVomit": {
+    "description": "Label for the vomit statistics category"
+  },
   "statsWeekLabel": "{range}",
   "@statsWeekLabel": {
     "description": "Displays the selected weekly range",
@@ -427,6 +435,14 @@
   "statsWeekNextTooltip": "Next week",
   "@statsWeekNextTooltip": {
     "description": "Tooltip for navigating to the next week"
+  },
+  "statsRangePickerTitle": "Select a date range",
+  "@statsRangePickerTitle": {
+    "description": "Title shown in the date range picker"
+  },
+  "statsRangeTooLongMessage": "Please choose 30 days or fewer.",
+  "@statsRangeTooLongMessage": {
+    "description": "Error message when the selected date range is too long"
   },
   "statsMetricTotalLabel": "Total",
   "@statsMetricTotalLabel": {
@@ -460,6 +476,18 @@
   "@statsDiaperConsistencyTitle": {
     "description": "Title for the stool consistency metric"
   },
+  "statsBathCountTitle": "Bath sessions",
+  "@statsBathCountTitle": {
+    "description": "Title for the bath count metric"
+  },
+  "statsVomitCountTitle": "Vomit events",
+  "@statsVomitCountTitle": {
+    "description": "Title for the vomit count metric"
+  },
+  "statsVomitIntensityTitle": "Average intensity",
+  "@statsVomitIntensityTitle": {
+    "description": "Title for the vomit intensity metric"
+  },
   "statsConsistencyLiquid": "Liquid",
   "@statsConsistencyLiquid": {
     "description": "Label for liquid stools"
@@ -483,6 +511,10 @@
   "statsChartYAxisConsistency": "Consistency",
   "@statsChartYAxisConsistency": {
     "description": "Y axis label for consistency"
+  },
+  "statsChartYAxisIntensity": "Intensity",
+  "@statsChartYAxisIntensity": {
+    "description": "Y axis label for vomit intensity"
   },
   "statsChartLegendSelected": "Selected period",
   "@statsChartLegendSelected": {

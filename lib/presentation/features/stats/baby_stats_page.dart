@@ -7,11 +7,15 @@ import 'package:intl/intl.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../domain/entities/bath_entry.dart';
 import '../../../domain/entities/feeding_entry.dart';
 import '../../../domain/entities/stool_entry.dart';
+import '../../../domain/entities/vomit_entry.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../features/home/state/bath_entries_provider.dart';
 import '../../features/home/state/feeding_entries_provider.dart';
 import '../../features/home/state/stool_entries_provider.dart';
+import '../../features/home/state/vomit_entries_provider.dart';
 
 part 'widgets/weekly_bar_chart.dart';
 
@@ -32,6 +36,8 @@ DateTime _endOfWeek(DateTime reference) {
 enum StatsCategory {
   feeding,
   diapers,
+  bath,
+  vomit,
 }
 
 extension StatsCategoryX on StatsCategory {
@@ -41,6 +47,10 @@ extension StatsCategoryX on StatsCategory {
         return LucideIcons.milk;
       case StatsCategory.diapers:
         return LucideIcons.baby;
+      case StatsCategory.bath:
+        return LucideIcons.bath;
+      case StatsCategory.vomit:
+        return LucideIcons.triangleAlert;
     }
   }
 }
@@ -99,26 +109,104 @@ class BabyStatsPage extends ConsumerStatefulWidget {
 
 class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
   StatsCategory _selectedCategory = StatsCategory.feeding;
-  int _weekOffset = 0;
+  late DateTimeRange _selectedRange;
   String? _selectedMetricId;
 
-  DateTime get _currentWeekDate {
-    final today = DateTime.now();
-    return today.add(Duration(days: _weekOffset * 7));
+  @override
+  void initState() {
+    super.initState();
+    final today = _normalizedDate(DateTime.now());
+    _selectedRange = DateTimeRange(
+      start: _startOfWeek(today),
+      end: _endOfWeek(today),
+    );
   }
 
-  void _goToPreviousWeek() {
+  DateTime get _today => _normalizedDate(DateTime.now());
+
+  int get _rangeLengthInDays =>
+      _selectedRange.end.difference(_selectedRange.start).inDays + 1;
+
+  List<DateTime> get _rangeDays => List.generate(
+        _rangeLengthInDays,
+        (index) => _selectedRange.start.add(Duration(days: index)),
+      );
+
+  DateTime _normalizedDate(DateTime value) {
+    return DateTime(value.year, value.month, value.day);
+  }
+
+  void _goToPreviousRange() {
+    final length = _rangeLengthInDays;
     setState(() {
-      _weekOffset -= 1;
+      _selectedRange = DateTimeRange(
+        start:
+            _normalizedDate(_selectedRange.start.subtract(Duration(days: length))),
+        end: _normalizedDate(
+            _selectedRange.end.subtract(Duration(days: length))),
+      );
     });
   }
 
-  void _goToNextWeek() {
-    if (_weekOffset >= 0) {
+  void _goToNextRange() {
+    final length = _rangeLengthInDays;
+    final today = _today;
+    final proposedStart =
+        _selectedRange.start.add(Duration(days: length));
+    final proposedEnd = _selectedRange.end.add(Duration(days: length));
+    if (proposedStart.isAfter(today)) {
       return;
     }
+    final clampedEnd = proposedEnd.isAfter(today) ? today : proposedEnd;
+    final clampedStart = proposedEnd.isAfter(today)
+        ? today.subtract(Duration(days: length - 1))
+        : proposedStart;
     setState(() {
-      _weekOffset += 1;
+      _selectedRange = DateTimeRange(
+        start: _normalizedDate(clampedStart),
+        end: _normalizedDate(clampedEnd),
+      );
+    });
+  }
+
+  bool get _canGoForward {
+    return _selectedRange.end.isBefore(_today);
+  }
+
+  Future<void> _pickDateRange() async {
+    final l10n = AppLocalizations.of(context);
+    final newRange = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(_today.year - 5),
+      lastDate: _today,
+      initialDateRange: _selectedRange,
+      helpText: l10n.statsRangePickerTitle,
+    );
+    if (newRange == null) {
+      return;
+    }
+
+    final normalizedStart = _normalizedDate(newRange.start);
+    final normalizedEnd = _normalizedDate(newRange.end);
+    final inclusiveLength =
+        normalizedEnd.difference(normalizedStart).inDays + 1;
+    if (inclusiveLength > 30) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.statsRangeTooLongMessage),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _selectedRange = DateTimeRange(
+        start: normalizedStart,
+        end: normalizedEnd,
+      );
     });
   }
 
@@ -141,20 +229,20 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final weekStart = _startOfWeek(_currentWeekDate);
-    final weekEnd = _endOfWeek(_currentWeekDate);
-    final weekDays =
-        List.generate(7, (index) => weekStart.add(Duration(days: index)));
+    final rangeStart = _selectedRange.start;
+    final rangeEnd = _selectedRange.end;
+    final rangeDays = _rangeDays;
 
     final header = _StatsHeader(
       accentColor: widget.accentColor,
       category: _selectedCategory,
       onCategoryChanged: _selectCategory,
-      weekStart: weekStart,
-      weekEnd: weekEnd,
-      canGoForward: _weekOffset < 0,
-      onPreviousWeek: _goToPreviousWeek,
-      onNextWeek: _goToNextWeek,
+      rangeStart: rangeStart,
+      rangeEnd: rangeEnd,
+      canGoForward: _canGoForward,
+      onPreviousRange: _goToPreviousRange,
+      onNextRange: _goToNextRange,
+      onRangeTap: _pickDateRange,
     );
 
     return Scaffold(
@@ -170,9 +258,9 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
                 accentColor: widget.accentColor,
                 selectedMetricId: _selectedMetricId,
                 onMetricSelected: _selectMetric,
-                weekDays: weekDays,
-                weekStart: weekStart,
-                weekEnd: weekEnd,
+                days: rangeDays,
+                rangeStart: rangeStart,
+                rangeEnd: rangeEnd,
               ),
             ),
           ],
@@ -187,21 +275,23 @@ class _StatsHeader extends StatelessWidget {
     required this.accentColor,
     required this.category,
     required this.onCategoryChanged,
-    required this.weekStart,
-    required this.weekEnd,
+    required this.rangeStart,
+    required this.rangeEnd,
     required this.canGoForward,
-    required this.onPreviousWeek,
-    required this.onNextWeek,
+    required this.onPreviousRange,
+    required this.onNextRange,
+    required this.onRangeTap,
   });
 
   final Color accentColor;
   final StatsCategory category;
   final ValueChanged<StatsCategory> onCategoryChanged;
-  final DateTime weekStart;
-  final DateTime weekEnd;
+  final DateTime rangeStart;
+  final DateTime rangeEnd;
   final bool canGoForward;
-  final VoidCallback onPreviousWeek;
-  final VoidCallback onNextWeek;
+  final VoidCallback onPreviousRange;
+  final VoidCallback onNextRange;
+  final VoidCallback onRangeTap;
 
   @override
   Widget build(BuildContext context) {
@@ -210,9 +300,14 @@ class _StatsHeader extends StatelessWidget {
     final locale = l10n.localeName;
     final rangeFormatter = DateFormat('d MMM', locale);
     final rangeText =
-        '${rangeFormatter.format(weekStart)} - ${rangeFormatter.format(weekEnd)}';
+        '${rangeFormatter.format(rangeStart)} - ${rangeFormatter.format(rangeEnd)}';
 
-    final categories = [StatsCategory.feeding, StatsCategory.diapers];
+    final categories = const [
+      StatsCategory.feeding,
+      StatsCategory.diapers,
+      StatsCategory.bath,
+      StatsCategory.vomit,
+    ];
 
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
@@ -224,9 +319,18 @@ class _StatsHeader extends StatelessWidget {
             child: Row(
               children: categories.map((item) {
                 final isSelected = category == item;
-                final label = item == StatsCategory.feeding
-                    ? l10n.statsCategoryFeeding
-                    : l10n.statsCategoryDiapers;
+                final label = () {
+                  switch (item) {
+                    case StatsCategory.feeding:
+                      return l10n.statsCategoryFeeding;
+                    case StatsCategory.diapers:
+                      return l10n.statsCategoryDiapers;
+                    case StatsCategory.bath:
+                      return l10n.statsCategoryBath;
+                    case StatsCategory.vomit:
+                      return l10n.statsCategoryVomit;
+                  }
+                }();
                 return Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: ChoiceChip(
@@ -260,10 +364,36 @@ class _StatsHeader extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  l10n.statsWeekLabel(rangeText),
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: onRangeTap,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 4,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            LucideIcons.calendarRange,
+                            size: 18,
+                            color: accentColor,
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              l10n.statsWeekLabel(rangeText),
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -271,12 +401,12 @@ class _StatsHeader extends StatelessWidget {
                 children: [
                   IconButton(
                     tooltip: l10n.statsWeekPreviousTooltip,
-                    onPressed: onPreviousWeek,
+                    onPressed: onPreviousRange,
                     icon: const Icon(LucideIcons.chevronLeft),
                   ),
                   IconButton(
                     tooltip: l10n.statsWeekNextTooltip,
-                    onPressed: canGoForward ? onNextWeek : null,
+                    onPressed: canGoForward ? onNextRange : null,
                     icon: const Icon(LucideIcons.chevronRight),
                   ),
                 ],
@@ -295,18 +425,18 @@ class _CategoryContent extends ConsumerWidget {
     required this.accentColor,
     required this.selectedMetricId,
     required this.onMetricSelected,
-    required this.weekDays,
-    required this.weekStart,
-    required this.weekEnd,
+    required this.days,
+    required this.rangeStart,
+    required this.rangeEnd,
   });
 
   final StatsCategory category;
   final Color accentColor;
   final String? selectedMetricId;
   final ValueChanged<String> onMetricSelected;
-  final List<DateTime> weekDays;
-  final DateTime weekStart;
-  final DateTime weekEnd;
+  final List<DateTime> days;
+  final DateTime rangeStart;
+  final DateTime rangeEnd;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -320,9 +450,9 @@ class _CategoryContent extends ConsumerWidget {
               metrics: _buildFeedingMetrics(
                 context,
                 entries,
-                weekDays,
-                weekStart,
-                weekEnd,
+                days,
+                rangeStart,
+                rangeEnd,
               ),
               selectedMetricId: selectedMetricId,
               onMetricSelected: onMetricSelected,
@@ -340,9 +470,49 @@ class _CategoryContent extends ConsumerWidget {
               metrics: _buildDiaperMetrics(
                 context,
                 entries,
-                weekDays,
-                weekStart,
-                weekEnd,
+                days,
+                rangeStart,
+                rangeEnd,
+              ),
+              selectedMetricId: selectedMetricId,
+              onMetricSelected: onMetricSelected,
+            );
+          },
+          error: (error, stackTrace) => _StatsError(message: '$error'),
+          loading: () => const Center(child: CircularProgressIndicator()),
+        );
+      case StatsCategory.bath:
+        final asyncEntries = ref.watch(bathEntriesProvider);
+        return asyncEntries.when(
+          data: (entries) {
+            return _StatsContent(
+              accentColor: accentColor,
+              metrics: _buildBathMetrics(
+                context,
+                entries,
+                days,
+                rangeStart,
+                rangeEnd,
+              ),
+              selectedMetricId: selectedMetricId,
+              onMetricSelected: onMetricSelected,
+            );
+          },
+          error: (error, stackTrace) => _StatsError(message: '$error'),
+          loading: () => const Center(child: CircularProgressIndicator()),
+        );
+      case StatsCategory.vomit:
+        final asyncEntries = ref.watch(vomitEntriesProvider);
+        return asyncEntries.when(
+          data: (entries) {
+            return _StatsContent(
+              accentColor: accentColor,
+              metrics: _buildVomitMetrics(
+                context,
+                entries,
+                days,
+                rangeStart,
+                rangeEnd,
               ),
               selectedMetricId: selectedMetricId,
               onMetricSelected: onMetricSelected,
@@ -357,22 +527,23 @@ class _CategoryContent extends ConsumerWidget {
   List<WeeklyMetric> _buildFeedingMetrics(
     BuildContext context,
     List<FeedingEntry> entries,
-    List<DateTime> weekDays,
-    DateTime weekStart,
-    DateTime weekEnd,
+    List<DateTime> days,
+    DateTime rangeStart,
+    DateTime rangeEnd,
   ) {
     final l10n = AppLocalizations.of(context);
     final locale = l10n.localeName;
     final numberFormat = NumberFormat.decimalPattern(locale);
     final averageFormat = NumberFormat('#,##0.0', locale);
-    final rangeEnd = weekEnd.add(const Duration(days: 1));
+    final rangeEndExclusive = rangeEnd.add(const Duration(days: 1));
 
     final weekEntries = entries.where((entry) {
       final timestamp = entry.timestamp;
-      return !timestamp.isBefore(weekStart) && timestamp.isBefore(rangeEnd);
+      return !timestamp.isBefore(rangeStart) &&
+          timestamp.isBefore(rangeEndExclusive);
     }).toList();
 
-    final counts = weekDays.map((day) {
+    final counts = days.map((day) {
       final count = weekEntries
           .where((entry) => _isSameDay(entry.timestamp, day))
           .length
@@ -380,7 +551,7 @@ class _CategoryContent extends ConsumerWidget {
       return DailyMetricPoint(date: day, value: count);
     }).toList();
 
-    final volumes = weekDays.map((day) {
+    final volumes = days.map((day) {
       final total = weekEntries
           .where((entry) => _isSameDay(entry.timestamp, day))
           .fold<double>(0, (sum, entry) => sum + entry.amountMl);
@@ -405,7 +576,7 @@ class _CategoryContent extends ConsumerWidget {
           MetricSummary(
             label: l10n.statsMetricDailyAverageLabel,
             value:
-                '${_formatAverage(totalFeedings / weekDays.length, numberFormat, averageFormat)}x',
+                '${_formatAverage(totalFeedings / days.length, numberFormat, averageFormat)}x',
           ),
         ],
         yAxisLabel: l10n.statsChartYAxisTimes,
@@ -424,7 +595,7 @@ class _CategoryContent extends ConsumerWidget {
           MetricSummary(
             label: l10n.statsMetricDailyAverageLabel,
             value:
-                '${_formatAverage(totalVolume / weekDays.length, numberFormat, averageFormat)} ml',
+                '${_formatAverage(totalVolume / days.length, numberFormat, averageFormat)} ml',
           ),
         ],
         yAxisLabel: l10n.statsChartYAxisVolume,
@@ -437,22 +608,23 @@ class _CategoryContent extends ConsumerWidget {
   List<WeeklyMetric> _buildDiaperMetrics(
     BuildContext context,
     List<StoolEntry> entries,
-    List<DateTime> weekDays,
-    DateTime weekStart,
-    DateTime weekEnd,
+    List<DateTime> days,
+    DateTime rangeStart,
+    DateTime rangeEnd,
   ) {
     final l10n = AppLocalizations.of(context);
     final locale = l10n.localeName;
     final numberFormat = NumberFormat.decimalPattern(locale);
     final averageFormat = NumberFormat('#,##0.0', locale);
-    final rangeEnd = weekEnd.add(const Duration(days: 1));
+    final rangeEndExclusive = rangeEnd.add(const Duration(days: 1));
 
     final weekEntries = entries.where((entry) {
       final timestamp = entry.timestamp;
-      return !timestamp.isBefore(weekStart) && timestamp.isBefore(rangeEnd);
+      return !timestamp.isBefore(rangeStart) &&
+          timestamp.isBefore(rangeEndExclusive);
     }).toList();
 
-    final counts = weekDays.map((day) {
+    final counts = days.map((day) {
       final count = weekEntries
           .where((entry) => _isSameDay(entry.timestamp, day))
           .length
@@ -460,7 +632,7 @@ class _CategoryContent extends ConsumerWidget {
       return DailyMetricPoint(date: day, value: count);
     }).toList();
 
-    final consistencyValues = weekDays.map((day) {
+    final consistencyValues = days.map((day) {
       final dayEntries =
           weekEntries.where((entry) => _isSameDay(entry.timestamp, day)).toList();
       if (dayEntries.isEmpty) {
@@ -498,7 +670,7 @@ class _CategoryContent extends ConsumerWidget {
           MetricSummary(
             label: l10n.statsMetricDailyAverageLabel,
             value:
-                '${_formatAverage(totalChanges / weekDays.length, numberFormat, averageFormat)}x',
+                '${_formatAverage(totalChanges / days.length, numberFormat, averageFormat)}x',
           ),
         ],
         yAxisLabel: l10n.statsChartYAxisTimes,
@@ -528,6 +700,200 @@ class _CategoryContent extends ConsumerWidget {
             return l10n.statsMetricEmptyValue;
           }
           return _consistencyLabelFromScore(point.value, l10n);
+        },
+      ),
+    ];
+
+    return metrics;
+  }
+
+  List<WeeklyMetric> _buildBathMetrics(
+    BuildContext context,
+    List<BathEntry> entries,
+    List<DateTime> days,
+    DateTime rangeStart,
+    DateTime rangeEnd,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final locale = l10n.localeName;
+    final numberFormat = NumberFormat.decimalPattern(locale);
+    final averageFormat = NumberFormat('#,##0.0', locale);
+    final rangeEndExclusive = rangeEnd.add(const Duration(days: 1));
+
+    final rangeEntries = entries.where((entry) {
+      final timestamp = entry.timestamp;
+      return !timestamp.isBefore(rangeStart) &&
+          timestamp.isBefore(rangeEndExclusive);
+    }).toList();
+
+    final counts = days.map((day) {
+      final count = rangeEntries
+          .where((entry) => _isSameDay(entry.timestamp, day))
+          .length
+          .toDouble();
+      return DailyMetricPoint(date: day, value: count);
+    }).toList();
+
+    final totalBaths = counts.fold<double>(0, (sum, item) => sum + item.value);
+    final fullCount = rangeEntries
+        .where((entry) => entry.type == BathType.full)
+        .length
+        .toDouble();
+    final quickCount = rangeEntries
+        .where((entry) => entry.type == BathType.quick)
+        .length
+        .toDouble();
+
+    final metrics = <WeeklyMetric>[
+      WeeklyMetric(
+        id: 'baths_count',
+        title: l10n.statsBathCountTitle,
+        icon: LucideIcons.bath,
+        unitSuffix: 'x',
+        points: counts,
+        summaries: [
+          MetricSummary(
+            label: l10n.statsMetricTotalLabel,
+            value: '${numberFormat.format(totalBaths)}x',
+          ),
+          MetricSummary(
+            label: l10n.statsMetricDailyAverageLabel,
+            value:
+                '${_formatAverage(totalBaths / days.length, numberFormat, averageFormat)}x',
+          ),
+          MetricSummary(
+            label: l10n.bathLogTypeFullOption,
+            value: '${numberFormat.format(fullCount)}x',
+          ),
+          MetricSummary(
+            label: l10n.bathLogTypeQuickOption,
+            value: '${numberFormat.format(quickCount)}x',
+          ),
+        ],
+        yAxisLabel: l10n.statsChartYAxisTimes,
+      ),
+    ];
+
+    return metrics;
+  }
+
+  List<WeeklyMetric> _buildVomitMetrics(
+    BuildContext context,
+    List<VomitEntry> entries,
+    List<DateTime> days,
+    DateTime rangeStart,
+    DateTime rangeEnd,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final locale = l10n.localeName;
+    final numberFormat = NumberFormat.decimalPattern(locale);
+    final averageFormat = NumberFormat('#,##0.0', locale);
+    final rangeEndExclusive = rangeEnd.add(const Duration(days: 1));
+
+    final rangeEntries = entries.where((entry) {
+      final timestamp = entry.timestamp;
+      return !timestamp.isBefore(rangeStart) &&
+          timestamp.isBefore(rangeEndExclusive);
+    }).toList();
+
+    final counts = days.map((day) {
+      final count = rangeEntries
+          .where((entry) => _isSameDay(entry.timestamp, day))
+          .length
+          .toDouble();
+      return DailyMetricPoint(date: day, value: count);
+    }).toList();
+
+    final intensityValues = days.map((day) {
+      final dayEntries =
+          rangeEntries.where((entry) => _isSameDay(entry.timestamp, day)).toList();
+      if (dayEntries.isEmpty) {
+        return DailyMetricPoint(date: day, value: 0, hasValue: false);
+      }
+      final averageValue = dayEntries
+              .map((entry) => _vomitScore(entry.amount))
+              .fold<double>(0, (sum, value) => sum + value) /
+          dayEntries.length;
+      return DailyMetricPoint(date: day, value: averageValue);
+    }).toList();
+
+    final totalVomits = counts.fold<double>(0, (sum, item) => sum + item.value);
+    final lowCount = rangeEntries
+        .where((entry) => entry.amount == VomitAmount.low)
+        .length
+        .toDouble();
+    final mediumCount = rangeEntries
+        .where((entry) => entry.amount == VomitAmount.medium)
+        .length
+        .toDouble();
+    final highCount = rangeEntries
+        .where((entry) => entry.amount == VomitAmount.high)
+        .length
+        .toDouble();
+    final allScores =
+        rangeEntries.map((entry) => _vomitScore(entry.amount)).toList();
+    final averageScore = allScores.isEmpty
+        ? 0
+        : allScores.reduce((a, b) => a + b) / allScores.length;
+    final dominantAmount = _dominantVomitAmount(rangeEntries);
+
+    final metrics = <WeeklyMetric>[
+      WeeklyMetric(
+        id: 'vomits_count',
+        title: l10n.statsVomitCountTitle,
+        icon: LucideIcons.triangleAlert,
+        unitSuffix: 'x',
+        points: counts,
+        summaries: [
+          MetricSummary(
+            label: l10n.statsMetricTotalLabel,
+            value: '${numberFormat.format(totalVomits)}x',
+          ),
+          MetricSummary(
+            label: l10n.statsMetricDailyAverageLabel,
+            value:
+                '${_formatAverage(totalVomits / days.length, numberFormat, averageFormat)}x',
+          ),
+          MetricSummary(
+            label: l10n.vomitLogAmountHighOption,
+            value: '${numberFormat.format(highCount)}x',
+          ),
+          MetricSummary(
+            label: l10n.vomitLogAmountMediumOption,
+            value: '${numberFormat.format(mediumCount)}x',
+          ),
+          MetricSummary(
+            label: l10n.vomitLogAmountLowOption,
+            value: '${numberFormat.format(lowCount)}x',
+          ),
+        ],
+        yAxisLabel: l10n.statsChartYAxisTimes,
+      ),
+      WeeklyMetric(
+        id: 'vomits_intensity',
+        title: l10n.statsVomitIntensityTitle,
+        icon: LucideIcons.activity,
+        unitSuffix: '',
+        points: intensityValues,
+        summaries: [
+          MetricSummary(
+            label: l10n.statsMetricDailyAverageLabel,
+            value: _vomitLabelFromScore(averageScore, l10n),
+          ),
+          MetricSummary(
+            label: l10n.statsMetricDominantLabel,
+            value: dominantAmount == null
+                ? l10n.statsMetricEmptyValue
+                : _vomitLabel(dominantAmount, l10n),
+          ),
+        ],
+        yAxisLabel: l10n.statsChartYAxisIntensity,
+        maxValueOverride: 3,
+        valueLabelBuilder: (point) {
+          if (!point.hasValue) {
+            return l10n.statsMetricEmptyValue;
+          }
+          return _vomitLabelFromScore(point.value, l10n);
         },
       ),
     ];
@@ -576,6 +942,49 @@ class _CategoryContent extends ConsumerWidget {
       return l10n.statsConsistencySoft;
     }
     return l10n.statsConsistencyFirm;
+  }
+
+  double _vomitScore(VomitAmount amount) {
+    switch (amount) {
+      case VomitAmount.low:
+        return 1;
+      case VomitAmount.medium:
+        return 2;
+      case VomitAmount.high:
+        return 3;
+    }
+  }
+
+  VomitAmount? _dominantVomitAmount(List<VomitEntry> entries) {
+    if (entries.isEmpty) {
+      return null;
+    }
+    final counts = <VomitAmount, int>{};
+    for (final entry in entries) {
+      counts.update(entry.amount, (value) => value + 1, ifAbsent: () => 1);
+    }
+    return counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+  }
+
+  String _vomitLabel(VomitAmount amount, AppLocalizations l10n) {
+    switch (amount) {
+      case VomitAmount.low:
+        return l10n.vomitLogAmountLowOption;
+      case VomitAmount.medium:
+        return l10n.vomitLogAmountMediumOption;
+      case VomitAmount.high:
+        return l10n.vomitLogAmountHighOption;
+    }
+  }
+
+  String _vomitLabelFromScore(double score, AppLocalizations l10n) {
+    if (score <= 1.5) {
+      return l10n.vomitLogAmountLowOption;
+    }
+    if (score < 2.5) {
+      return l10n.vomitLogAmountMediumOption;
+    }
+    return l10n.vomitLogAmountHighOption;
   }
 
   String _formatAverage(
@@ -713,14 +1122,6 @@ class _MetricCard extends StatelessWidget {
             color: borderColor,
             width: isSelected ? 1.6 : 1,
           ),
-          boxShadow: [
-            if (isSelected)
-              BoxShadow(
-                color: accentColor.withValues(alpha: 0.08),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

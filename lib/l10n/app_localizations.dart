@@ -1328,6 +1328,18 @@ abstract class AppLocalizations {
   /// **'Pañal'**
   String get statsCategoryDiapers;
 
+  /// Etiqueta para la categoría de estadísticas de baño
+  ///
+  /// In es, this message translates to:
+  /// **'Baño'**
+  String get statsCategoryBath;
+
+  /// Etiqueta para la categoría de estadísticas de vómito
+  ///
+  /// In es, this message translates to:
+  /// **'Vómito'**
+  String get statsCategoryVomit;
+
   /// Etiqueta que muestra el rango semanal
   ///
   /// In es, this message translates to:
@@ -1351,6 +1363,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Semana siguiente'**
   String get statsWeekNextTooltip;
+
+  /// Título que aparece en el selector de rango de fechas
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona un rango de fechas'**
+  String get statsRangePickerTitle;
+
+  /// Mensaje de error cuando el rango supera los 30 días
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona un máximo de 30 días.'**
+  String get statsRangeTooLongMessage;
 
   /// Etiqueta para indicar el total semanal
   ///
@@ -1400,6 +1424,24 @@ abstract class AppLocalizations {
   /// **'Consistencia promedio'**
   String get statsDiaperConsistencyTitle;
 
+  /// Título de la métrica de conteo de baños
+  ///
+  /// In es, this message translates to:
+  /// **'Sesiones de baño'**
+  String get statsBathCountTitle;
+
+  /// Título de la métrica de conteo de vómitos
+  ///
+  /// In es, this message translates to:
+  /// **'Episodios de vómito'**
+  String get statsVomitCountTitle;
+
+  /// Título de la métrica de intensidad de vómitos
+  ///
+  /// In es, this message translates to:
+  /// **'Intensidad promedio'**
+  String get statsVomitIntensityTitle;
+
   /// Etiqueta para caca líquida
   ///
   /// In es, this message translates to:
@@ -1435,6 +1477,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Consistencia'**
   String get statsChartYAxisConsistency;
+
+  /// Etiqueta del eje Y para la intensidad del vómito
+  ///
+  /// In es, this message translates to:
+  /// **'Intensidad'**
+  String get statsChartYAxisIntensity;
 
   /// Texto de la leyenda para las barras
   ///
