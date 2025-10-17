@@ -1,12 +1,14 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
 
+import 'package:baby_log/core/providers.dart';
 import 'package:baby_log/core/theme/app_colors.dart';
 import 'package:baby_log/domain/entities/baby_profile.dart';
 import 'package:baby_log/domain/entities/bath_entry.dart';
@@ -205,6 +207,50 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
   double _dayDragDelta = 0;
   bool _isDraggingDay = false;
   int _lastDayAnimationDirection = 0;
+
+  Future<void> _handleImport() async {
+    final l10n = AppLocalizations.of(context);
+
+    try {
+      final selection = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const ['csv'],
+        withData: true,
+      );
+
+      if (selection == null || selection.files.isEmpty) {
+        return;
+      }
+
+      final pickedFile = selection.files.first;
+      final bytes = pickedFile.bytes;
+
+      if (bytes == null) {
+        throw StateError(l10n.dashboardImportReadError);
+      }
+
+      final importer = ref.read(csvImportServiceProvider);
+      final result = await importer.importCsv(bytes);
+
+      if (!mounted) {
+        return;
+      }
+
+      final summary = l10n.dashboardImportSummary(result.total);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(summary)),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      final errorMessage =
+          error is StateError ? error.message : error.toString();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.dashboardImportError(errorMessage))),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -552,7 +598,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
           _TimelineHeader(
             selectedDate: _selectedDate,
             onSelectDate: _openDayPicker,
-            onImport: () {},
+            onImport: _handleImport,
             onExport: () {},
           ),
           const SizedBox(height: 12),

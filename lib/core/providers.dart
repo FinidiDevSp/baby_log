@@ -9,6 +9,7 @@ import '../data/repositories/stool_repository_impl.dart';
 import '../data/repositories/temperature_repository_impl.dart';
 import '../data/repositories/vomit_repository_impl.dart';
 import '../data/repositories/pediatrician_question_repository_impl.dart';
+import '../data/services/csv_import_service.dart';
 import '../domain/entities/baby_profile.dart';
 import '../domain/repositories/baby_repository.dart';
 import '../domain/repositories/bath_repository.dart';
@@ -59,6 +60,15 @@ final pediatricianQuestionRepositoryProvider =
       final database = ref.watch(appDatabaseProvider);
       return PediatricianQuestionRepositoryImpl(database);
     });
+
+final csvImportServiceProvider = Provider<CsvImportService>((ref) {
+  return CsvImportService(
+    feedingRepository: ref.watch(feedingRepositoryProvider),
+    stoolRepository: ref.watch(stoolRepositoryProvider),
+    vomitRepository: ref.watch(vomitRepositoryProvider),
+    bathRepository: ref.watch(bathRepositoryProvider),
+  );
+});
 
 final babyStreamProvider = StreamProvider<BabyProfile?>((ref) {
   final repository = ref.watch(babyRepositoryProvider);

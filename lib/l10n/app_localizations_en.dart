@@ -354,6 +354,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardImportTooltip => 'Import data';
 
   @override
+  String dashboardImportSummary(int count) {
+    return intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      zero: 'No entries were imported.',
+      one: '1 entry imported successfully.',
+      other: '$count entries imported successfully.',
+    );
+  }
+
+  @override
+  String dashboardImportError(String reason) {
+    return 'Could not import the file: $reason';
+  }
+
+  @override
+  String get dashboardImportReadError => 'The selected file could not be read.';
+
+  @override
   String get dashboardExportTooltip => 'Export data';
 
   @override

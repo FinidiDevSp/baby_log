@@ -168,6 +168,27 @@
   "dashboardTodayLabel": "Today",
   "dashboardChangeDayTooltip": "Choose another day",
   "dashboardImportTooltip": "Import data",
+  "dashboardImportSummary": "{count, plural, =0 {No entries were imported.} =1 {1 entry imported successfully.} other {{count} entries imported successfully.}}",
+  "@dashboardImportSummary": {
+    "description": "Summary message shown after importing events from CSV",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "dashboardImportError": "Could not import the file: {reason}",
+  "@dashboardImportError": {
+    "description": "Error shown when the CSV import fails",
+    "placeholders": {
+      "reason": {
+        "type": "String",
+        "example": "Invalid format"
+      }
+    }
+  },
+  "dashboardImportReadError": "The selected file could not be read.",
   "dashboardExportTooltip": "Export data",
   "dashboardPediatricQuestionsLabel": "Questions",
   "dashboardTemperatureLabel": "Temperature",

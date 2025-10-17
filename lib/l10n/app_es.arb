@@ -168,6 +168,27 @@
   "dashboardTodayLabel": "Hoy",
   "dashboardChangeDayTooltip": "Cambiar día",
   "dashboardImportTooltip": "Importar datos",
+  "dashboardImportSummary": "{count, plural, =0 {No se importaron registros.} =1 {Se importó 1 registro correctamente.} other {Se importaron {count} registros correctamente.}}",
+  "@dashboardImportSummary": {
+    "description": "Mensaje que resume el resultado de la importación desde CSV",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "dashboardImportError": "No se pudo importar el archivo: {reason}",
+  "@dashboardImportError": {
+    "description": "Error mostrado cuando falla la importación CSV",
+    "placeholders": {
+      "reason": {
+        "type": "String",
+        "example": "Formato inválido"
+      }
+    }
+  },
+  "dashboardImportReadError": "No se pudo leer el archivo seleccionado.",
   "dashboardExportTooltip": "Exportar datos",
   "dashboardPediatricQuestionsLabel": "Preguntas",
   "dashboardTemperatureLabel": "Temperatura",
