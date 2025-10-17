@@ -947,11 +947,11 @@ class _CategoryContent extends ConsumerWidget {
   double _vomitScore(VomitAmount amount) {
     switch (amount) {
       case VomitAmount.low:
-        return 1;
+        return 1.0;
       case VomitAmount.medium:
-        return 2;
+        return 2.0;
       case VomitAmount.high:
-        return 3;
+        return 3.0;
     }
   }
 
