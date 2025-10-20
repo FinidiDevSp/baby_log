@@ -9,7 +9,9 @@ import '../../../l10n/app_localizations.dart';
 import 'state/medical_appointments_controller.dart';
 
 class MedicalAgendaPage extends ConsumerStatefulWidget {
-  const MedicalAgendaPage({super.key});
+  const MedicalAgendaPage({super.key, this.initialAppointment});
+
+  final MedicalAppointment? initialAppointment;
 
   @override
   ConsumerState<MedicalAgendaPage> createState() => _MedicalAgendaPageState();
@@ -26,6 +28,7 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
   bool _isFormVisible = false;
   String? _editingId;
   String? _dateErrorText;
+  bool _didScheduleInitialEdit = false;
 
   bool get _isEditing => _editingId != null;
 
@@ -35,6 +38,20 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
     _notesController.dispose();
     _dateController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didScheduleInitialEdit && widget.initialAppointment != null) {
+      _didScheduleInitialEdit = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        _startEditFlow(widget.initialAppointment!);
+      });
+    }
   }
 
   @override

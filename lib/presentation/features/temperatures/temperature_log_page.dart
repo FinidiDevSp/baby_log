@@ -10,7 +10,9 @@ import 'package:lucide_flutter/lucide_flutter.dart';
 import '../../../l10n/app_localizations.dart';
 
 class TemperatureLogPage extends ConsumerStatefulWidget {
-  const TemperatureLogPage({super.key});
+  const TemperatureLogPage({super.key, this.existingEntry});
+
+  final TemperatureEntry? existingEntry;
 
   @override
   ConsumerState<TemperatureLogPage> createState() => _TemperatureLogPageState();
@@ -21,6 +23,8 @@ class _TemperatureLogPageState extends ConsumerState<TemperatureLogPage> {
   late TextEditingController _temperatureController;
   late TextEditingController _notesController;
 
+  bool get _isEditing => widget.existingEntry != null;
+
   double get _temperature {
     final sanitized = _temperatureController.text.replaceAll(',', '.');
     return double.tryParse(sanitized) ?? 0;
@@ -29,9 +33,12 @@ class _TemperatureLogPageState extends ConsumerState<TemperatureLogPage> {
   @override
   void initState() {
     super.initState();
-    _selectedDateTime = DateTime.now();
-    _temperatureController = TextEditingController(text: '36.6');
-    _notesController = TextEditingController();
+    final existing = widget.existingEntry;
+    _selectedDateTime = existing?.timestamp ?? DateTime.now();
+    final initialValue = existing?.celsius ?? 36.6;
+    _temperatureController =
+        TextEditingController(text: initialValue.toStringAsFixed(1));
+    _notesController = TextEditingController(text: existing?.notes ?? '');
   }
 
   @override
@@ -103,15 +110,28 @@ class _TemperatureLogPageState extends ConsumerState<TemperatureLogPage> {
     }
 
     try {
-      await ref.read(temperatureRepositoryProvider).addTemperature(
-            TemperatureEntry(
-              timestamp: _selectedDateTime,
-              celsius: double.parse(temperature.toStringAsFixed(1)),
-              notes: _notesController.text.trim().isEmpty
-                  ? null
-                  : _notesController.text.trim(),
-            ),
-          );
+      final trimmedNotes = _notesController.text.trim();
+      final formattedTemperature =
+          double.parse(temperature.toStringAsFixed(1));
+      final repository = ref.read(temperatureRepositoryProvider);
+      if (_isEditing) {
+        final existing = widget.existingEntry!;
+        await repository.updateTemperature(
+          existing.copyWith(
+            timestamp: _selectedDateTime,
+            celsius: formattedTemperature,
+            notes: trimmedNotes.isEmpty ? null : trimmedNotes,
+          ),
+        );
+      } else {
+        await repository.addTemperature(
+          TemperatureEntry(
+            timestamp: _selectedDateTime,
+            celsius: formattedTemperature,
+            notes: trimmedNotes.isEmpty ? null : trimmedNotes,
+          ),
+        );
+      }
       if (!mounted) {
         return;
       }
@@ -145,9 +165,8 @@ class _TemperatureLogPageState extends ConsumerState<TemperatureLogPage> {
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
           children: [
             Center(
-              child: Hero(
-                tag: 'temperature_shortcut',
-                child: Container(
+              child: () {
+                final circle = Container(
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
@@ -160,8 +179,15 @@ class _TemperatureLogPageState extends ConsumerState<TemperatureLogPage> {
                     size: 32,
                     color: Colors.white,
                   ),
-                ),
-              ),
+                );
+                if (_isEditing) {
+                  return circle;
+                }
+                return Hero(
+                  tag: 'temperature_shortcut',
+                  child: circle,
+                );
+              }(),
             ),
             const SizedBox(height: 32),
             Container(

@@ -28,6 +28,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeLogDeleteAction => 'Eliminar registro';
 
   @override
+  String get homeLogDeleteSuccess => 'Registro eliminado.';
+
+  @override
+  String homeLogDeleteError(Object error) {
+    return 'No se pudo eliminar el registro: $error';
+  }
+
+  @override
   String homeLoadError(Object error) {
     return 'No se pudo cargar la información del bebé.\n$error';
   }

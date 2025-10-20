@@ -16,9 +16,9 @@ BathEntry mapBathRowToDomain(db.BathEntryRow row) {
 }
 
 db.BathEntriesCompanion mapBathToCompanion(BathEntry entry) {
-  return db.BathEntriesCompanion.insert(
-    timestamp: entry.timestamp,
-    type: entry.type.index,
+  return db.BathEntriesCompanion(
+    timestamp: Value(entry.timestamp),
+    type: Value(entry.type.index),
     notes: Value(entry.notes),
   );
 }

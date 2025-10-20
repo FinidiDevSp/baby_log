@@ -13,9 +13,9 @@ FeedingEntry mapFeedingRowToDomain(db.BottleFeedingRow row) {
 }
 
 db.BottleFeedingsCompanion mapFeedingToCompanion(FeedingEntry entry) {
-  return db.BottleFeedingsCompanion.insert(
-    timestamp: entry.timestamp,
-    amountMl: entry.amountMl,
+  return db.BottleFeedingsCompanion(
+    timestamp: Value(entry.timestamp),
+    amountMl: Value(entry.amountMl),
     notes: Value(entry.notes),
   );
 }

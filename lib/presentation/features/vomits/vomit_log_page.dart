@@ -9,7 +9,9 @@ import 'package:lucide_flutter/lucide_flutter.dart';
 import '../../../l10n/app_localizations.dart';
 
 class VomitLogPage extends ConsumerStatefulWidget {
-  const VomitLogPage({super.key});
+  const VomitLogPage({super.key, this.existingEntry});
+
+  final VomitEntry? existingEntry;
 
   @override
   ConsumerState<VomitLogPage> createState() => _VomitLogPageState();
@@ -20,12 +22,15 @@ class _VomitLogPageState extends ConsumerState<VomitLogPage> {
   late TextEditingController _notesController;
   VomitAmount? _selectedAmount;
 
+  bool get _isEditing => widget.existingEntry != null;
+
   @override
   void initState() {
     super.initState();
-    _selectedDateTime = DateTime.now();
-    _notesController = TextEditingController();
-    _selectedAmount = VomitAmount.medium;
+    final existing = widget.existingEntry;
+    _selectedDateTime = existing?.timestamp ?? DateTime.now();
+    _notesController = TextEditingController(text: existing?.notes ?? '');
+    _selectedAmount = existing?.amount ?? VomitAmount.medium;
   }
 
   @override
@@ -91,15 +96,26 @@ class _VomitLogPageState extends ConsumerState<VomitLogPage> {
     }
 
     try {
-      await ref.read(vomitRepositoryProvider).addVomit(
-            VomitEntry(
-              timestamp: _selectedDateTime,
-              amount: amount,
-              notes: _notesController.text.trim().isEmpty
-                  ? null
-                  : _notesController.text.trim(),
-            ),
-          );
+      final trimmedNotes = _notesController.text.trim();
+      final repository = ref.read(vomitRepositoryProvider);
+      if (_isEditing) {
+        final existing = widget.existingEntry!;
+        await repository.updateVomit(
+          existing.copyWith(
+            timestamp: _selectedDateTime,
+            amount: amount,
+            notes: trimmedNotes.isEmpty ? null : trimmedNotes,
+          ),
+        );
+      } else {
+        await repository.addVomit(
+          VomitEntry(
+            timestamp: _selectedDateTime,
+            amount: amount,
+            notes: trimmedNotes.isEmpty ? null : trimmedNotes,
+          ),
+        );
+      }
       if (!mounted) {
         return;
       }
@@ -130,9 +146,8 @@ class _VomitLogPageState extends ConsumerState<VomitLogPage> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 32, 20, 24),
           children: [
-            Hero(
-              tag: 'vomit_shortcut',
-              child: Material(
+            () {
+              final circle = Material(
                 color: Colors.transparent,
                 child: Container(
                   width: 72,
@@ -148,8 +163,15 @@ class _VomitLogPageState extends ConsumerState<VomitLogPage> {
                     color: Colors.white,
                   ),
                 ),
-              ),
-            ),
+              );
+              if (_isEditing) {
+                return circle;
+              }
+              return Hero(
+                tag: 'vomit_shortcut',
+                child: circle,
+              );
+            }(),
             const SizedBox(height: 32),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),

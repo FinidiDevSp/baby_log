@@ -7,4 +7,10 @@ abstract class BathRepository {
 
   /// Persists a new bath entry and returns the stored entity.
   Future<BathEntry> addBath(BathEntry entry);
+
+  /// Updates an existing bath entry and returns the stored entity.
+  Future<BathEntry> updateBath(BathEntry entry);
+
+  /// Removes the bath entry identified by [id].
+  Future<void> deleteBath(int id);
 }

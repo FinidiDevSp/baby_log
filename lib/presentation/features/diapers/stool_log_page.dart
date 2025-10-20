@@ -9,7 +9,9 @@ import 'package:lucide_flutter/lucide_flutter.dart';
 import '../../../l10n/app_localizations.dart';
 
 class StoolLogPage extends ConsumerStatefulWidget {
-  const StoolLogPage({super.key});
+  const StoolLogPage({super.key, this.existingEntry});
+
+  final StoolEntry? existingEntry;
 
   @override
   ConsumerState<StoolLogPage> createState() => _StoolLogPageState();
@@ -20,12 +22,15 @@ class _StoolLogPageState extends ConsumerState<StoolLogPage> {
   StoolConsistency? _selectedConsistency;
   late TextEditingController _notesController;
 
+  bool get _isEditing => widget.existingEntry != null;
+
   @override
   void initState() {
     super.initState();
-    _selectedDateTime = DateTime.now();
-    _notesController = TextEditingController();
-    _selectedConsistency = StoolConsistency.soft;
+    final existing = widget.existingEntry;
+    _selectedDateTime = existing?.timestamp ?? DateTime.now();
+    _notesController = TextEditingController(text: existing?.notes ?? '');
+    _selectedConsistency = existing?.consistency ?? StoolConsistency.soft;
   }
 
   @override
@@ -91,15 +96,26 @@ class _StoolLogPageState extends ConsumerState<StoolLogPage> {
     }
 
     try {
-      await ref.read(stoolRepositoryProvider).addStool(
-            StoolEntry(
-              timestamp: _selectedDateTime,
-              consistency: consistency,
-              notes: _notesController.text.trim().isEmpty
-                  ? null
-                  : _notesController.text.trim(),
-            ),
-          );
+      final trimmedNotes = _notesController.text.trim();
+      final repository = ref.read(stoolRepositoryProvider);
+      if (_isEditing) {
+        final existing = widget.existingEntry!;
+        await repository.updateStool(
+          existing.copyWith(
+            timestamp: _selectedDateTime,
+            consistency: consistency,
+            notes: trimmedNotes.isEmpty ? null : trimmedNotes,
+          ),
+        );
+      } else {
+        await repository.addStool(
+          StoolEntry(
+            timestamp: _selectedDateTime,
+            consistency: consistency,
+            notes: trimmedNotes.isEmpty ? null : trimmedNotes,
+          ),
+        );
+      }
       if (!mounted) {
         return;
       }
@@ -132,9 +148,8 @@ class _StoolLogPageState extends ConsumerState<StoolLogPage> {
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
           children: [
             Center(
-              child: Hero(
-                tag: 'stool_shortcut',
-                child: Container(
+              child: () {
+                final circle = Container(
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
@@ -147,8 +162,15 @@ class _StoolLogPageState extends ConsumerState<StoolLogPage> {
                     size: 32,
                     color: Colors.white,
                   ),
-                ),
-              ),
+                );
+                if (_isEditing) {
+                  return circle;
+                }
+                return Hero(
+                  tag: 'stool_shortcut',
+                  child: circle,
+                );
+              }(),
             ),
             const SizedBox(height: 32),
             Container(

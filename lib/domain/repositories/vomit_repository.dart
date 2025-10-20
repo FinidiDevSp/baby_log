@@ -7,4 +7,10 @@ abstract class VomitRepository {
 
   /// Persists a new vomit entry and returns the stored entity.
   Future<VomitEntry> addVomit(VomitEntry entry);
+
+  /// Updates an existing vomit entry and returns the stored entity.
+  Future<VomitEntry> updateVomit(VomitEntry entry);
+
+  /// Removes the vomit entry identified by [id].
+  Future<void> deleteVomit(int id);
 }

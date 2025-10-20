@@ -7,4 +7,10 @@ abstract class StoolRepository {
 
   /// Persists a new stool entry and returns the stored entity.
   Future<StoolEntry> addStool(StoolEntry entry);
+
+  /// Updates an existing stool entry and returns the stored entity.
+  Future<StoolEntry> updateStool(StoolEntry entry);
+
+  /// Removes the stool entry identified by [id].
+  Future<void> deleteStool(int id);
 }

@@ -15,9 +15,9 @@ TemperatureEntry mapTemperatureRowToDomain(db.TemperatureEntryRow row) {
 db.TemperatureEntriesCompanion mapTemperatureToCompanion(
   TemperatureEntry entry,
 ) {
-  return db.TemperatureEntriesCompanion.insert(
-    timestamp: entry.timestamp,
-    valueCelsius: entry.celsius,
+  return db.TemperatureEntriesCompanion(
+    timestamp: Value(entry.timestamp),
+    valueCelsius: Value(entry.celsius),
     notes: Value(entry.notes),
   );
 }

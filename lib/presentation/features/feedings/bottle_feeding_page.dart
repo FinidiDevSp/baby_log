@@ -10,7 +10,9 @@ import 'package:lucide_flutter/lucide_flutter.dart';
 import '../../../l10n/app_localizations.dart';
 
 class BottleFeedingPage extends ConsumerStatefulWidget {
-  const BottleFeedingPage({super.key});
+  const BottleFeedingPage({super.key, this.existingEntry});
+
+  final FeedingEntry? existingEntry;
 
   @override
   ConsumerState<BottleFeedingPage> createState() => _BottleFeedingPageState();
@@ -21,14 +23,18 @@ class _BottleFeedingPageState extends ConsumerState<BottleFeedingPage> {
   late TextEditingController _amountController;
   late TextEditingController _notesController;
 
+  bool get _isEditing => widget.existingEntry != null;
+
   int get _amount => int.tryParse(_amountController.text) ?? 0;
 
   @override
   void initState() {
     super.initState();
-    _selectedDateTime = DateTime.now();
-    _amountController = TextEditingController(text: '120');
-    _notesController = TextEditingController();
+    final existing = widget.existingEntry;
+    _selectedDateTime = existing?.timestamp ?? DateTime.now();
+    final initialAmount = existing?.amountMl ?? 120;
+    _amountController = TextEditingController(text: '$initialAmount');
+    _notesController = TextEditingController(text: existing?.notes ?? '');
   }
 
   @override
@@ -100,15 +106,26 @@ class _BottleFeedingPageState extends ConsumerState<BottleFeedingPage> {
     }
 
     try {
-      await ref.read(feedingRepositoryProvider).addFeeding(
-            FeedingEntry(
-              timestamp: _selectedDateTime,
-              amountMl: amount,
-              notes: _notesController.text.trim().isEmpty
-                  ? null
-                  : _notesController.text.trim(),
-            ),
-          );
+      final trimmedNotes = _notesController.text.trim();
+      final repository = ref.read(feedingRepositoryProvider);
+      if (_isEditing) {
+        final existing = widget.existingEntry!;
+        await repository.updateFeeding(
+          existing.copyWith(
+            timestamp: _selectedDateTime,
+            amountMl: amount,
+            notes: trimmedNotes.isEmpty ? null : trimmedNotes,
+          ),
+        );
+      } else {
+        await repository.addFeeding(
+          FeedingEntry(
+            timestamp: _selectedDateTime,
+            amountMl: amount,
+            notes: trimmedNotes.isEmpty ? null : trimmedNotes,
+          ),
+        );
+      }
       if (!mounted) {
         return;
       }
@@ -142,9 +159,8 @@ class _BottleFeedingPageState extends ConsumerState<BottleFeedingPage> {
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
           children: [
             Center(
-              child: Hero(
-                tag: 'bottle_shortcut',
-                child: Container(
+              child: () {
+                final circle = Container(
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
@@ -157,8 +173,15 @@ class _BottleFeedingPageState extends ConsumerState<BottleFeedingPage> {
                     size: 32,
                     color: Colors.white,
                   ),
-                ),
-              ),
+                );
+                if (_isEditing) {
+                  return circle;
+                }
+                return Hero(
+                  tag: 'bottle_shortcut',
+                  child: circle,
+                );
+              }(),
             ),
             const SizedBox(height: 32),
             Container(

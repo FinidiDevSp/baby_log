@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -1475,7 +1476,7 @@ class _EventsPlaceholder extends StatelessWidget {
   }
 }
 
-class _DailyLogList extends StatefulWidget {
+class _DailyLogList extends ConsumerStatefulWidget {
   const _DailyLogList({
     required this.feedings,
     required this.stools,
@@ -1495,12 +1496,166 @@ class _DailyLogList extends StatefulWidget {
   final Color accentColor;
 
   @override
-  State<_DailyLogList> createState() => _DailyLogListState();
+  ConsumerState<_DailyLogList> createState() => _DailyLogListState();
 }
 
-class _DailyLogListState extends State<_DailyLogList>
+class _DailyLogListState extends ConsumerState<_DailyLogList>
     with SingleTickerProviderStateMixin {
   bool _isExpanded = true;
+
+  void _openEntryForEdit(_DailyLogEntry entry) {
+    final navigator = Navigator.of(context);
+    switch (entry.type) {
+      case _DailyLogType.feeding:
+        final feeding = entry.feeding;
+        if (feeding != null) {
+          navigator.push(
+            MaterialPageRoute(
+              builder: (_) => BottleFeedingPage(existingEntry: feeding),
+            ),
+          );
+        }
+        break;
+      case _DailyLogType.stool:
+        final stool = entry.stool;
+        if (stool != null) {
+          navigator.push(
+            MaterialPageRoute(
+              builder: (_) => StoolLogPage(existingEntry: stool),
+            ),
+          );
+        }
+        break;
+      case _DailyLogType.vomit:
+        final vomit = entry.vomit;
+        if (vomit != null) {
+          navigator.push(
+            MaterialPageRoute(
+              builder: (_) => VomitLogPage(existingEntry: vomit),
+            ),
+          );
+        }
+        break;
+      case _DailyLogType.bath:
+        final bath = entry.bath;
+        if (bath != null) {
+          navigator.push(
+            MaterialPageRoute(
+              builder: (_) => BathLogPage(existingEntry: bath),
+            ),
+          );
+        }
+        break;
+      case _DailyLogType.temperature:
+        final temperature = entry.temperature;
+        if (temperature != null) {
+          navigator.push(
+            MaterialPageRoute(
+              builder: (_) => TemperatureLogPage(
+                existingEntry: temperature,
+              ),
+            ),
+          );
+        }
+        break;
+      case _DailyLogType.appointment:
+        final appointment = entry.appointment;
+        if (appointment != null) {
+          navigator.push(
+            MaterialPageRoute(
+              builder: (_) => MedicalAgendaPage(
+                initialAppointment: appointment,
+              ),
+            ),
+          );
+        }
+        break;
+    }
+  }
+
+  Future<void> _deleteEntry(_DailyLogEntry entry) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      switch (entry.type) {
+        case _DailyLogType.feeding:
+          final feeding = entry.feeding;
+          final id = feeding?.id;
+          if (id == null) {
+            throw StateError('La toma seleccionada no tiene identificador.');
+          }
+          await ref.read(feedingRepositoryProvider).deleteFeeding(id);
+          break;
+        case _DailyLogType.stool:
+          final stool = entry.stool;
+          final id = stool?.id;
+          if (id == null) {
+            throw StateError('El cambio de pañal no tiene identificador.');
+          }
+          await ref.read(stoolRepositoryProvider).deleteStool(id);
+          break;
+        case _DailyLogType.vomit:
+          final vomit = entry.vomit;
+          final id = vomit?.id;
+          if (id == null) {
+            throw StateError('El vómito no tiene identificador.');
+          }
+          await ref.read(vomitRepositoryProvider).deleteVomit(id);
+          break;
+        case _DailyLogType.bath:
+          final bath = entry.bath;
+          final id = bath?.id;
+          if (id == null) {
+            throw StateError('El baño no tiene identificador.');
+          }
+          await ref.read(bathRepositoryProvider).deleteBath(id);
+          break;
+        case _DailyLogType.temperature:
+          final temperature = entry.temperature;
+          final id = temperature?.id;
+          if (id == null) {
+            throw StateError('La temperatura no tiene identificador.');
+          }
+          await ref.read(temperatureRepositoryProvider).deleteTemperature(id);
+          break;
+        case _DailyLogType.appointment:
+          final appointment = entry.appointment;
+          if (appointment == null) {
+            throw StateError('La cita médica no está disponible.');
+          }
+          ref
+              .read(medicalAppointmentsProvider.notifier)
+              .removeAppointment(appointment.id);
+          break;
+      }
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.homeLogDeleteSuccess)),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.homeLogDeleteError('$error'))),
+      );
+    }
+  }
+
+  void _handleLogAction(
+    _DailyLogEntry entry,
+    _LogActionMenuOption option,
+  ) {
+    switch (option) {
+      case _LogActionMenuOption.edit:
+        _openEntryForEdit(entry);
+        break;
+      case _LogActionMenuOption.delete:
+        unawaited(_deleteEntry(entry));
+        break;
+    }
+  }
 
   void _toggleExpanded() {
     setState(() {
@@ -1566,6 +1721,7 @@ class _DailyLogListState extends State<_DailyLogList>
       required IconData icon,
       required Color color,
       required List<Widget> content,
+      required _DailyLogEntry entry,
     }) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1593,6 +1749,7 @@ class _DailyLogListState extends State<_DailyLogList>
             editLabel: l10n.homeLogEditAction,
             deleteLabel: l10n.homeLogDeleteAction,
             tooltip: l10n.homeLogActionsTooltip,
+            onSelected: (option) => _handleLogAction(entry, option),
           ),
         ],
       );
@@ -1667,6 +1824,7 @@ class _DailyLogListState extends State<_DailyLogList>
                             return buildEntryRow(
                               icon: LucideIcons.milk,
                               color: widget.accentColor,
+                              entry: entry,
                               content: [
                                 Text(
                                   timeLabel,
@@ -1699,6 +1857,7 @@ class _DailyLogListState extends State<_DailyLogList>
                             return buildEntryRow(
                               icon: LucideIcons.toilet,
                               color: _stoolAccentColor,
+                              entry: entry,
                               content: [
                                 Text(
                                   timeLabel,
@@ -1731,6 +1890,7 @@ class _DailyLogListState extends State<_DailyLogList>
                             return buildEntryRow(
                               icon: LucideIcons.triangleAlert,
                               color: _vomitAccentColor,
+                              entry: entry,
                               content: [
                                 Text(
                                   timeLabel,
@@ -1763,6 +1923,7 @@ class _DailyLogListState extends State<_DailyLogList>
                             return buildEntryRow(
                               icon: LucideIcons.bath,
                               color: _bathAccentColor,
+                              entry: entry,
                               content: [
                                 Text(
                                   timeLabel,
@@ -1793,6 +1954,7 @@ class _DailyLogListState extends State<_DailyLogList>
                             return buildEntryRow(
                               icon: LucideIcons.thermometer,
                               color: _temperatureAccentColor,
+                              entry: entry,
                               content: [
                                 Text(
                                   timeLabel,
@@ -1826,6 +1988,7 @@ class _DailyLogListState extends State<_DailyLogList>
                             return buildEntryRow(
                               icon: LucideIcons.calendarCheck,
                               color: _appointmentAccentColor,
+                              entry: entry,
                               content: [
                                 Text(
                                   timeLabel,
@@ -1951,6 +2114,7 @@ class _LogActionsMenu extends StatelessWidget {
     required this.editLabel,
     required this.deleteLabel,
     required this.tooltip,
+    required this.onSelected,
   });
 
   final Color editColor;
@@ -1958,6 +2122,7 @@ class _LogActionsMenu extends StatelessWidget {
   final String editLabel;
   final String deleteLabel;
   final String tooltip;
+  final ValueChanged<_LogActionMenuOption> onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -1965,7 +2130,7 @@ class _LogActionsMenu extends StatelessWidget {
       tooltip: tooltip,
       offset: const Offset(0, 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      onSelected: (_) {},
+      onSelected: onSelected,
       itemBuilder: (context) => [
         PopupMenuItem<_LogActionMenuOption>(
           value: _LogActionMenuOption.edit,

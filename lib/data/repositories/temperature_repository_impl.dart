@@ -21,4 +21,20 @@ class TemperatureRepositoryImpl implements TemperatureRepository {
     final row = await _db.createTemperatureEntry(companion);
     return mapTemperatureRowToDomain(row);
   }
+
+  @override
+  Future<TemperatureEntry> updateTemperature(TemperatureEntry entry) async {
+    final id = entry.id;
+    if (id == null) {
+      throw ArgumentError('Cannot update a temperature entry without an id.');
+    }
+    final companion = mapTemperatureToCompanion(entry);
+    final row = await _db.updateTemperatureEntry(id, companion);
+    return mapTemperatureRowToDomain(row);
+  }
+
+  @override
+  Future<void> deleteTemperature(int id) {
+    return _db.deleteTemperatureEntry(id);
+  }
 }

@@ -7,4 +7,10 @@ abstract class TemperatureRepository {
 
   /// Persists a new temperature entry and returns the stored entity.
   Future<TemperatureEntry> addTemperature(TemperatureEntry entry);
+
+  /// Updates an existing temperature entry and returns the stored entity.
+  Future<TemperatureEntry> updateTemperature(TemperatureEntry entry);
+
+  /// Removes the temperature entry identified by [id].
+  Future<void> deleteTemperature(int id);
 }

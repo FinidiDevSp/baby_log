@@ -6,6 +6,19 @@
   "homeLogActionsTooltip": "Manage entry",
   "homeLogEditAction": "Edit entry",
   "homeLogDeleteAction": "Delete entry",
+  "homeLogDeleteSuccess": "Entry deleted.",
+  "@homeLogDeleteSuccess": {
+    "description": "Snack bar message shown after deleting a log entry."
+  },
+  "homeLogDeleteError": "Couldn't delete the entry: {error}",
+  "@homeLogDeleteError": {
+    "description": "Error message when deleting a log entry fails.",
+    "placeholders": {
+      "error": {
+        "example": "Database unavailable"
+      }
+    }
+  },
   "homeLoadError": "We couldn't load the baby's information.\n{error}",
   "@homeLoadError": {
     "description": "Error message when the home screen cannot load baby data",
