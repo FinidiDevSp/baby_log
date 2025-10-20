@@ -134,13 +134,13 @@ abstract class AppLocalizations {
   /// **'Eliminar registro'**
   String get homeLogDeleteAction;
 
-  /// No description provided for @homeLogDeleteSuccess.
+  /// Mensaje mostrado al eliminar un registro del resumen.
   ///
   /// In es, this message translates to:
   /// **'Registro eliminado.'**
   String get homeLogDeleteSuccess;
 
-  /// No description provided for @homeLogDeleteError.
+  /// Error al eliminar un registro del resumen.
   ///
   /// In es, this message translates to:
   /// **'No se pudo eliminar el registro: {error}'**

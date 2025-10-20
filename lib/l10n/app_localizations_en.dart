@@ -32,7 +32,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String homeLogDeleteError(Object error) {
-    return "Couldn't delete the entry: $error";
+    return 'Couldn\'t delete the entry: $error';
   }
 
   @override

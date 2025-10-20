@@ -1,6 +1,6 @@
 {
-    "name": "baby_log",
-    "short_name": "baby_log",
+    "name": "Baby Log",
+    "short_name": "Baby Log",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
