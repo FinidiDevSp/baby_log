@@ -28,6 +28,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeLogDeleteAction => 'Delete entry';
 
   @override
+  String get homeLogDeleteSuccess => 'Entry deleted.';
+
+  @override
+  String homeLogDeleteError(Object error) {
+    return "Couldn't delete the entry: $error";
+  }
+
+  @override
   String homeLoadError(Object error) {
     return 'We couldn\'t load the baby\'s information.\n$error';
   }

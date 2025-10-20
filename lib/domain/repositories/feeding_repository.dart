@@ -7,4 +7,10 @@ abstract class FeedingRepository {
 
   /// Persists a new feeding entry and returns the stored entity.
   Future<FeedingEntry> addFeeding(FeedingEntry entry);
+
+  /// Updates an existing feeding entry and returns the stored entity.
+  Future<FeedingEntry> updateFeeding(FeedingEntry entry);
+
+  /// Removes the feeding entry identified by [id].
+  Future<void> deleteFeeding(int id);
 }

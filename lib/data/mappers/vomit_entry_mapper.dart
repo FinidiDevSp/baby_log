@@ -16,9 +16,9 @@ VomitEntry mapVomitRowToDomain(db.VomitEntryRow row) {
 }
 
 db.VomitEntriesCompanion mapVomitToCompanion(VomitEntry entry) {
-  return db.VomitEntriesCompanion.insert(
-    timestamp: entry.timestamp,
-    amount: entry.amount.index,
+  return db.VomitEntriesCompanion(
+    timestamp: Value(entry.timestamp),
+    amount: Value(entry.amount.index),
     notes: Value(entry.notes),
   );
 }

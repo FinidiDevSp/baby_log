@@ -9,7 +9,9 @@ import 'package:lucide_flutter/lucide_flutter.dart';
 import '../../../l10n/app_localizations.dart';
 
 class BathLogPage extends ConsumerStatefulWidget {
-  const BathLogPage({super.key});
+  const BathLogPage({super.key, this.existingEntry});
+
+  final BathEntry? existingEntry;
 
   @override
   ConsumerState<BathLogPage> createState() => _BathLogPageState();
@@ -20,12 +22,15 @@ class _BathLogPageState extends ConsumerState<BathLogPage> {
   late BathType _selectedType;
   late TextEditingController _notesController;
 
+  bool get _isEditing => widget.existingEntry != null;
+
   @override
   void initState() {
     super.initState();
-    _selectedDateTime = DateTime.now();
-    _selectedType = BathType.full;
-    _notesController = TextEditingController();
+    final existing = widget.existingEntry;
+    _selectedDateTime = existing?.timestamp ?? DateTime.now();
+    _selectedType = existing?.type ?? BathType.full;
+    _notesController = TextEditingController(text: existing?.notes ?? '');
   }
 
   @override
@@ -83,17 +88,26 @@ class _BathLogPageState extends ConsumerState<BathLogPage> {
     final l10n = AppLocalizations.of(context);
 
     try {
-      await ref
-          .read(bathRepositoryProvider)
-          .addBath(
-            BathEntry(
-              timestamp: _selectedDateTime,
-              type: _selectedType,
-              notes: _notesController.text.trim().isEmpty
-                  ? null
-                  : _notesController.text.trim(),
-            ),
-          );
+      final trimmedNotes = _notesController.text.trim();
+      final repository = ref.read(bathRepositoryProvider);
+      if (_isEditing) {
+        final existing = widget.existingEntry!;
+        await repository.updateBath(
+          existing.copyWith(
+            timestamp: _selectedDateTime,
+            type: _selectedType,
+            notes: trimmedNotes.isEmpty ? null : trimmedNotes,
+          ),
+        );
+      } else {
+        await repository.addBath(
+          BathEntry(
+            timestamp: _selectedDateTime,
+            type: _selectedType,
+            notes: trimmedNotes.isEmpty ? null : trimmedNotes,
+          ),
+        );
+      }
       if (!mounted) {
         return;
       }
@@ -128,9 +142,8 @@ class _BathLogPageState extends ConsumerState<BathLogPage> {
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
           children: [
             Center(
-              child: Hero(
-                tag: 'bath_shortcut',
-                child: Container(
+              child: () {
+                final circle = Container(
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
@@ -143,8 +156,15 @@ class _BathLogPageState extends ConsumerState<BathLogPage> {
                     size: 32,
                     color: Colors.white,
                   ),
-                ),
-              ),
+                );
+                if (_isEditing) {
+                  return circle;
+                }
+                return Hero(
+                  tag: 'bath_shortcut',
+                  child: circle,
+                );
+              }(),
             ),
             const SizedBox(height: 32),
             Container(

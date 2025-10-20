@@ -134,6 +134,18 @@ abstract class AppLocalizations {
   /// **'Eliminar registro'**
   String get homeLogDeleteAction;
 
+  /// No description provided for @homeLogDeleteSuccess.
+  ///
+  /// In es, this message translates to:
+  /// **'Registro eliminado.'**
+  String get homeLogDeleteSuccess;
+
+  /// No description provided for @homeLogDeleteError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo eliminar el registro: {error}'**
+  String homeLogDeleteError(Object error);
+
   /// Mensaje de error cuando la pantalla inicial no puede cargar los datos del bebé
   ///
   /// In es, this message translates to:

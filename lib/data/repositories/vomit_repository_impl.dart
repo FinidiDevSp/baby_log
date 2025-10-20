@@ -21,4 +21,20 @@ class VomitRepositoryImpl implements VomitRepository {
     final row = await _db.createVomitEntry(companion);
     return mapVomitRowToDomain(row);
   }
+
+  @override
+  Future<VomitEntry> updateVomit(VomitEntry entry) async {
+    final id = entry.id;
+    if (id == null) {
+      throw ArgumentError('Cannot update a vomit entry without an id.');
+    }
+    final companion = mapVomitToCompanion(entry);
+    final row = await _db.updateVomitEntry(id, companion);
+    return mapVomitRowToDomain(row);
+  }
+
+  @override
+  Future<void> deleteVomit(int id) {
+    return _db.deleteVomitEntry(id);
+  }
 }

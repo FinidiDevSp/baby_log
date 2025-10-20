@@ -21,4 +21,20 @@ class FeedingRepositoryImpl implements FeedingRepository {
     final row = await _db.createBottleFeeding(companion);
     return mapFeedingRowToDomain(row);
   }
+
+  @override
+  Future<FeedingEntry> updateFeeding(FeedingEntry entry) async {
+    final id = entry.id;
+    if (id == null) {
+      throw ArgumentError('Cannot update a feeding without an id.');
+    }
+    final companion = mapFeedingToCompanion(entry);
+    final row = await _db.updateBottleFeeding(id, companion);
+    return mapFeedingRowToDomain(row);
+  }
+
+  @override
+  Future<void> deleteFeeding(int id) {
+    return _db.deleteBottleFeeding(id);
+  }
 }

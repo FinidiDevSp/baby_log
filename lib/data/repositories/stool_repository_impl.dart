@@ -21,4 +21,20 @@ class StoolRepositoryImpl implements StoolRepository {
     final row = await _db.createStoolEntry(companion);
     return mapStoolRowToDomain(row);
   }
+
+  @override
+  Future<StoolEntry> updateStool(StoolEntry entry) async {
+    final id = entry.id;
+    if (id == null) {
+      throw ArgumentError('Cannot update a stool entry without an id.');
+    }
+    final companion = mapStoolToCompanion(entry);
+    final row = await _db.updateStoolEntry(id, companion);
+    return mapStoolRowToDomain(row);
+  }
+
+  @override
+  Future<void> deleteStool(int id) {
+    return _db.deleteStoolEntry(id);
+  }
 }

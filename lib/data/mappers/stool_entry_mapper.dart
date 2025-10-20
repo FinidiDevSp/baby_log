@@ -19,9 +19,9 @@ StoolEntry mapStoolRowToDomain(db.StoolEntryRow row) {
 }
 
 db.StoolEntriesCompanion mapStoolToCompanion(StoolEntry entry) {
-  return db.StoolEntriesCompanion.insert(
-    timestamp: entry.timestamp,
-    consistency: entry.consistency.index,
+  return db.StoolEntriesCompanion(
+    timestamp: Value(entry.timestamp),
+    consistency: Value(entry.consistency.index),
     notes: Value(entry.notes),
   );
 }

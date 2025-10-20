@@ -196,6 +196,23 @@ class AppDatabase extends _$AppDatabase {
     return row;
   }
 
+  Future<BottleFeedingRow> updateBottleFeeding(
+    int id,
+    BottleFeedingsCompanion entry,
+  ) async {
+    await (update(bottleFeedings)..where((tbl) => tbl.id.equals(id))).write(entry);
+    final query = select(bottleFeedings)..where((tbl) => tbl.id.equals(id));
+    final row = await query.getSingleOrNull();
+    if (row == null) {
+      throw StateError('No se pudo obtener la toma actualizada.');
+    }
+    return row;
+  }
+
+  Future<void> deleteBottleFeeding(int id) async {
+    await (delete(bottleFeedings)..where((tbl) => tbl.id.equals(id))).go();
+  }
+
   Stream<List<StoolEntryRow>> watchStoolEntries() {
     final query =
         (select(stoolEntries)..orderBy([
@@ -214,6 +231,23 @@ class AppDatabase extends _$AppDatabase {
       throw StateError('No se pudo obtener el cambio de pañal recién creado.');
     }
     return row;
+  }
+
+  Future<StoolEntryRow> updateStoolEntry(
+    int id,
+    StoolEntriesCompanion entry,
+  ) async {
+    await (update(stoolEntries)..where((tbl) => tbl.id.equals(id))).write(entry);
+    final query = select(stoolEntries)..where((tbl) => tbl.id.equals(id));
+    final row = await query.getSingleOrNull();
+    if (row == null) {
+      throw StateError('No se pudo obtener el cambio de pañal actualizado.');
+    }
+    return row;
+  }
+
+  Future<void> deleteStoolEntry(int id) async {
+    await (delete(stoolEntries)..where((tbl) => tbl.id.equals(id))).go();
   }
 
   Stream<List<VomitEntryRow>> watchVomitEntries() {
@@ -236,6 +270,23 @@ class AppDatabase extends _$AppDatabase {
     return row;
   }
 
+  Future<VomitEntryRow> updateVomitEntry(
+    int id,
+    VomitEntriesCompanion entry,
+  ) async {
+    await (update(vomitEntries)..where((tbl) => tbl.id.equals(id))).write(entry);
+    final query = select(vomitEntries)..where((tbl) => tbl.id.equals(id));
+    final row = await query.getSingleOrNull();
+    if (row == null) {
+      throw StateError('No se pudo obtener el vómito actualizado.');
+    }
+    return row;
+  }
+
+  Future<void> deleteVomitEntry(int id) async {
+    await (delete(vomitEntries)..where((tbl) => tbl.id.equals(id))).go();
+  }
+
   Stream<List<BathEntryRow>> watchBathEntries() {
     final query =
         (select(bathEntries)..orderBy([
@@ -254,6 +305,23 @@ class AppDatabase extends _$AppDatabase {
       throw StateError('No se pudo obtener el baño recién creado.');
     }
     return row;
+  }
+
+  Future<BathEntryRow> updateBathEntry(
+    int id,
+    BathEntriesCompanion entry,
+  ) async {
+    await (update(bathEntries)..where((tbl) => tbl.id.equals(id))).write(entry);
+    final query = select(bathEntries)..where((tbl) => tbl.id.equals(id));
+    final row = await query.getSingleOrNull();
+    if (row == null) {
+      throw StateError('No se pudo obtener el baño actualizado.');
+    }
+    return row;
+  }
+
+  Future<void> deleteBathEntry(int id) async {
+    await (delete(bathEntries)..where((tbl) => tbl.id.equals(id))).go();
   }
 
   Stream<List<TemperatureEntryRow>> watchTemperatureEntries() {
@@ -276,6 +344,24 @@ class AppDatabase extends _$AppDatabase {
       throw StateError('No se pudo obtener la temperatura recién creada.');
     }
     return row;
+  }
+
+  Future<TemperatureEntryRow> updateTemperatureEntry(
+    int id,
+    TemperatureEntriesCompanion entry,
+  ) async {
+    await (update(temperatureEntries)..where((tbl) => tbl.id.equals(id)))
+        .write(entry);
+    final query = select(temperatureEntries)..where((tbl) => tbl.id.equals(id));
+    final row = await query.getSingleOrNull();
+    if (row == null) {
+      throw StateError('No se pudo obtener la temperatura actualizada.');
+    }
+    return row;
+  }
+
+  Future<void> deleteTemperatureEntry(int id) async {
+    await (delete(temperatureEntries)..where((tbl) => tbl.id.equals(id))).go();
   }
 
   Stream<List<PediatricianQuestionRow>> watchPediatricianQuestions() {

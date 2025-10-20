@@ -21,4 +21,20 @@ class BathRepositoryImpl implements BathRepository {
     final row = await _db.createBathEntry(companion);
     return mapBathRowToDomain(row);
   }
+
+  @override
+  Future<BathEntry> updateBath(BathEntry entry) async {
+    final id = entry.id;
+    if (id == null) {
+      throw ArgumentError('Cannot update a bath entry without an id.');
+    }
+    final companion = mapBathToCompanion(entry);
+    final row = await _db.updateBathEntry(id, companion);
+    return mapBathRowToDomain(row);
+  }
+
+  @override
+  Future<void> deleteBath(int id) {
+    return _db.deleteBathEntry(id);
+  }
 }
