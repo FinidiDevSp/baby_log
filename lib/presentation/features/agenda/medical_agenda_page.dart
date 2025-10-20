@@ -25,10 +25,9 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
 
   MedicalAppointmentType _selectedType = MedicalAppointmentType.revision;
   DateTime? _selectedDateTime;
-  bool _isFormVisible = false;
   String? _editingId;
   String? _dateErrorText;
-  bool _didScheduleInitialEdit = false;
+  bool _didInitializeForm = false;
 
   bool get _isEditing => _editingId != null;
 
@@ -43,15 +42,23 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_didScheduleInitialEdit && widget.initialAppointment != null) {
-      _didScheduleInitialEdit = true;
+    final l10n = AppLocalizations.of(context);
+    if (_didInitializeForm) {
+      return;
+    }
+    _didInitializeForm = true;
+
+    if (widget.initialAppointment != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) {
           return;
         }
         _startEditFlow(widget.initialAppointment!);
       });
+      return;
     }
+
+    _applyDefaultValues(l10n);
   }
 
   @override
@@ -82,44 +89,61 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
+        elevation: 0,
         title: Text(l10n.agendaTitle),
-        actions: [
-          IconButton(
-            onPressed: () => _startCreateFlow(l10n),
-            tooltip: l10n.agendaNewAppointmentTooltip,
-            icon: const Icon(LucideIcons.plus),
-          ),
-        ],
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
           children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: _isFormVisible
-                  ? _AgendaFormCard(
-                      key: const ValueKey('agenda_form'),
-                      formKey: _formKey,
-                      titleController: _titleController,
-                      notesController: _notesController,
-                      dateController: _dateController,
-                      selectedType: _selectedType,
-                      dateErrorText: _dateErrorText,
-                      isEditing: _isEditing,
-                      onCancel: _cancelEditing,
-                      onSave: () => _submitForm(l10n),
-                      onPickDateTime: () => _pickDateTime(l10n),
-                      onTypeChanged: (value) {
-                        setState(() {
-                          _selectedType = value;
-                        });
-                      },
-                      typeLabelBuilder: (type) => _typeLabel(l10n, type),
-                    )
-                  : const SizedBox.shrink(),
+            Center(
+              child: () {
+                final circle = Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    LucideIcons.calendarCheck,
+                    size: 32,
+                    color: Colors.white,
+                  ),
+                );
+                if (_isEditing) {
+                  return circle;
+                }
+                return Hero(
+                  tag: 'agenda_shortcut',
+                  child: circle,
+                );
+              }(),
             ),
-            if (_isFormVisible) const SizedBox(height: 20),
+            const SizedBox(height: 32),
+            _AgendaFormCard(
+              key: const ValueKey('agenda_form'),
+              formKey: _formKey,
+              titleController: _titleController,
+              notesController: _notesController,
+              dateController: _dateController,
+              selectedType: _selectedType,
+              dateErrorText: _dateErrorText,
+              isEditing: _isEditing,
+              onCancel: _cancelEditing,
+              onSave: () => _submitForm(l10n),
+              onPickDateTime: () => _pickDateTime(l10n),
+              onTypeChanged: (value) {
+                setState(() {
+                  _selectedType = value;
+                });
+              },
+              typeLabelBuilder: (type) => _typeLabel(l10n, type),
+            ),
+            const SizedBox(height: 24),
             if (todayItems.isNotEmpty)
               _AgendaSection(
                 label: l10n.agendaSectionToday,
@@ -129,19 +153,7 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
                 onEdit: _startEditFlow,
                 onDelete: _deleteAppointment,
               ),
-            if (todayItems.isNotEmpty &&
-                (upcomingItems.isNotEmpty || pastItems.isNotEmpty))
-              const SizedBox(height: 24),
-            if (upcomingItems.isNotEmpty)
-              _AgendaSection(
-                label: l10n.agendaSectionUpcoming,
-                appointments: upcomingItems,
-                typeLabelBuilder: (type) => _typeLabel(l10n, type),
-                locale: locale,
-                onEdit: _startEditFlow,
-                onDelete: _deleteAppointment,
-              ),
-            if (upcomingItems.isNotEmpty && pastItems.isNotEmpty)
+            if (todayItems.isNotEmpty && pastItems.isNotEmpty)
               const SizedBox(height: 24),
             if (pastItems.isNotEmpty)
               _AgendaSection(
@@ -166,23 +178,9 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
     );
   }
 
-  void _startCreateFlow(AppLocalizations l10n) {
-    setState(() {
-      _isFormVisible = true;
-      _editingId = null;
-      _selectedType = MedicalAppointmentType.revision;
-      _selectedDateTime = DateTime.now();
-      _titleController.clear();
-      _notesController.clear();
-      _dateErrorText = null;
-      _dateController.text = _formatDate(_selectedDateTime, l10n);
-    });
-  }
-
   void _startEditFlow(MedicalAppointment appointment) {
     final l10n = AppLocalizations.of(context);
     setState(() {
-      _isFormVisible = true;
       _editingId = appointment.id;
       _selectedType = appointment.type;
       _selectedDateTime = appointment.scheduledAt;
@@ -247,11 +245,10 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
   }
 
   void _cancelEditing() {
+    final l10n = AppLocalizations.of(context);
     FocusScope.of(context).unfocus();
     setState(() {
-      _isFormVisible = false;
-      _editingId = null;
-      _dateErrorText = null;
+      _applyDefaultValues(l10n);
     });
   }
 
@@ -295,10 +292,18 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
 
     FocusScope.of(context).unfocus();
     setState(() {
-      _isFormVisible = false;
-      _editingId = null;
-      _dateErrorText = null;
+      _applyDefaultValues(l10n);
     });
+  }
+
+  void _applyDefaultValues(AppLocalizations l10n) {
+    _editingId = null;
+    _selectedType = MedicalAppointmentType.revision;
+    _selectedDateTime = DateTime.now();
+    _titleController.clear();
+    _notesController.clear();
+    _dateErrorText = null;
+    _dateController.text = _formatDate(_selectedDateTime, l10n);
   }
 
   Future<void> _deleteAppointment(MedicalAppointment appointment) async {
@@ -434,35 +439,43 @@ class _AgendaFormCard extends StatelessWidget {
               },
             ),
             const SizedBox(height: 12),
-            DropdownButtonFormField<MedicalAppointmentType>(
-              value: selectedType,
-              items: MedicalAppointmentType.values
-                  .map(
-                    (type) => DropdownMenuItem(
-                      value: type,
-                      child: Text(typeLabelBuilder(type)),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<MedicalAppointmentType>(
+                    value: selectedType,
+                    items: MedicalAppointmentType.values
+                        .map(
+                          (type) => DropdownMenuItem(
+                            value: type,
+                            child: Text(typeLabelBuilder(type)),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        onTypeChanged(value);
+                      }
+                    },
+                    decoration: InputDecoration(
+                      labelText: l10n.agendaFormTypeLabel,
                     ),
-                  )
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  onTypeChanged(value);
-                }
-              },
-              decoration: InputDecoration(
-                labelText: l10n.agendaFormTypeLabel,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: dateController,
-              readOnly: true,
-              onTap: onPickDateTime,
-              decoration: InputDecoration(
-                labelText: l10n.agendaFormDateTimeLabel,
-                suffixIcon: const Icon(LucideIcons.calendarClock),
-                errorText: dateErrorText,
-              ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: dateController,
+                    readOnly: true,
+                    onTap: onPickDateTime,
+                    decoration: InputDecoration(
+                      labelText: l10n.agendaFormDateTimeLabel,
+                      suffixIcon: const Icon(LucideIcons.calendarClock),
+                      errorText: dateErrorText,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             TextFormField(
