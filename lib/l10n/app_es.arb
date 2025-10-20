@@ -19,6 +19,22 @@
       }
     }
   },
+  "homeLogDeleteConfirmTitle": "¿Eliminar registro?",
+  "@homeLogDeleteConfirmTitle": {
+    "description": "Título del diálogo que confirma la eliminación de un registro del resumen."
+  },
+  "homeLogDeleteConfirmMessage": "¿Quieres eliminar este registro? Esta acción no se puede deshacer.",
+  "@homeLogDeleteConfirmMessage": {
+    "description": "Mensaje del diálogo previo a eliminar un registro del resumen."
+  },
+  "homeLogDeleteConfirmAction": "Eliminar",
+  "@homeLogDeleteConfirmAction": {
+    "description": "Botón principal para confirmar la eliminación de un registro."
+  },
+  "homeLogDeleteCancelAction": "Cancelar",
+  "@homeLogDeleteCancelAction": {
+    "description": "Botón secundario para cancelar la eliminación del registro."
+  },
   "homeLoadError": "No se pudo cargar la información del bebé.\n{error}",
   "@homeLoadError": {
     "description": "Mensaje de error cuando la pantalla inicial no puede cargar los datos del bebé",
@@ -202,7 +218,84 @@
     }
   },
   "dashboardImportReadError": "No se pudo leer el archivo seleccionado.",
+  "dashboardImportDialogTitle": "Confirmar importacion",
+  "dashboardImportPreviewTotal": "El archivo contiene {count, plural, =1 {1 registro.} other {{count} registros.}}",
+  "@dashboardImportPreviewTotal": {
+    "description": "Resumen con la cantidad total detectada en el CSV",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "12"
+      }
+    }
+  },
+  "dashboardImportPreviewNew": "{count, plural, =1 {Se creara 1 registro nuevo.} other {Se crearan {count} registros nuevos.}}",
+  "@dashboardImportPreviewNew": {
+    "description": "Indica cuantos registros se crearan desde cero",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "8"
+      }
+    }
+  },
+  "dashboardImportPreviewDuplicates": "{count, plural, =1 {1 registro coincide con los existentes.} other {{count} registros coinciden con los existentes.}}",
+  "@dashboardImportPreviewDuplicates": {
+    "description": "Indica cuantos registros coinciden con los existentes",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "dashboardImportPreviewIssues": "{count, plural, =1 {1 fila tiene errores y se omitira.} other {{count} filas tienen errores y se omitiran.}}",
+  "@dashboardImportPreviewIssues": {
+    "description": "Advierte sobre filas que no se pudieron procesar",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "dashboardImportNoData": "El archivo seleccionado no contiene registros.",
+  "dashboardImportCancelAction": "Cancelar",
+  "dashboardImportSkipAction": "Omitir duplicados",
+  "dashboardImportOverwriteAction": "Sobrescribir duplicados",
+  "dashboardImportConfirmAction": "Importar registros",
   "dashboardExportTooltip": "Exportar datos",
+  "dashboardExportEmpty": "Aun no hay datos para exportar.",
+  "dashboardExportError": "No se pudo exportar la informacion: {reason}",
+  "@dashboardExportError": {
+    "description": "Mensaje de error cuando falla la exportacion",
+    "placeholders": {
+      "reason": {
+        "type": "String",
+        "example": "Sin permisos de almacenamiento"
+      }
+    }
+  },
+  "dashboardExportShareSubject": "Exportacion de Baby Log ({fileName})",
+  "@dashboardExportShareSubject": {
+    "description": "Asunto utilizado al compartir el CSV exportado",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "baby-log-export-20250120-102030.csv"
+      }
+    }
+  },
+  "dashboardExportShareBody": "Este CSV incluye {count, plural, =1 {1 registro} other {{count} registros}} exportados desde Baby Log.",
+  "@dashboardExportShareBody": {
+    "description": "Texto incluido al compartir el CSV exportado",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "42"
+      }
+    }
+  },
   "dashboardPediatricQuestionsLabel": "Preguntas",
   "dashboardTemperatureLabel": "Temperatura",
   "bottleLogTitle": "Toma de biberón",

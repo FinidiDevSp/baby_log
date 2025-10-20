@@ -146,6 +146,30 @@ abstract class AppLocalizations {
   /// **'No se pudo eliminar el registro: {error}'**
   String homeLogDeleteError(Object error);
 
+  /// Título del diálogo que confirma la eliminación de un registro del resumen.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Eliminar registro?'**
+  String get homeLogDeleteConfirmTitle;
+
+  /// Mensaje del diálogo previo a eliminar un registro del resumen.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Quieres eliminar este registro? Esta acción no se puede deshacer.'**
+  String get homeLogDeleteConfirmMessage;
+
+  /// Botón principal para confirmar la eliminación de un registro.
+  ///
+  /// In es, this message translates to:
+  /// **'Eliminar'**
+  String get homeLogDeleteConfirmAction;
+
+  /// Botón secundario para cancelar la eliminación del registro.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar'**
+  String get homeLogDeleteCancelAction;
+
   /// Mensaje de error cuando la pantalla inicial no puede cargar los datos del bebé
   ///
   /// In es, this message translates to:
@@ -722,11 +746,95 @@ abstract class AppLocalizations {
   /// **'No se pudo leer el archivo seleccionado.'**
   String get dashboardImportReadError;
 
+  /// No description provided for @dashboardImportDialogTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmar importacion'**
+  String get dashboardImportDialogTitle;
+
+  /// Resumen con la cantidad total detectada en el CSV
+  ///
+  /// In es, this message translates to:
+  /// **'El archivo contiene {count, plural, =1 {1 registro.} other {{count} registros.}}'**
+  String dashboardImportPreviewTotal(int count);
+
+  /// Indica cuantos registros se crearan desde cero
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1 {Se creara 1 registro nuevo.} other {Se crearan {count} registros nuevos.}}'**
+  String dashboardImportPreviewNew(int count);
+
+  /// Indica cuantos registros coinciden con los existentes
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1 {1 registro coincide con los existentes.} other {{count} registros coinciden con los existentes.}}'**
+  String dashboardImportPreviewDuplicates(int count);
+
+  /// Advierte sobre filas que no se pudieron procesar
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1 {1 fila tiene errores y se omitira.} other {{count} filas tienen errores y se omitiran.}}'**
+  String dashboardImportPreviewIssues(int count);
+
+  /// No description provided for @dashboardImportNoData.
+  ///
+  /// In es, this message translates to:
+  /// **'El archivo seleccionado no contiene registros.'**
+  String get dashboardImportNoData;
+
+  /// No description provided for @dashboardImportCancelAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar'**
+  String get dashboardImportCancelAction;
+
+  /// No description provided for @dashboardImportSkipAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Omitir duplicados'**
+  String get dashboardImportSkipAction;
+
+  /// No description provided for @dashboardImportOverwriteAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Sobrescribir duplicados'**
+  String get dashboardImportOverwriteAction;
+
+  /// No description provided for @dashboardImportConfirmAction.
+  ///
+  /// In es, this message translates to:
+  /// **'Importar registros'**
+  String get dashboardImportConfirmAction;
+
   /// No description provided for @dashboardExportTooltip.
   ///
   /// In es, this message translates to:
   /// **'Exportar datos'**
   String get dashboardExportTooltip;
+
+  /// No description provided for @dashboardExportEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Aun no hay datos para exportar.'**
+  String get dashboardExportEmpty;
+
+  /// Mensaje de error cuando falla la exportacion
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo exportar la informacion: {reason}'**
+  String dashboardExportError(String reason);
+
+  /// Asunto utilizado al compartir el CSV exportado
+  ///
+  /// In es, this message translates to:
+  /// **'Exportacion de Baby Log ({fileName})'**
+  String dashboardExportShareSubject(String fileName);
+
+  /// Texto incluido al compartir el CSV exportado
+  ///
+  /// In es, this message translates to:
+  /// **'Este CSV incluye {count, plural, =1 {1 registro} other {{count} registros}} exportados desde Baby Log.'**
+  String dashboardExportShareBody(int count);
 
   /// No description provided for @dashboardPediatricQuestionsLabel.
   ///

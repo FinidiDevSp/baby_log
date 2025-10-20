@@ -19,6 +19,22 @@
       }
     }
   },
+  "homeLogDeleteConfirmTitle": "Delete entry?",
+  "@homeLogDeleteConfirmTitle": {
+    "description": "Dialog title asking for confirmation before deleting a dashboard entry."
+  },
+  "homeLogDeleteConfirmMessage": "Do you want to delete this entry? This action cannot be undone.",
+  "@homeLogDeleteConfirmMessage": {
+    "description": "Dialog message shown before deleting a dashboard entry."
+  },
+  "homeLogDeleteConfirmAction": "Delete",
+  "@homeLogDeleteConfirmAction": {
+    "description": "Primary action button to confirm deletion of a dashboard entry."
+  },
+  "homeLogDeleteCancelAction": "Cancel",
+  "@homeLogDeleteCancelAction": {
+    "description": "Secondary action button to keep the dashboard entry."
+  },
   "homeLoadError": "We couldn't load the baby's information.\n{error}",
   "@homeLoadError": {
     "description": "Error message when the home screen cannot load baby data",
@@ -202,7 +218,84 @@
     }
   },
   "dashboardImportReadError": "The selected file could not be read.",
+  "dashboardImportDialogTitle": "Confirm import",
+  "dashboardImportPreviewTotal": "The file contains {count, plural, =1 {1 record.} other {{count} records.}}",
+  "@dashboardImportPreviewTotal": {
+    "description": "Summarizes the total amount of rows detected in the CSV file",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "12"
+      }
+    }
+  },
+  "dashboardImportPreviewNew": "{count, plural, =1 {1 new entry will be created.} other {{count} new entries will be created.}}",
+  "@dashboardImportPreviewNew": {
+    "description": "Explains how many brand new entries will be inserted",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "8"
+      }
+    }
+  },
+  "dashboardImportPreviewDuplicates": "{count, plural, =1 {1 entry matches existing data.} other {{count} entries match existing data.}}",
+  "@dashboardImportPreviewDuplicates": {
+    "description": "Explains how many entries conflict with existing data",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "dashboardImportPreviewIssues": "{count, plural, =1 {1 row had issues and will be skipped.} other {{count} rows had issues and will be skipped.}}",
+  "@dashboardImportPreviewIssues": {
+    "description": "Warns the user about rows that could not be parsed",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "dashboardImportNoData": "The selected file does not contain any records.",
+  "dashboardImportCancelAction": "Cancel",
+  "dashboardImportSkipAction": "Skip duplicates",
+  "dashboardImportOverwriteAction": "Overwrite duplicates",
+  "dashboardImportConfirmAction": "Import entries",
   "dashboardExportTooltip": "Export data",
+  "dashboardExportEmpty": "There is nothing to export yet.",
+  "dashboardExportError": "Could not export the data: {reason}",
+  "@dashboardExportError": {
+    "description": "Error shown when the CSV export fails",
+    "placeholders": {
+      "reason": {
+        "type": "String",
+        "example": "Storage permission denied"
+      }
+    }
+  },
+  "dashboardExportShareSubject": "Baby Log export ({fileName})",
+  "@dashboardExportShareSubject": {
+    "description": "Subject used when sharing the exported CSV file",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "baby-log-export-20250120-102030.csv"
+      }
+    }
+  },
+  "dashboardExportShareBody": "This CSV contains {count, plural, =1 {1 record} other {{count} records}} exported from Baby Log.",
+  "@dashboardExportShareBody": {
+    "description": "Body text used when sharing the exported CSV file",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "42"
+      }
+    }
+  },
   "dashboardPediatricQuestionsLabel": "Questions",
   "dashboardTemperatureLabel": "Temperature",
   "bottleLogTitle": "Bottle feeding",

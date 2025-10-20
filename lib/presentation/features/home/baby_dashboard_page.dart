@@ -3,15 +3,16 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'package:baby_log/core/providers.dart';
 import 'package:baby_log/core/theme/app_colors.dart';
 import 'package:baby_log/domain/entities/baby_profile.dart';
+import 'package:baby_log/data/services/csv_import_service.dart';
 import 'package:baby_log/domain/entities/bath_entry.dart';
 import 'package:baby_log/domain/entities/feeding_entry.dart';
 import 'package:baby_log/domain/entities/medical_appointment.dart';
@@ -231,7 +232,25 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       }
 
       final importer = ref.read(csvImportServiceProvider);
-      final result = await importer.importCsv(bytes);
+      final preview = await importer.previewCsv(bytes);
+
+      if (!mounted) {
+        return;
+      }
+
+      if (!preview.hasData) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.dashboardImportNoData)),
+        );
+        return;
+      }
+
+      final mode = await _askImportMode(preview);
+      if (!mounted || mode == null) {
+        return;
+      }
+
+      final result = await importer.importPreview(preview, mode: mode);
 
       if (!mounted) {
         return;
@@ -251,6 +270,112 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
         SnackBar(content: Text(l10n.dashboardImportError(errorMessage))),
       );
     }
+  }
+
+  Future<void> _handleExport() async {
+    final l10n = AppLocalizations.of(context);
+
+    try {
+      final exporter = ref.read(csvExportServiceProvider);
+      final result = await exporter.exportAll();
+
+      if (!mounted) {
+        return;
+      }
+
+      if (result.totalRows == 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.dashboardExportEmpty)),
+        );
+        return;
+      }
+
+      final attachment = XFile.fromData(
+        result.bytes,
+        name: result.fileName,
+        mimeType: 'text/csv',
+      );
+
+      await Share.shareXFiles(
+        [attachment],
+        subject: l10n.dashboardExportShareSubject(result.fileName),
+        text: l10n.dashboardExportShareBody(result.totalRows),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      final errorMessage =
+          error is StateError ? error.message : error.toString();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.dashboardExportError(errorMessage))),
+      );
+    }
+  }
+
+  Future<CsvImportMode?> _askImportMode(CsvImportPreview preview) {
+    final l10n = AppLocalizations.of(context);
+    final lines = <String>[
+      l10n.dashboardImportPreviewTotal(preview.totalIncoming),
+      if (preview.totalNew > 0)
+        l10n.dashboardImportPreviewNew(preview.totalNew),
+      if (preview.totalToOverwrite > 0)
+        l10n.dashboardImportPreviewDuplicates(preview.totalToOverwrite),
+      if (preview.issues.isNotEmpty)
+        l10n.dashboardImportPreviewIssues(preview.issues.length),
+    ];
+
+    return showDialog<CsvImportMode>(
+      context: context,
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+        final actions = <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).maybePop(),
+            child: Text(l10n.dashboardImportCancelAction),
+          ),
+        ];
+
+        if (preview.hasDuplicates) {
+          actions.addAll([
+            TextButton(
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(CsvImportMode.skipDuplicates),
+              child: Text(l10n.dashboardImportSkipAction),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext)
+                  .pop(CsvImportMode.overwriteDuplicates),
+              child: Text(l10n.dashboardImportOverwriteAction),
+            ),
+          ]);
+        } else {
+          actions.add(
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext)
+                  .pop(CsvImportMode.overwriteDuplicates),
+              child: Text(l10n.dashboardImportConfirmAction),
+            ),
+          );
+        }
+
+        return AlertDialog(
+          title: Text(l10n.dashboardImportDialogTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final line in lines)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Text(line, style: theme.textTheme.bodyMedium),
+                ),
+            ],
+          ),
+          actions: actions,
+        );
+      },
+    );
   }
 
   @override
@@ -600,7 +725,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
             selectedDate: _selectedDate,
             onSelectDate: _openDayPicker,
             onImport: _handleImport,
-            onExport: () {},
+            onExport: _handleExport,
           ),
           const SizedBox(height: 12),
           GestureDetector(
@@ -1643,6 +1768,39 @@ class _DailyLogListState extends ConsumerState<_DailyLogList>
     }
   }
 
+  Future<void> _confirmDeleteEntry(_DailyLogEntry entry) async {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(l10n.homeLogDeleteConfirmTitle),
+          content: Text(l10n.homeLogDeleteConfirmMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.homeLogDeleteCancelAction),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: theme.colorScheme.error,
+                foregroundColor: theme.colorScheme.onError,
+              ),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.homeLogDeleteConfirmAction),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete == true) {
+      unawaited(_deleteEntry(entry));
+    }
+  }
+
   void _handleLogAction(
     _DailyLogEntry entry,
     _LogActionMenuOption option,
@@ -1652,7 +1810,7 @@ class _DailyLogListState extends ConsumerState<_DailyLogList>
         _openEntryForEdit(entry);
         break;
       case _LogActionMenuOption.delete:
-        unawaited(_deleteEntry(entry));
+        unawaited(_confirmDeleteEntry(entry));
         break;
     }
   }

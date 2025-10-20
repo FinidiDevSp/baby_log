@@ -36,6 +36,19 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get homeLogDeleteConfirmTitle => '¿Eliminar registro?';
+
+  @override
+  String get homeLogDeleteConfirmMessage =>
+      '¿Quieres eliminar este registro? Esta acción no se puede deshacer.';
+
+  @override
+  String get homeLogDeleteConfirmAction => 'Eliminar';
+
+  @override
+  String get homeLogDeleteCancelAction => 'Cancelar';
+
+  @override
   String homeLoadError(Object error) {
     return 'No se pudo cargar la información del bebé.\n$error';
   }
@@ -383,7 +396,94 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo leer el archivo seleccionado.';
 
   @override
+  String get dashboardImportDialogTitle => 'Confirmar importacion';
+
+  @override
+  String dashboardImportPreviewTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count registros.',
+      one: '1 registro.',
+    );
+    return 'El archivo contiene $_temp0';
+  }
+
+  @override
+  String dashboardImportPreviewNew(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Se crearan $count registros nuevos.',
+      one: 'Se creara 1 registro nuevo.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dashboardImportPreviewDuplicates(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count registros coinciden con los existentes.',
+      one: '1 registro coincide con los existentes.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String dashboardImportPreviewIssues(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count filas tienen errores y se omitiran.',
+      one: '1 fila tiene errores y se omitira.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardImportNoData =>
+      'El archivo seleccionado no contiene registros.';
+
+  @override
+  String get dashboardImportCancelAction => 'Cancelar';
+
+  @override
+  String get dashboardImportSkipAction => 'Omitir duplicados';
+
+  @override
+  String get dashboardImportOverwriteAction => 'Sobrescribir duplicados';
+
+  @override
+  String get dashboardImportConfirmAction => 'Importar registros';
+
+  @override
   String get dashboardExportTooltip => 'Exportar datos';
+
+  @override
+  String get dashboardExportEmpty => 'Aun no hay datos para exportar.';
+
+  @override
+  String dashboardExportError(String reason) {
+    return 'No se pudo exportar la informacion: $reason';
+  }
+
+  @override
+  String dashboardExportShareSubject(String fileName) {
+    return 'Exportacion de Baby Log ($fileName)';
+  }
+
+  @override
+  String dashboardExportShareBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count registros',
+      one: '1 registro',
+    );
+    return 'Este CSV incluye $_temp0 exportados desde Baby Log.';
+  }
 
   @override
   String get dashboardPediatricQuestionsLabel => 'Preguntas';
