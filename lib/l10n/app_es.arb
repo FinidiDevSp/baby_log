@@ -100,7 +100,7 @@
   "dashboardBathLabel": "Baño",
   "dashboardTemperatureLabel": "Temperatura",
   "dashboardFoodLabel": "Comida",
-  "dashboardMedicalAgendaLabel": "AGENDA",
+  "dashboardMedicalAgendaLabel": "CITAS",
   "agendaTitle": "Agenda médica",
   "agendaNewAppointmentTooltip": "Agregar cita",
   "agendaCreateTitle": "Nueva cita",
@@ -135,6 +135,11 @@
   "dashboardAgendaStatusToday": "Hoy",
   "dashboardAgendaStatusTomorrow": "Mañana",
   "dashboardAgendaStatusInDays": "{count, plural, =1 {En 1 día} other {En {count} días}}",
+  "dashboardAppointmentsChipLabelToday": "Hoy",
+  "dashboardAppointmentsChipLabelTomorrow": "Mañana",
+  "dashboardAppointmentsChipLabelInDays": "+{count} días",
+  "dashboardAppointmentsCount": "{count, plural, =0 {Sin citas} =1 {1 cita} other {{count} citas}}",
+  "dashboardAppointmentsNoTime": "—",
   "@dashboardAgendaStatusInDays": {
     "description": "Indicador de días restantes para la próxima cita médica",
     "placeholders": {

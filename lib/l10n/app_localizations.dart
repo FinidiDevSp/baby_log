@@ -626,6 +626,36 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1 {En 1 día} other {En {count} días}}'**
   String dashboardAgendaStatusInDays(int count);
 
+  /// No description provided for @dashboardAppointmentsChipLabelToday.
+  ///
+  /// In es, this message translates to:
+  /// **'Hoy'**
+  String get dashboardAppointmentsChipLabelToday;
+
+  /// No description provided for @dashboardAppointmentsChipLabelTomorrow.
+  ///
+  /// In es, this message translates to:
+  /// **'Mañana'**
+  String get dashboardAppointmentsChipLabelTomorrow;
+
+  /// No description provided for @dashboardAppointmentsChipLabelInDays.
+  ///
+  /// In es, this message translates to:
+  /// **'+{count} días'**
+  String dashboardAppointmentsChipLabelInDays(int count);
+
+  /// No description provided for @dashboardAppointmentsCount.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0 {Sin citas} =1 {1 cita} other {{count} citas}}'**
+  String dashboardAppointmentsCount(int count);
+
+  /// No description provided for @dashboardAppointmentsNoTime.
+  ///
+  /// In es, this message translates to:
+  /// **'—'**
+  String get dashboardAppointmentsNoTime;
+
   /// Estado mostrado en el acceso directo de preguntas cuando hay pendientes
   ///
   /// In es, this message translates to:

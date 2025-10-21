@@ -100,7 +100,7 @@
   "dashboardBathLabel": "Bath",
   "dashboardTemperatureLabel": "Temperature",
   "dashboardFoodLabel": "Feeding",
-  "dashboardMedicalAgendaLabel": "AGENDA",
+  "dashboardMedicalAgendaLabel": "APPOINTMENTS",
   "agendaTitle": "Medical agenda",
   "agendaNewAppointmentTooltip": "Add appointment",
   "agendaCreateTitle": "New appointment",
@@ -135,6 +135,11 @@
   "dashboardAgendaStatusToday": "Today",
   "dashboardAgendaStatusTomorrow": "Tomorrow",
   "dashboardAgendaStatusInDays": "{count, plural, =1 {In 1 day} other {In {count} days}}",
+  "dashboardAppointmentsChipLabelToday": "Today",
+  "dashboardAppointmentsChipLabelTomorrow": "Tomorrow",
+  "dashboardAppointmentsChipLabelInDays": "+{count} days",
+  "dashboardAppointmentsCount": "{count, plural, =0 {No appointments} =1 {1 appointment} other {{count} appointments}}",
+  "dashboardAppointmentsNoTime": "—",
   "@dashboardAgendaStatusInDays": {
     "description": "Badge summarising days left for the next appointment",
     "placeholders": {
