@@ -13,6 +13,7 @@ import 'package:baby_log/core/providers.dart';
 import 'package:baby_log/core/theme/app_colors.dart';
 import 'package:baby_log/domain/entities/baby_profile.dart';
 import 'package:baby_log/data/services/csv_import_service.dart';
+import 'package:baby_log/data/services/csv_export_service.dart';
 import 'package:baby_log/domain/entities/bath_entry.dart';
 import 'package:baby_log/domain/entities/feeding_entry.dart';
 import 'package:baby_log/domain/entities/medical_appointment.dart';
@@ -722,7 +723,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
         label: label,
         status: statusLabel,
         timeLabel: timeLabel,
-        nextAppointment: items.isEmpty ? null : items.first,
+        appointment: items.isEmpty ? null : items.first,
       );
     });
 
@@ -792,14 +793,6 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
               onChipDelete: _confirmDeleteAppointment,
             ),
           ],
-          const SizedBox(height: 12),
-          _AppointmentChipsCarousel(
-            accentColor: widget.accentColor,
-            items: appointmentChipItems,
-            onChipTap: (appointment) => _openAgenda(appointment: appointment),
-            onChipEdit: (appointment) => _openAgenda(appointment: appointment),
-            onChipDelete: _confirmDeleteAppointment,
-          ),
           const SizedBox(height: 12),
           _TimelineHeader(
             selectedDate: _selectedDate,
@@ -1041,7 +1034,7 @@ class _AppointmentChipsCarousel extends StatelessWidget {
 
   final Color accentColor;
   final List<_AppointmentChipData> items;
-  final Future<void> Function(MedicalAppointment appointment) onChipTap;
+  final Future<void> Function(MedicalAppointment? appointment) onChipTap;
   final Future<void> Function(MedicalAppointment appointment) onChipDelete;
 
   @override
@@ -1052,7 +1045,8 @@ class _AppointmentChipsCarousel extends StatelessWidget {
 
     final theme = Theme.of(context);
     final textScaleFactor = MediaQuery.textScaleFactorOf(context);
-    final extraHeightFactor = (textScaleFactor - 1.0).clamp(0.0, 1.0) as double;
+    final extraHeightFactor =
+        math.max(0.0, math.min(1.0, textScaleFactor - 1.0));
     final carouselHeight = 76.0 + extraHeightFactor * 28.0;
 
     return SizedBox(
@@ -1063,89 +1057,61 @@ class _AppointmentChipsCarousel extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final item = items[index];
+          final appointment = item.appointment;
           final backgroundColor = accentColor.withValues(alpha: 0.18);
           final borderColor = accentColor.withValues(alpha: 0.5);
 
           return Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => unawaited(onChipTap(item.appointment)),
-              onLongPress: () => unawaited(onChipDelete(item.appointment)),
+              onTap: () => unawaited(onChipTap(appointment)),
+              onLongPress: appointment == null
+                  ? null
+                  : () => unawaited(onChipDelete(appointment)),
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 width: 196,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: backgroundColor,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: borderColor),
                 ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: accentColor,
-                        ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: accentColor,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.status,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.status,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        item.timeLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.72),
-                        ),
-                      ],
-                    );
-
-                    if (selection == null) {
-                      return;
-                    }
-
-                    switch (selection) {
-                      case _AppointmentQuickAction.edit:
-                        await onChipEdit(item.nextAppointment!);
-                        break;
-                      case _AppointmentQuickAction.delete:
-                        await onChipDelete(item.nextAppointment!);
-                        break;
-                    }
-                  }
-                : null,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => unawaited(onChipTap(item.nextAppointment)),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  width: 124,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: borderColor),
-                  ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      item.timeLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.72),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -1155,6 +1121,7 @@ class _AppointmentChipsCarousel extends StatelessWidget {
     );
   }
 }
+
 class _AppointmentChipData {
   const _AppointmentChipData({
     required this.label,
@@ -1166,7 +1133,7 @@ class _AppointmentChipData {
   final String label;
   final String status;
   final String timeLabel;
-  final MedicalAppointment appointment;
+  final MedicalAppointment? appointment;
 }
 
 class _TimelineCard extends StatelessWidget {
