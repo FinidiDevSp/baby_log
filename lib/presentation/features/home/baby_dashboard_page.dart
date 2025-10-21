@@ -709,12 +709,11 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
             accentColor: widget.accentColor,
             items: appointmentChipItems,
             onChipTap: (appointment) {
+              final page = appointment != null
+                  ? MedicalAgendaPage(initialAppointment: appointment)
+                  : const MedicalAgendaPage();
               Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => MedicalAgendaPage(
-                    initialAppointment: appointment,
-                  ),
-                ),
+                MaterialPageRoute(builder: (_) => page),
               );
             },
           ),
@@ -965,9 +964,13 @@ class _AppointmentChipsCarousel extends StatelessWidget {
     }
 
     final theme = Theme.of(context);
+    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    final extraHeightFactor =
+        (textScaleFactor - 1.0).clamp(0.0, 1.0) as double;
+    final carouselHeight = 76.0 + extraHeightFactor * 28.0;
 
     return SizedBox(
-      height: 76,
+      height: carouselHeight,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: items.length,
@@ -996,40 +999,43 @@ class _AppointmentChipsCarousel extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: borderColor),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: hasAppointment
-                            ? accentColor
-                            : Colors.white.withValues(alpha: 0.72),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: hasAppointment
+                              ? accentColor
+                              : Colors.white.withValues(alpha: 0.72),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      item.status,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(height: 4),
+                      Text(
+                        item.status,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      item.timeLabel,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.72),
+                      const SizedBox(height: 2),
+                      Text(
+                        item.timeLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.72),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
