@@ -482,6 +482,22 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     return l10n.dashboardElapsedDays(days);
   }
 
+  String _appointmentTypeLabel(
+    AppLocalizations l10n,
+    MedicalAppointmentType type,
+  ) {
+    switch (type) {
+      case MedicalAppointmentType.revision:
+        return l10n.agendaTypeRevision;
+      case MedicalAppointmentType.pediatrics:
+        return l10n.agendaTypePediatrics;
+      case MedicalAppointmentType.vaccines:
+        return l10n.agendaTypeVaccines;
+      case MedicalAppointmentType.emergency:
+        return l10n.agendaTypeEmergency;
+    }
+  }
+
   void _changeDay(int delta) {
     setState(() {
       _selectedDate = _selectedDate.add(Duration(days: delta));
@@ -670,36 +686,26 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       temperatureStatus = _formatElapsedTime(l10n, latestTemperature.timestamp);
     }
 
-    final today = DateTime.now();
-    final todayDate = DateTime(today.year, today.month, today.day);
-    final appointmentChipItems = List<_AppointmentChipData>.generate(3, (index) {
-      final targetDate = todayDate.add(Duration(days: index));
-      final items = appointments
-          .where((entry) => _isSameCalendarDay(entry.scheduledAt, targetDate))
-          .toList()
-        ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
-      late final String label;
-      switch (index) {
-        case 0:
-          label = l10n.dashboardAppointmentsChipLabelToday;
-          break;
-        case 1:
-          label = l10n.dashboardAppointmentsChipLabelTomorrow;
-          break;
-        default:
-          label = l10n.dashboardAppointmentsChipLabelInDays(index);
-      }
-      final statusLabel = l10n.dashboardAppointmentsCount(items.length);
-      final timeLabel = items.isEmpty
-          ? l10n.dashboardAppointmentsNoTime
-          : DateFormat.Hm(l10n.localeName).format(items.first.scheduledAt);
-      return _AppointmentChipData(
-        label: label,
-        status: statusLabel,
-        timeLabel: timeLabel,
-        nextAppointment: items.isEmpty ? null : items.first,
-      );
-    });
+    final now = DateTime.now();
+    final locale = l10n.localeName;
+    final upcomingAppointments = appointments
+        .where((appointment) => !appointment.scheduledAt.isBefore(now))
+        .toList()
+      ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+    final appointmentChipItems = upcomingAppointments
+        .map(
+          (appointment) => _AppointmentChipData(
+            label: DateFormat.MMMd(locale).format(appointment.scheduledAt),
+            status: appointment.title.trim().isNotEmpty
+                ? appointment.title.trim()
+                : _appointmentTypeLabel(l10n, appointment.type),
+            timeLabel: DateFormat.Hm(locale).format(appointment.scheduledAt),
+            appointment: appointment,
+          ),
+        )
+        .toList();
+    final appointmentsStatus =
+        l10n.dashboardAppointmentsCount(appointmentChipItems.length);
 
     final hasEntries =
         selectedFeedings.isNotEmpty ||
@@ -755,17 +761,18 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
             bathStatus: bathStatus,
             temperatureStatus: temperatureStatus,
             questionsStatus: questionsStatus,
+            appointmentsStatus: appointmentsStatus,
           ),
-          const SizedBox(height: 12),
-          _AppointmentChipsCarousel(
-            accentColor: widget.accentColor,
-            items: appointmentChipItems,
-            onChipTap: (appointment) =>
-                _openAgenda(appointment: appointment),
-            onChipEdit: (appointment) =>
-                _openAgenda(appointment: appointment),
-            onChipDelete: _confirmDeleteAppointment,
-          ),
+          if (appointmentChipItems.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _AppointmentChipsCarousel(
+              accentColor: widget.accentColor,
+              items: appointmentChipItems,
+              onChipTap: (appointment) =>
+                  _openAgenda(appointment: appointment),
+              onChipDelete: _confirmDeleteAppointment,
+            ),
+          ],
           const SizedBox(height: 12),
           _TimelineHeader(
             selectedDate: _selectedDate,
@@ -819,6 +826,7 @@ class _ShortcutCarousel extends StatelessWidget {
     this.bathStatus,
     this.temperatureStatus,
     this.questionsStatus,
+    this.appointmentsStatus,
   });
 
   final VoidCallback onBottleTap;
@@ -834,6 +842,7 @@ class _ShortcutCarousel extends StatelessWidget {
   final String? bathStatus;
   final String? temperatureStatus;
   final String? questionsStatus;
+  final String? appointmentsStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -890,7 +899,7 @@ class _ShortcutCarousel extends StatelessWidget {
         label: l10n.dashboardMedicalAgendaLabel,
         onTap: onAgendaTap,
         heroTag: 'agenda_shortcut',
-        status: null,
+        status: appointmentsStatus,
       ),
       _ShortcutData(
         color: const Color(0xFF8E8CD8),
@@ -1000,14 +1009,12 @@ class _AppointmentChipsCarousel extends StatelessWidget {
     required this.accentColor,
     required this.items,
     required this.onChipTap,
-    required this.onChipEdit,
     required this.onChipDelete,
   });
 
   final Color accentColor;
   final List<_AppointmentChipData> items;
-  final Future<void> Function(MedicalAppointment? appointment) onChipTap;
-  final Future<void> Function(MedicalAppointment appointment) onChipEdit;
+  final Future<void> Function(MedicalAppointment appointment) onChipTap;
   final Future<void> Function(MedicalAppointment appointment) onChipDelete;
 
   @override
@@ -1016,7 +1023,6 @@ class _AppointmentChipsCarousel extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final textScaleFactor = MediaQuery.textScaleFactorOf(context);
     final extraHeightFactor =
@@ -1031,127 +1037,80 @@ class _AppointmentChipsCarousel extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final item = items[index];
-          final hasAppointment = item.nextAppointment != null;
-          final backgroundColor = hasAppointment
-              ? accentColor.withValues(alpha: 0.18)
-              : AppColors.surface;
-          final borderColor = hasAppointment
-              ? accentColor.withValues(alpha: 0.5)
-              : Colors.white.withValues(alpha: 0.08);
+          final backgroundColor = accentColor.withValues(alpha: 0.18);
+          final borderColor = accentColor.withValues(alpha: 0.5);
 
-          return GestureDetector(
-            onLongPressStart: hasAppointment
-                ? (details) async {
-                    final overlaySize = MediaQuery.sizeOf(context);
-                    final selection = await showMenu<_AppointmentQuickAction>(
-                      context: context,
-                      position: RelativeRect.fromLTRB(
-                        details.globalPosition.dx,
-                        details.globalPosition.dy,
-                        overlaySize.width - details.globalPosition.dx,
-                        overlaySize.height - details.globalPosition.dy,
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => unawaited(onChipTap(item.appointment)),
+              onLongPress: () => unawaited(onChipDelete(item.appointment)),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: 196,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: borderColor),
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: accentColor,
+                        ),
                       ),
-                      items: [
-                        PopupMenuItem(
-                          value: _AppointmentQuickAction.edit,
-                          child: Text(l10n.agendaEditAction),
+                      const SizedBox(height: 4),
+                      Text(
+                        item.status,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
-                        PopupMenuItem(
-                          value: _AppointmentQuickAction.delete,
-                          child: Text(l10n.agendaDeleteAction),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        item.timeLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.72),
                         ),
-                      ],
-                    );
-
-                    if (selection == null) {
-                      return;
-                    }
-
-                    switch (selection) {
-                      case _AppointmentQuickAction.edit:
-                        await onChipEdit(item.nextAppointment!);
-                        break;
-                      case _AppointmentQuickAction.delete:
-                        await onChipDelete(item.nextAppointment!);
-                        break;
-                    }
-                  }
-                : null,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => unawaited(onChipTap(item.nextAppointment)),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  width: 124,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: borderColor),
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: hasAppointment
-                                ? accentColor
-                                : Colors.white.withValues(alpha: 0.72),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.status,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          item.timeLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.72),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            );
+            ),
+          );
         },
       ),
     );
   }
 }
-
-enum _AppointmentQuickAction { edit, delete }
-
 class _AppointmentChipData {
   const _AppointmentChipData({
     required this.label,
     required this.status,
     required this.timeLabel,
-    required this.nextAppointment,
+    required this.appointment,
   });
 
   final String label;
   final String status;
   final String timeLabel;
-  final MedicalAppointment? nextAppointment;
+  final MedicalAppointment appointment;
 }
 
 class _TimelineCard extends StatelessWidget {

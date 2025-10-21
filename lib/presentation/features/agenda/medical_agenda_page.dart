@@ -22,6 +22,7 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
   final _titleController = TextEditingController();
   final _notesController = TextEditingController();
   final _dateController = TextEditingController();
+  final _scrollController = ScrollController();
 
   MedicalAppointmentType _selectedType = MedicalAppointmentType.revision;
   DateTime? _selectedDateTime;
@@ -36,6 +37,7 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
     _titleController.dispose();
     _notesController.dispose();
     _dateController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -89,6 +91,7 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
       ),
       body: SafeArea(
         child: ListView(
+          controller: _scrollController,
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
           children: [
             Center(
@@ -176,9 +179,10 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
       _dateController.text = _formatDate(_selectedDateTime, l10n);
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final scrollableState = Scrollable.of(context);
-      scrollableState?.position.animateTo(
+      if (!mounted || !_scrollController.hasClients) {
+        return;
+      }
+      _scrollController.animateTo(
         0,
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOut,
