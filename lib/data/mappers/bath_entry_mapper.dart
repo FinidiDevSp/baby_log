@@ -5,7 +5,7 @@ import '../local/app_database.dart' as db;
 
 BathEntry mapBathRowToDomain(db.BathEntryRow row) {
   final typeIndex = row.type;
-  final safeIndex = typeIndex.clamp(0, BathType.values.length - 1) as int;
+  final safeIndex = typeIndex.clamp(0, BathType.values.length - 1);
   final type = BathType.values[safeIndex];
   return BathEntry(
     id: row.id,

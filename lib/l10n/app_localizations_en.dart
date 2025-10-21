@@ -178,7 +178,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardFoodLabel => 'Feeding';
 
   @override
-  String get dashboardMedicalAgendaLabel => 'APPOINTMENTS';
+  String get dashboardMedicalAgendaLabel => 'Appointments';
 
   @override
   String get agendaTitle => 'Medical agenda';
@@ -263,6 +263,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agendaDeleteSuccess => 'Appointment deleted.';
 
   @override
+  String get agendaTabTimeline => 'Timeline';
+
+  @override
+  String get agendaTabAppointments => 'Appointments';
+
+  @override
   String get agendaTypeRevision => 'Check-up';
 
   @override
@@ -303,6 +309,27 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get dashboardAppointmentsMarkDone => 'Mark as attended';
+
+  @override
+  String get dashboardAppointmentsMarkPending => 'Mark as pending';
+
+  @override
+  String get dashboardAppointmentsMarkedDone =>
+      'Appointment marked as attended.';
+
+  @override
+  String get dashboardAppointmentsMarkedPending =>
+      'Appointment marked as pending.';
+
+  @override
+  String get dashboardAppointmentsNotesTitle => 'Appointment notes';
+
+  @override
+  String get dashboardAppointmentsNotesEmpty =>
+      'This appointment has no notes.';
+
+  @override
   String dashboardAppointmentsCount(num count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -316,6 +343,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dashboardAppointmentsNoTime => '—';
+
+  @override
+  String get dashboardAppointmentsPendingBadge => 'Pending';
+
+  @override
+  String get dashboardAppointmentsOpenAgenda => 'Open in agenda';
 
   @override
   String dashboardQuestionsPending(int count) {

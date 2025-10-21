@@ -419,7 +419,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardMedicalAgendaLabel.
   ///
   /// In es, this message translates to:
-  /// **'CITAS'**
+  /// **'Citas'**
   String get dashboardMedicalAgendaLabel;
 
   /// No description provided for @agendaTitle.
@@ -584,6 +584,18 @@ abstract class AppLocalizations {
   /// **'Cita eliminada.'**
   String get agendaDeleteSuccess;
 
+  /// No description provided for @agendaTabTimeline.
+  ///
+  /// In es, this message translates to:
+  /// **'Línea de tiempo'**
+  String get agendaTabTimeline;
+
+  /// No description provided for @agendaTabAppointments.
+  ///
+  /// In es, this message translates to:
+  /// **'Citas'**
+  String get agendaTabAppointments;
+
   /// No description provided for @agendaTypeRevision.
   ///
   /// In es, this message translates to:
@@ -644,6 +656,42 @@ abstract class AppLocalizations {
   /// **'+{count} días'**
   String dashboardAppointmentsChipLabelInDays(Object count);
 
+  /// No description provided for @dashboardAppointmentsMarkDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar como atendida'**
+  String get dashboardAppointmentsMarkDone;
+
+  /// No description provided for @dashboardAppointmentsMarkPending.
+  ///
+  /// In es, this message translates to:
+  /// **'Volver a pendiente'**
+  String get dashboardAppointmentsMarkPending;
+
+  /// No description provided for @dashboardAppointmentsMarkedDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Cita marcada como atendida.'**
+  String get dashboardAppointmentsMarkedDone;
+
+  /// No description provided for @dashboardAppointmentsMarkedPending.
+  ///
+  /// In es, this message translates to:
+  /// **'Cita marcada como pendiente.'**
+  String get dashboardAppointmentsMarkedPending;
+
+  /// No description provided for @dashboardAppointmentsNotesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas de la cita'**
+  String get dashboardAppointmentsNotesTitle;
+
+  /// No description provided for @dashboardAppointmentsNotesEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta cita no tiene notas.'**
+  String get dashboardAppointmentsNotesEmpty;
+
   /// No description provided for @dashboardAppointmentsCount.
   ///
   /// In es, this message translates to:
@@ -655,6 +703,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'—'**
   String get dashboardAppointmentsNoTime;
+
+  /// No description provided for @dashboardAppointmentsPendingBadge.
+  ///
+  /// In es, this message translates to:
+  /// **'Pendiente'**
+  String get dashboardAppointmentsPendingBadge;
+
+  /// No description provided for @dashboardAppointmentsOpenAgenda.
+  ///
+  /// In es, this message translates to:
+  /// **'Abrir en agenda'**
+  String get dashboardAppointmentsOpenAgenda;
 
   /// Estado mostrado en el acceso directo de preguntas cuando hay pendientes
   ///

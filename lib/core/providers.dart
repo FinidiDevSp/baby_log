@@ -9,6 +9,7 @@ import '../data/repositories/stool_repository_impl.dart';
 import '../data/repositories/temperature_repository_impl.dart';
 import '../data/repositories/vomit_repository_impl.dart';
 import '../data/repositories/pediatrician_question_repository_impl.dart';
+import '../data/repositories/medical_appointment_repository_impl.dart';
 import '../data/services/csv_export_service.dart';
 import '../data/services/csv_import_service.dart';
 import '../domain/entities/baby_profile.dart';
@@ -19,6 +20,7 @@ import '../domain/repositories/stool_repository.dart';
 import '../domain/repositories/temperature_repository.dart';
 import '../domain/repositories/vomit_repository.dart';
 import '../domain/repositories/pediatrician_question_repository.dart';
+import '../domain/repositories/medical_appointment_repository.dart';
 
 final appDatabaseProvider = Provider<db.AppDatabase>((ref) {
   final database = db.AppDatabase();
@@ -60,6 +62,12 @@ final pediatricianQuestionRepositoryProvider =
     Provider<PediatricianQuestionRepository>((ref) {
       final database = ref.watch(appDatabaseProvider);
       return PediatricianQuestionRepositoryImpl(database);
+    });
+
+final medicalAppointmentRepositoryProvider =
+    Provider<MedicalAppointmentRepository>((ref) {
+      final database = ref.watch(appDatabaseProvider);
+      return MedicalAppointmentRepositoryImpl(database);
     });
 
 final csvImportServiceProvider = Provider<CsvImportService>((ref) {

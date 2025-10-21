@@ -103,6 +103,23 @@ class PediatricianQuestions extends Table {
   TextColumn get resolutionNote => text().nullable()();
 }
 
+@DataClassName('MedicalAppointmentRow')
+class MedicalAppointments extends Table {
+  TextColumn get id => text()();
+  TextColumn get title => text().withLength(min: 1, max: 120)();
+  IntColumn get type => integer()();
+  DateTimeColumn get scheduledAt => dateTime()();
+  TextColumn get notes => text().nullable()();
+  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt =>
+      dateTime().clientDefault(() => DateTime.now())();
+  DateTimeColumn get updatedAt =>
+      dateTime().clientDefault(() => DateTime.now())();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     BabyProfiles,
@@ -112,6 +129,7 @@ class PediatricianQuestions extends Table {
     BathEntries,
     TemperatureEntries,
     PediatricianQuestions,
+    MedicalAppointments,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -119,7 +137,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -152,6 +170,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 6) {
         await m.createTable(pediatricianQuestions);
+      }
+      if (from < 8) {
+        await m.createTable(medicalAppointments);
       }
     },
   );
@@ -200,7 +221,9 @@ class AppDatabase extends _$AppDatabase {
     int id,
     BottleFeedingsCompanion entry,
   ) async {
-    await (update(bottleFeedings)..where((tbl) => tbl.id.equals(id))).write(entry);
+    await (update(
+      bottleFeedings,
+    )..where((tbl) => tbl.id.equals(id))).write(entry);
     final query = select(bottleFeedings)..where((tbl) => tbl.id.equals(id));
     final row = await query.getSingleOrNull();
     if (row == null) {
@@ -237,7 +260,9 @@ class AppDatabase extends _$AppDatabase {
     int id,
     StoolEntriesCompanion entry,
   ) async {
-    await (update(stoolEntries)..where((tbl) => tbl.id.equals(id))).write(entry);
+    await (update(
+      stoolEntries,
+    )..where((tbl) => tbl.id.equals(id))).write(entry);
     final query = select(stoolEntries)..where((tbl) => tbl.id.equals(id));
     final row = await query.getSingleOrNull();
     if (row == null) {
@@ -274,7 +299,9 @@ class AppDatabase extends _$AppDatabase {
     int id,
     VomitEntriesCompanion entry,
   ) async {
-    await (update(vomitEntries)..where((tbl) => tbl.id.equals(id))).write(entry);
+    await (update(
+      vomitEntries,
+    )..where((tbl) => tbl.id.equals(id))).write(entry);
     final query = select(vomitEntries)..where((tbl) => tbl.id.equals(id));
     final row = await query.getSingleOrNull();
     if (row == null) {
@@ -350,8 +377,9 @@ class AppDatabase extends _$AppDatabase {
     int id,
     TemperatureEntriesCompanion entry,
   ) async {
-    await (update(temperatureEntries)..where((tbl) => tbl.id.equals(id)))
-        .write(entry);
+    await (update(
+      temperatureEntries,
+    )..where((tbl) => tbl.id.equals(id))).write(entry);
     final query = select(temperatureEntries)..where((tbl) => tbl.id.equals(id));
     final row = await query.getSingleOrNull();
     if (row == null) {
@@ -407,5 +435,55 @@ class AppDatabase extends _$AppDatabase {
     await (delete(
       pediatricianQuestions,
     )..where((tbl) => tbl.id.equals(id))).go();
+  }
+
+  Future<List<MedicalAppointmentRow>> fetchMedicalAppointments() {
+    final query = (select(medicalAppointments)
+      ..orderBy([
+        (tbl) => OrderingTerm.asc(tbl.scheduledAt),
+        (tbl) => OrderingTerm.asc(tbl.id),
+      ]));
+    return query.get();
+  }
+
+  Stream<List<MedicalAppointmentRow>> watchMedicalAppointments() {
+    final query = (select(medicalAppointments)
+      ..orderBy([
+        (tbl) => OrderingTerm.asc(tbl.scheduledAt),
+        (tbl) => OrderingTerm.asc(tbl.id),
+      ]));
+    return query.watch();
+  }
+
+  Future<MedicalAppointmentRow> createMedicalAppointment(
+    MedicalAppointmentsCompanion entry,
+  ) async {
+    await into(medicalAppointments).insert(entry);
+    final query = select(medicalAppointments)
+      ..where((tbl) => tbl.id.equals(entry.id.value));
+    final row = await query.getSingleOrNull();
+    if (row == null) {
+      throw StateError('No se pudo obtener la cita médica recién creada.');
+    }
+    return row;
+  }
+
+  Future<MedicalAppointmentRow> updateMedicalAppointment(
+    String id,
+    MedicalAppointmentsCompanion entry,
+  ) async {
+    await (update(medicalAppointments)..where((tbl) => tbl.id.equals(id)))
+        .write(entry.copyWith(updatedAt: Value(DateTime.now())));
+    final query = select(medicalAppointments)
+      ..where((tbl) => tbl.id.equals(id));
+    final row = await query.getSingleOrNull();
+    if (row == null) {
+      throw StateError('No se pudo obtener la cita médica actualizada.');
+    }
+    return row;
+  }
+
+  Future<void> deleteMedicalAppointment(String id) async {
+    await (delete(medicalAppointments)..where((tbl) => tbl.id.equals(id))).go();
   }
 }

@@ -11,6 +11,7 @@ class MedicalAppointment extends Equatable {
     required this.type,
     required this.scheduledAt,
     this.notes,
+    this.isCompleted = false,
   });
 
   /// Unique identifier generated on the client while persistence is implemented.
@@ -28,6 +29,9 @@ class MedicalAppointment extends Equatable {
   /// Optional notes for additional context.
   final String? notes;
 
+  /// Indicates whether the caregiver already attended this appointment.
+  final bool isCompleted;
+
   /// Returns a new instance with the provided values replaced.
   MedicalAppointment copyWith({
     String? id,
@@ -35,6 +39,7 @@ class MedicalAppointment extends Equatable {
     MedicalAppointmentType? type,
     DateTime? scheduledAt,
     String? notes,
+    bool? isCompleted,
   }) {
     return MedicalAppointment(
       id: id ?? this.id,
@@ -42,9 +47,10 @@ class MedicalAppointment extends Equatable {
       type: type ?? this.type,
       scheduledAt: scheduledAt ?? this.scheduledAt,
       notes: notes ?? this.notes,
+      isCompleted: isCompleted ?? this.isCompleted,
     );
   }
 
   @override
-  List<Object?> get props => [id, title, type, scheduledAt, notes];
+  List<Object?> get props => [id, title, type, scheduledAt, notes, isCompleted];
 }

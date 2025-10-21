@@ -226,7 +226,7 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    AppLocalizations.of(context);
     final rangeStart = _selectedRange.start;
     final rangeEnd = _selectedRange.end;
     final rangeDays = _rangeDays;

@@ -5,7 +5,7 @@ import '../local/app_database.dart' as db;
 
 VomitEntry mapVomitRowToDomain(db.VomitEntryRow row) {
   final amountIndex = row.amount;
-  final safeIndex = amountIndex.clamp(0, VomitAmount.values.length - 1) as int;
+  final safeIndex = amountIndex.clamp(0, VomitAmount.values.length - 1);
   final amount = VomitAmount.values[safeIndex];
   return VomitEntry(
     id: row.id,

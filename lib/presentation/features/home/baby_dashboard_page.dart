@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +11,6 @@ import 'package:baby_log/core/providers.dart';
 import 'package:baby_log/core/theme/app_colors.dart';
 import 'package:baby_log/domain/entities/baby_profile.dart';
 import 'package:baby_log/data/services/csv_import_service.dart';
-import 'package:baby_log/data/services/csv_export_service.dart';
 import 'package:baby_log/domain/entities/bath_entry.dart';
 import 'package:baby_log/domain/entities/feeding_entry.dart';
 import 'package:baby_log/domain/entities/medical_appointment.dart';
@@ -27,6 +24,7 @@ import 'package:baby_log/presentation/features/agenda/medical_agenda_page.dart';
 import 'package:baby_log/presentation/features/account/account_settings_view.dart';
 import 'package:baby_log/presentation/features/questions/pediatrician_questions_page.dart';
 import 'package:baby_log/presentation/widgets/baby_avatar.dart';
+import 'package:baby_log/presentation/shared/medical_appointment_style.dart';
 
 import 'state/bath_entries_provider.dart';
 import 'state/feeding_entries_provider.dart';
@@ -51,6 +49,7 @@ const double _timelineTileBaseHeight = 70.0;
 const double _timelineMarkerSize = 18.0;
 const double _timelineMarkerTop = 38.0;
 const double _timelineMarkerSpacing = 20.0;
+const _appointmentsExpandedPrefKey = 'dashboard.lastExpandedAppointmentId';
 
 bool _isSameDay(DateTime a, DateTime b) {
   return a.year == b.year && a.month == b.month && a.day == b.day;
@@ -170,27 +169,15 @@ class _BabyDashboardPageState extends ConsumerState<BabyDashboardPage> {
         ],
       ),
       body: IndexedStack(index: _currentIndex, children: pages),
-      bottomNavigationBar: NavigationBar(
-        backgroundColor: AppColors.surface,
-        indicatorColor: accentColor.withValues(alpha: 0.18),
-        indicatorShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-        ),
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
+      bottomNavigationBar: _DashboardFooter(
+        accentColor: accentColor,
+        currentIndex: _currentIndex,
+        destinations: destinations,
+        onIndexSelected: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
-        destinations: destinations
-            .map(
-              (item) => NavigationDestination(
-                icon: Icon(item.icon),
-                selectedIcon: Icon(item.icon, color: accentColor),
-                label: item.label,
-              ),
-            )
-            .toList(),
       ),
     );
   }
@@ -210,6 +197,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
   double _dayDragDelta = 0;
   bool _isDraggingDay = false;
   int _lastDayAnimationDirection = 0;
+  String? _lastExpandedAppointmentId;
 
   Future<void> _handleImport() async {
     final l10n = AppLocalizations.of(context);
@@ -335,22 +323,60 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
 
   Future<void> _confirmDeleteAppointment(MedicalAppointment appointment) async {
     final l10n = AppLocalizations.of(context);
-    final shouldDelete = await showDialog<bool>(
+    final shouldDelete = await showModalBottomSheet<bool>(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(l10n.agendaDeleteConfirmTitle),
-          content: Text(l10n.agendaDeleteConfirmMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(l10n.agendaDeleteConfirmCancel),
+      showDragHandle: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        final theme = Theme.of(sheetContext);
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.agendaDeleteConfirmTitle,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.agendaDeleteConfirmMessage,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () =>
+                            Navigator.of(sheetContext).maybePop(false),
+                        child: Text(l10n.agendaDeleteConfirmCancel),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: theme.colorScheme.error,
+                          foregroundColor: theme.colorScheme.onError,
+                        ),
+                        onPressed: () =>
+                            Navigator.of(sheetContext).maybePop(true),
+                        child: Text(l10n.agendaDeleteConfirmAccept),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(l10n.agendaDeleteConfirmAccept),
-            ),
-          ],
+          ),
         );
       },
     );
@@ -359,7 +385,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       return;
     }
 
-    ref
+    await ref
         .read(medicalAppointmentsProvider.notifier)
         .removeAppointment(appointment.id);
 
@@ -370,6 +396,88 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(l10n.agendaDeleteSuccess)));
+  }
+
+  Future<void> _toggleAppointmentCompletion(
+    MedicalAppointment appointment,
+    bool markAsCompleted,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    await ref
+        .read(medicalAppointmentsProvider.notifier)
+        .setAppointmentCompletion(
+          id: appointment.id,
+          isCompleted: markAsCompleted,
+        );
+
+    if (!mounted) {
+      return;
+    }
+
+    final feedbackMessage = markAsCompleted
+        ? l10n.dashboardAppointmentsMarkedDone
+        : l10n.dashboardAppointmentsMarkedPending;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(feedbackMessage)));
+  }
+
+  void _handleExpandedTicketChange(String? appointmentId) {
+    final preferences = ref.read(sharedPreferencesProvider);
+    if (appointmentId == null) {
+      preferences.remove(_appointmentsExpandedPrefKey);
+    } else {
+      preferences.setString(_appointmentsExpandedPrefKey, appointmentId);
+    }
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _lastExpandedAppointmentId = appointmentId;
+    });
+  }
+
+  Future<void> _showAppointmentNotes(MedicalAppointment appointment) async {
+    final l10n = AppLocalizations.of(context);
+    final notes = appointment.notes?.trim();
+
+    if (notes == null || notes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.dashboardAppointmentsNotesEmpty)),
+      );
+      return;
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        final theme = Theme.of(sheetContext);
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.dashboardAppointmentsNotesTitle,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(notes, style: theme.textTheme.bodyMedium),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<CsvImportMode?> _askImportMode(CsvImportPreview preview) {
@@ -439,11 +547,38 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     );
   }
 
+  String _appointmentTypeLabel(
+    AppLocalizations l10n,
+    MedicalAppointmentType type,
+  ) {
+    switch (type) {
+      case MedicalAppointmentType.revision:
+        return l10n.agendaTypeRevision;
+      case MedicalAppointmentType.pediatrics:
+        return l10n.agendaTypePediatrics;
+      case MedicalAppointmentType.vaccines:
+        return l10n.agendaTypeVaccines;
+      case MedicalAppointmentType.emergency:
+        return l10n.agendaTypeEmergency;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
     _selectedDate = DateTime(now.year, now.month, now.day);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final prefs = ref.read(sharedPreferencesProvider);
+      setState(() {
+        _lastExpandedAppointmentId = prefs.getString(
+          _appointmentsExpandedPrefKey,
+        );
+      });
+    });
   }
 
   Future<void> _openDayPicker() async {
@@ -485,22 +620,6 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     }
     final days = difference.inDays;
     return l10n.dashboardElapsedDays(days);
-  }
-
-  String _appointmentTypeLabel(
-    AppLocalizations l10n,
-    MedicalAppointmentType type,
-  ) {
-    switch (type) {
-      case MedicalAppointmentType.revision:
-        return l10n.agendaTypeRevision;
-      case MedicalAppointmentType.pediatrics:
-        return l10n.agendaTypePediatrics;
-      case MedicalAppointmentType.vaccines:
-        return l10n.agendaTypeVaccines;
-      case MedicalAppointmentType.emergency:
-        return l10n.agendaTypeEmergency;
-    }
   }
 
   void _changeDay(int delta) {
@@ -691,41 +810,88 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       temperatureStatus = _formatElapsedTime(l10n, latestTemperature.timestamp);
     }
 
-    final today = DateTime.now();
-    final todayDate = DateTime(today.year, today.month, today.day);
-    final appointmentChipItems = List<_AppointmentChipData>.generate(3, (
-      index,
-    ) {
-      final targetDate = todayDate.add(Duration(days: index));
-      final items =
-          appointments
-              .where(
-                (entry) => _isSameCalendarDay(entry.scheduledAt, targetDate),
-              )
+    String? appointmentsStatus;
+    final now = DateTime.now();
+    final pendingAppointments = appointments
+        .where((appointment) => !appointment.isCompleted)
+        .toList();
+    if (pendingAppointments.isEmpty) {
+      appointmentsStatus = l10n.dashboardAppointmentsCount(0);
+    } else {
+      final upcoming =
+          pendingAppointments
+              .where((appointment) => !appointment.scheduledAt.isBefore(now))
               .toList()
             ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
-      late final String label;
-      switch (index) {
-        case 0:
-          label = l10n.dashboardAppointmentsChipLabelToday;
-          break;
-        case 1:
-          label = l10n.dashboardAppointmentsChipLabelTomorrow;
-          break;
-        default:
-          label = l10n.dashboardAppointmentsChipLabelInDays(index);
+      if (upcoming.isNotEmpty) {
+        final next = upcoming.first;
+        final todayDate = DateTime(now.year, now.month, now.day);
+        final nextDate = DateTime(
+          next.scheduledAt.year,
+          next.scheduledAt.month,
+          next.scheduledAt.day,
+        );
+        final difference = nextDate.difference(todayDate).inDays;
+        if (difference <= 0) {
+          appointmentsStatus = l10n.dashboardAgendaStatusToday;
+        } else if (difference == 1) {
+          appointmentsStatus = l10n.dashboardAgendaStatusTomorrow;
+        } else {
+          appointmentsStatus = l10n.dashboardAgendaStatusInDays(difference);
+        }
+      } else {
+        appointmentsStatus = l10n.dashboardAppointmentsCount(
+          pendingAppointments.length,
+        );
       }
-      final statusLabel = l10n.dashboardAppointmentsCount(items.length);
-      final timeLabel = items.isEmpty
-          ? l10n.dashboardAppointmentsNoTime
-          : DateFormat.Hm(l10n.localeName).format(items.first.scheduledAt);
-      return _AppointmentChipData(
-        label: label,
-        status: statusLabel,
-        timeLabel: timeLabel,
-        appointment: items.isEmpty ? null : items.first,
-      );
-    });
+    }
+
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final upcomingAppointments =
+        pendingAppointments
+            .where((entry) => !entry.scheduledAt.isBefore(today))
+            .toList()
+          ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+    final appointmentTicketItems = <_AppointmentTicketData>[
+      for (var index = 0; index < upcomingAppointments.length; index++)
+        () {
+          final appointment = upcomingAppointments[index];
+          final appointmentDate = DateTime(
+            appointment.scheduledAt.year,
+            appointment.scheduledAt.month,
+            appointment.scheduledAt.day,
+          );
+          final dayDifference = appointmentDate.difference(todayDate).inDays;
+          final dayLabel = dayDifference <= 0
+              ? l10n.dashboardAppointmentsChipLabelToday
+              : dayDifference == 1
+              ? l10n.dashboardAppointmentsChipLabelTomorrow
+              : DateFormat.MMMd(l10n.localeName).format(appointmentDate);
+          final timeLabel = DateFormat.Hm(
+            l10n.localeName,
+          ).format(appointment.scheduledAt);
+          final typeLabel = _appointmentTypeLabel(l10n, appointment.type);
+          final shouldShine =
+              index == 0 &&
+              appointment.scheduledAt.isAfter(now) &&
+              appointment.scheduledAt.difference(now) <=
+                  const Duration(hours: 24) &&
+              !appointment.isCompleted;
+          final style = MedicalAppointmentVisualStyle.resolve(appointment.type);
+          return _AppointmentTicketData(
+            appointment: appointment,
+            typeLabel: typeLabel,
+            dayLabel: dayLabel,
+            timeLabel: timeLabel,
+            title: appointment.title,
+            notes: appointment.notes,
+            shouldAnimateAccent: shouldShine,
+            icon: style.icon,
+            accentColor: style.color,
+          );
+        }(),
+    ];
 
     final hasEntries =
         selectedFeedings.isNotEmpty ||
@@ -783,14 +949,17 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
             questionsStatus: questionsStatus,
             appointmentsStatus: appointmentsStatus,
           ),
-          if (appointmentChipItems.isNotEmpty) ...[
+          if (appointmentTicketItems.isNotEmpty) ...[
             const SizedBox(height: 12),
-            _AppointmentChipsCarousel(
-              accentColor: widget.accentColor,
-              items: appointmentChipItems,
-              onChipTap: (appointment) =>
+            _AppointmentTicketsStack(
+              items: appointmentTicketItems,
+              initialExpandedId: _lastExpandedAppointmentId,
+              onExpandedChanged: _handleExpandedTicketChange,
+              onOpenDetails: (appointment) =>
                   _openAgenda(appointment: appointment),
-              onChipDelete: _confirmDeleteAppointment,
+              onDelete: _confirmDeleteAppointment,
+              onToggleCompletion: _toggleAppointmentCompletion,
+              onShowNotes: _showAppointmentNotes,
             ),
           ],
           const SizedBox(height: 12),
@@ -1024,116 +1193,587 @@ class _ShortcutCircle extends StatelessWidget {
   }
 }
 
-class _AppointmentChipsCarousel extends StatelessWidget {
-  const _AppointmentChipsCarousel({
-    required this.accentColor,
+class _AppointmentTicketsStack extends StatefulWidget {
+  const _AppointmentTicketsStack({
     required this.items,
-    required this.onChipTap,
-    required this.onChipDelete,
+    required this.onOpenDetails,
+    required this.onDelete,
+    required this.onToggleCompletion,
+    required this.onShowNotes,
+    this.initialExpandedId,
+    this.onExpandedChanged,
   });
 
-  final Color accentColor;
-  final List<_AppointmentChipData> items;
-  final Future<void> Function(MedicalAppointment? appointment) onChipTap;
-  final Future<void> Function(MedicalAppointment appointment) onChipDelete;
+  final List<_AppointmentTicketData> items;
+  final Future<void> Function(MedicalAppointment appointment) onOpenDetails;
+  final Future<void> Function(MedicalAppointment appointment) onDelete;
+  final Future<void> Function(
+    MedicalAppointment appointment,
+    bool markAsCompleted,
+  )
+  onToggleCompletion;
+  final Future<void> Function(MedicalAppointment appointment) onShowNotes;
+  final String? initialExpandedId;
+  final ValueChanged<String?>? onExpandedChanged;
+
+  @override
+  State<_AppointmentTicketsStack> createState() =>
+      _AppointmentTicketsStackState();
+}
+
+class _AppointmentTicketsStackState extends State<_AppointmentTicketsStack>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
+  String? _expandedId;
+  late final AnimationController _shineController;
+  Timer? _shineTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _shineController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _expandedId = _findValidExpandedId(widget.initialExpandedId);
+    widget.onExpandedChanged?.call(_expandedId);
+    if (_shouldAnimateAccent) {
+      _startShineLoop(initialDelay: const Duration(milliseconds: 800));
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _AppointmentTicketsStack oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final resolvedId = _findValidExpandedId(
+      widget.initialExpandedId ?? _expandedId,
+    );
+    if (resolvedId != _expandedId) {
+      setState(() {
+        _expandedId = resolvedId;
+      });
+      widget.onExpandedChanged?.call(_expandedId);
+    } else if (widget.items.isEmpty && _expandedId != null) {
+      setState(() {
+        _expandedId = null;
+      });
+      widget.onExpandedChanged?.call(null);
+    }
+    _syncShineLoop();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _stopShineLoop();
+    _shineController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      _stopShineLoop();
+    } else if (state == AppLifecycleState.resumed) {
+      if (_shouldAnimateAccent) {
+        _startShineLoop(initialDelay: const Duration(milliseconds: 600));
+      }
+    }
+  }
+
+  bool get _shouldAnimateAccent {
+    if (widget.items.isEmpty) {
+      return false;
+    }
+    final first = widget.items.first;
+    if (!first.shouldAnimateAccent) {
+      return false;
+    }
+    return _expandedId == null || _expandedId == first.appointment.id;
+  }
+
+  void _handleExpand(String appointmentId) {
+    if (_expandedId == appointmentId) {
+      return;
+    }
+    setState(() {
+      _expandedId = appointmentId;
+    });
+    widget.onExpandedChanged?.call(_expandedId);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      if (_shouldAnimateAccent) {
+        _startShineLoop();
+      } else {
+        _stopShineLoop();
+      }
+    });
+  }
+
+  void _startShineLoop({Duration initialDelay = Duration.zero}) {
+    _stopShineLoop();
+    if (!_shouldAnimateAccent) {
+      return;
+    }
+    if (initialDelay == Duration.zero) {
+      _triggerShine();
+    } else {
+      Future<void>.delayed(initialDelay, () {
+        if (mounted && _shouldAnimateAccent) {
+          _triggerShine();
+        }
+      });
+    }
+    _shineTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      _triggerShine();
+    });
+  }
+
+  void _triggerShine() {
+    if (!mounted || !_shouldAnimateAccent) {
+      return;
+    }
+    _shineController.forward(from: 0);
+  }
+
+  void _stopShineLoop() {
+    _shineTimer?.cancel();
+    _shineTimer = null;
+    if (_shineController.isAnimating) {
+      _shineController.stop();
+    }
+  }
+
+  void _syncShineLoop() {
+    if (_shouldAnimateAccent) {
+      _startShineLoop();
+    } else {
+      _stopShineLoop();
+    }
+  }
+
+  String? _findValidExpandedId(String? preferredId) {
+    if (widget.items.isEmpty) {
+      return null;
+    }
+    if (preferredId != null &&
+        widget.items.any((item) => item.appointment.id == preferredId)) {
+      return preferredId;
+    }
+    return widget.items.first.appointment.id;
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) {
+    if (widget.items.isEmpty) {
       return const SizedBox.shrink();
     }
 
     final theme = Theme.of(context);
-    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
-    final extraHeightFactor =
-        math.max(0.0, math.min(1.0, textScaleFactor - 1.0));
-    final carouselHeight = 76.0 + extraHeightFactor * 28.0;
+    final l10n = AppLocalizations.of(context);
+    final expandedId = _expandedId;
+    final containerColor = theme.colorScheme.surfaceContainerHigh.withValues(
+      alpha: 0.32,
+    );
+    final outlineColor = theme.colorScheme.outlineVariant.withValues(
+      alpha: 0.18,
+    );
 
-    return SizedBox(
-      height: carouselHeight,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: items.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final item = items[index];
-          final appointment = item.appointment;
-          final backgroundColor = accentColor.withValues(alpha: 0.18);
-          final borderColor = accentColor.withValues(alpha: 0.5);
-
-          return Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => unawaited(onChipTap(appointment)),
-              onLongPress: appointment == null
-                  ? null
-                  : () => unawaited(onChipDelete(appointment)),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                width: 196,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: borderColor),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: accentColor,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.status,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      item.timeLabel,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.72),
-                      ),
-                    ),
-                  ],
+    return Container(
+      padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
+      decoration: BoxDecoration(
+        color: containerColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: outlineColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(LucideIcons.ticket, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.dashboardMedicalAgendaLabel,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          for (var index = 0; index < widget.items.length; index++) ...[
+            _AppointmentTicketItem(
+              data: widget.items[index],
+              isExpanded: widget.items[index].appointment.id == expandedId,
+              showShine:
+                  widget.items[index].shouldAnimateAccent &&
+                  widget.items[index].appointment.id == expandedId,
+              shineAnimation: _shineController,
+              onExpand: () => _handleExpand(widget.items[index].appointment.id),
+              onOpenDetails: () => unawaited(
+                widget.onOpenDetails(widget.items[index].appointment),
+              ),
+              onToggleCompletion: (markAsCompleted) => unawaited(
+                widget.onToggleCompletion(
+                  widget.items[index].appointment,
+                  markAsCompleted,
+                ),
+              ),
+              onDelete: () =>
+                  unawaited(widget.onDelete(widget.items[index].appointment)),
+              onShowNotes:
+                  widget.items[index].notes == null ||
+                      widget.items[index].notes!.trim().isEmpty
+                  ? null
+                  : () => unawaited(
+                      widget.onShowNotes(widget.items[index].appointment),
+                    ),
             ),
-          );
-        },
+            if (index != widget.items.length - 1) const SizedBox(height: 12),
+          ],
+        ],
       ),
     );
   }
 }
 
-class _AppointmentChipData {
-  const _AppointmentChipData({
-    required this.label,
-    required this.status,
-    required this.timeLabel,
+class _AppointmentTicketData {
+  const _AppointmentTicketData({
     required this.appointment,
+    required this.typeLabel,
+    required this.dayLabel,
+    required this.timeLabel,
+    required this.title,
+    this.notes,
+    required this.shouldAnimateAccent,
+    required this.icon,
+    required this.accentColor,
   });
 
-  final String label;
-  final String status;
+  final MedicalAppointment appointment;
+  final String typeLabel;
+  final String dayLabel;
   final String timeLabel;
-  final MedicalAppointment? appointment;
+  final String title;
+  final String? notes;
+  final bool shouldAnimateAccent;
+  final IconData icon;
+  final Color accentColor;
+
+  bool get hasNotes => notes != null && notes!.trim().isNotEmpty;
+}
+
+class _AppointmentTicketItem extends StatelessWidget {
+  const _AppointmentTicketItem({
+    required this.data,
+    required this.isExpanded,
+    required this.showShine,
+    required this.shineAnimation,
+    required this.onExpand,
+    required this.onOpenDetails,
+    required this.onToggleCompletion,
+    required this.onDelete,
+    this.onShowNotes,
+  });
+
+  final _AppointmentTicketData data;
+  final bool isExpanded;
+  final bool showShine;
+  final Animation<double> shineAnimation;
+  final VoidCallback onExpand;
+  final VoidCallback onOpenDetails;
+  final void Function(bool markAsCompleted) onToggleCompletion;
+  final VoidCallback onDelete;
+  final VoidCallback? onShowNotes;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final cardColor = theme.colorScheme.surface;
+    final borderColor = theme.colorScheme.outline.withValues(alpha: 0.08);
+    final textTheme = theme.textTheme;
+    final isCompleted = data.appointment.isCompleted;
+    final markTooltip = isCompleted
+        ? l10n.dashboardAppointmentsMarkPending
+        : l10n.dashboardAppointmentsMarkDone;
+    final notes = data.notes;
+    final hasNotes = data.hasNotes;
+    final shouldShowNotesLink =
+        hasNotes && notes!.trim().length > 140 && onShowNotes != null;
+
+    final semanticsLabel =
+        '${data.typeLabel}. ${data.dayLabel} ${data.timeLabel}. ${data.title}';
+
+    return Semantics(
+      label: semanticsLabel,
+      button: true,
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOutCubic,
+        alignment: Alignment.topCenter,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onExpand,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              AnimatedSlide(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                offset: isExpanded ? Offset.zero : const Offset(0, 0.02),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutCubic,
+                  padding: EdgeInsets.fromLTRB(
+                    20,
+                    isExpanded ? 28 : 20,
+                    20,
+                    isExpanded ? 24 : 18,
+                  ),
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: borderColor),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: isExpanded ? 18 : 12,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: data.accentColor.withValues(alpha: 0.18),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              data.icon,
+                              color: data.accentColor,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  data.typeLabel,
+                                  style: textTheme.labelLarge?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${data.dayLabel} - ${data.timeLabel}',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              isCompleted
+                                  ? LucideIcons.rotateCcw
+                                  : LucideIcons.check,
+                            ),
+                            tooltip: markTooltip,
+                            color: data.accentColor,
+                            onPressed: () => onToggleCompletion(!isCompleted),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          IconButton(
+                            icon: const Icon(LucideIcons.trash2),
+                            tooltip: l10n.agendaDeleteAction,
+                            color: theme.colorScheme.error,
+                            onPressed: onDelete,
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        data.title,
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (isExpanded) ...[
+                        const SizedBox(height: 12),
+                        if (hasNotes) ...[
+                          Text(
+                            notes!,
+                            maxLines: shouldShowNotesLink ? 3 : null,
+                            overflow: shouldShowNotesLink
+                                ? TextOverflow.ellipsis
+                                : null,
+                            style: textTheme.bodyMedium,
+                          ),
+                          if (shouldShowNotesLink)
+                            TextButton(
+                              onPressed: onShowNotes,
+                              child: Text(l10n.dashboardAppointmentsNotesTitle),
+                            ),
+                          const SizedBox(height: 12),
+                        ],
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: data.accentColor.withValues(alpha: 0.16),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                l10n.dashboardAppointmentsPendingBadge,
+                                style: textTheme.labelMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: data.accentColor,
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            TextButton.icon(
+                              onPressed: onOpenDetails,
+                              style: TextButton.styleFrom(
+                                foregroundColor: data.accentColor,
+                              ),
+                              icon: const Icon(LucideIcons.externalLink),
+                              label: Text(l10n.dashboardAppointmentsOpenAgenda),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: -8,
+                left: 28,
+                child: _TicketNotch(color: theme.scaffoldBackgroundColor),
+              ),
+              Positioned(
+                top: -8,
+                right: 28,
+                child: _TicketNotch(color: theme.scaffoldBackgroundColor),
+              ),
+              Positioned(
+                top: -2,
+                left: 0,
+                right: 0,
+                child: _TicketAccentStrip(
+                  showShine: showShine,
+                  shineAnimation: shineAnimation,
+                  accentColor: data.accentColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TicketNotch extends StatelessWidget {
+  const _TicketNotch({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 18,
+      height: 18,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TicketAccentStrip extends StatelessWidget {
+  const _TicketAccentStrip({
+    required this.showShine,
+    required this.shineAnimation,
+    required this.accentColor,
+  });
+
+  final bool showShine;
+  final Animation<double> shineAnimation;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: SizedBox(
+        height: 6,
+        child: Stack(
+          children: [
+            Container(color: accentColor),
+            if (showShine)
+              AnimatedBuilder(
+                animation: shineAnimation,
+                builder: (context, child) {
+                  final position = -1.2 + (shineAnimation.value * 2.4);
+                  return Align(alignment: Alignment(position, 0), child: child);
+                },
+                child: FractionallySizedBox(
+                  widthFactor: 0.32,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.white24,
+                          Colors.white70,
+                          Colors.white24,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _TimelineCard extends StatelessWidget {
@@ -1941,17 +2581,6 @@ class _DailyLogListState extends ConsumerState<_DailyLogList>
     final stoolCount = widget.stools.length;
     final vomitCount = widget.vomits.length;
     final bathCount = widget.baths.length;
-    final temperatureCount = widget.temperatures.length;
-    final latestTemperature = widget.temperatures.isEmpty
-        ? null
-        : widget.temperatures.reduce(
-            (previous, current) => previous.timestamp.isAfter(current.timestamp)
-                ? previous
-                : current,
-          );
-    final temperatureSummaryValue = latestTemperature == null
-        ? '0 · ${l10n.temperatureLogValueUnit}'
-        : '$temperatureCount · ${latestTemperature.celsius.toStringAsFixed(1)} ${l10n.temperatureLogValueUnit}';
     final entries = [
       ...widget.feedings.map(_DailyLogEntry.feeding),
       ...widget.stools.map(_DailyLogEntry.stool),
@@ -2244,7 +2873,6 @@ class _DailyLogListState extends ConsumerState<_DailyLogList>
                               ],
                             );
                         }
-                        return const SizedBox.shrink();
                       },
                     ),
                   )
@@ -2485,6 +3113,104 @@ class _NavigationDestination {
 
   final IconData icon;
   final String label;
+}
+
+class _DashboardFooter extends StatelessWidget {
+  const _DashboardFooter({
+    required this.accentColor,
+    required this.currentIndex,
+    required this.destinations,
+    required this.onIndexSelected,
+  });
+
+  final Color accentColor;
+  final int currentIndex;
+  final List<_NavigationDestination> destinations;
+  final ValueChanged<int> onIndexSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return SafeArea(
+      top: false,
+      child: Container(
+        color: AppColors.surface,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: Row(
+          children: destinations.asMap().entries.map((entry) {
+            final index = entry.key;
+            final destination = entry.value;
+            final isSelected = index == currentIndex;
+
+            return Expanded(
+              child: _DashboardFooterItem(
+                icon: destination.icon,
+                label: destination.label,
+                isSelected: isSelected,
+                accentColor: accentColor,
+                inactiveColor: colorScheme.onSurfaceVariant,
+                onTap: () => onIndexSelected(index),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}
+
+class _DashboardFooterItem extends StatelessWidget {
+  const _DashboardFooterItem({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.accentColor,
+    required this.inactiveColor,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final Color accentColor;
+  final Color inactiveColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      selected: isSelected,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: SizedBox(
+              height: 32,
+              child: AnimatedAlign(
+                alignment:
+                    isSelected ? const Alignment(0, -0.4) : Alignment.center,
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOut,
+                child: Icon(
+                  icon,
+                  color: isSelected
+                      ? accentColor
+                      : inactiveColor.withValues(alpha: 0.6),
+                  size: 26,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _ShortcutData {
