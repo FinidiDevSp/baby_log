@@ -298,12 +298,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardAppointmentsChipLabelTomorrow => 'Tomorrow';
 
   @override
-  String dashboardAppointmentsChipLabelInDays(int count) {
+  String dashboardAppointmentsChipLabelInDays(Object count) {
     return '+$count days';
   }
 
   @override
-  String dashboardAppointmentsCount(int count) {
+  String dashboardAppointmentsCount(num count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,

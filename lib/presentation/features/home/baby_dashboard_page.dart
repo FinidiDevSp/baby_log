@@ -239,9 +239,9 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       }
 
       if (!preview.hasData) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.dashboardImportNoData)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.dashboardImportNoData)));
         return;
       }
 
@@ -257,15 +257,16 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       }
 
       final summary = l10n.dashboardImportSummary(result.total);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(summary)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(summary)));
     } catch (error) {
       if (!mounted) {
         return;
       }
-      final errorMessage =
-          error is StateError ? error.message : error.toString();
+      final errorMessage = error is StateError
+          ? error.message
+          : error.toString();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.dashboardImportError(errorMessage))),
       );
@@ -284,9 +285,9 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       }
 
       if (result.totalRows == 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.dashboardExportEmpty)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.dashboardExportEmpty)));
         return;
       }
 
@@ -305,8 +306,9 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       if (!mounted) {
         return;
       }
-      final errorMessage =
-          error is StateError ? error.message : error.toString();
+      final errorMessage = error is StateError
+          ? error.message
+          : error.toString();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.dashboardExportError(errorMessage))),
       );
@@ -317,17 +319,17 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     final page = appointment != null
         ? MedicalAgendaPage(initialAppointment: appointment)
         : const MedicalAgendaPage();
-    final message = await Navigator.of(context).push<String?>(
-      MaterialPageRoute(builder: (_) => page),
-    );
+    final message = await Navigator.of(
+      context,
+    ).push<String?>(MaterialPageRoute(builder: (_) => page));
 
     if (!mounted || message == null || message.isEmpty) {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _confirmDeleteAppointment(MedicalAppointment appointment) async {
@@ -364,9 +366,9 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.agendaDeleteSuccess)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.agendaDeleteSuccess)));
   }
 
   Future<CsvImportMode?> _askImportMode(CsvImportPreview preview) {
@@ -400,16 +402,18 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
               child: Text(l10n.dashboardImportSkipAction),
             ),
             FilledButton(
-              onPressed: () => Navigator.of(dialogContext)
-                  .pop(CsvImportMode.overwriteDuplicates),
+              onPressed: () => Navigator.of(
+                dialogContext,
+              ).pop(CsvImportMode.overwriteDuplicates),
               child: Text(l10n.dashboardImportOverwriteAction),
             ),
           ]);
         } else {
           actions.add(
             FilledButton(
-              onPressed: () => Navigator.of(dialogContext)
-                  .pop(CsvImportMode.overwriteDuplicates),
+              onPressed: () => Navigator.of(
+                dialogContext,
+              ).pop(CsvImportMode.overwriteDuplicates),
               child: Text(l10n.dashboardImportConfirmAction),
             ),
           );
@@ -686,26 +690,41 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       temperatureStatus = _formatElapsedTime(l10n, latestTemperature.timestamp);
     }
 
-    final now = DateTime.now();
-    final locale = l10n.localeName;
-    final upcomingAppointments = appointments
-        .where((appointment) => !appointment.scheduledAt.isBefore(now))
-        .toList()
-      ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
-    final appointmentChipItems = upcomingAppointments
-        .map(
-          (appointment) => _AppointmentChipData(
-            label: DateFormat.MMMd(locale).format(appointment.scheduledAt),
-            status: appointment.title.trim().isNotEmpty
-                ? appointment.title.trim()
-                : _appointmentTypeLabel(l10n, appointment.type),
-            timeLabel: DateFormat.Hm(locale).format(appointment.scheduledAt),
-            appointment: appointment,
-          ),
-        )
-        .toList();
-    final appointmentsStatus =
-        l10n.dashboardAppointmentsCount(appointmentChipItems.length);
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final appointmentChipItems = List<_AppointmentChipData>.generate(3, (
+      index,
+    ) {
+      final targetDate = todayDate.add(Duration(days: index));
+      final items =
+          appointments
+              .where(
+                (entry) => _isSameCalendarDay(entry.scheduledAt, targetDate),
+              )
+              .toList()
+            ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+      late final String label;
+      switch (index) {
+        case 0:
+          label = l10n.dashboardAppointmentsChipLabelToday;
+          break;
+        case 1:
+          label = l10n.dashboardAppointmentsChipLabelTomorrow;
+          break;
+        default:
+          label = l10n.dashboardAppointmentsChipLabelInDays(index);
+      }
+      final statusLabel = l10n.dashboardAppointmentsCount(items.length);
+      final timeLabel = items.isEmpty
+          ? l10n.dashboardAppointmentsNoTime
+          : DateFormat.Hm(l10n.localeName).format(items.first.scheduledAt);
+      return _AppointmentChipData(
+        label: label,
+        status: statusLabel,
+        timeLabel: timeLabel,
+        nextAppointment: items.isEmpty ? null : items.first,
+      );
+    });
 
     final hasEntries =
         selectedFeedings.isNotEmpty ||
@@ -773,6 +792,14 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
               onChipDelete: _confirmDeleteAppointment,
             ),
           ],
+          const SizedBox(height: 12),
+          _AppointmentChipsCarousel(
+            accentColor: widget.accentColor,
+            items: appointmentChipItems,
+            onChipTap: (appointment) => _openAgenda(appointment: appointment),
+            onChipEdit: (appointment) => _openAgenda(appointment: appointment),
+            onChipDelete: _confirmDeleteAppointment,
+          ),
           const SizedBox(height: 12),
           _TimelineHeader(
             selectedDate: _selectedDate,
@@ -1025,8 +1052,7 @@ class _AppointmentChipsCarousel extends StatelessWidget {
 
     final theme = Theme.of(context);
     final textScaleFactor = MediaQuery.textScaleFactorOf(context);
-    final extraHeightFactor =
-        (textScaleFactor - 1.0).clamp(0.0, 1.0) as double;
+    final extraHeightFactor = (textScaleFactor - 1.0).clamp(0.0, 1.0) as double;
     final carouselHeight = 76.0 + extraHeightFactor * 28.0;
 
     return SizedBox(
@@ -1087,8 +1113,38 @@ class _AppointmentChipsCarousel extends StatelessWidget {
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: Colors.white.withValues(alpha: 0.72),
                         ),
-                      ),
-                    ],
+                      ],
+                    );
+
+                    if (selection == null) {
+                      return;
+                    }
+
+                    switch (selection) {
+                      case _AppointmentQuickAction.edit:
+                        await onChipEdit(item.nextAppointment!);
+                        break;
+                      case _AppointmentQuickAction.delete:
+                        await onChipDelete(item.nextAppointment!);
+                        break;
+                    }
+                  }
+                : null,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => unawaited(onChipTap(item.nextAppointment)),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 124,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: borderColor),
                   ),
                 ),
               ),
@@ -1186,9 +1242,7 @@ class _TimelineCard extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: AppColors.surfaceVariant,
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.05),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
             ),
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -1416,10 +1470,7 @@ class _TimelineTileData {
 }
 
 class _TimelineTile extends StatelessWidget {
-  const _TimelineTile({
-    required this.data,
-    required this.isLast,
-  });
+  const _TimelineTile({required this.data, required this.isLast});
 
   final _TimelineTileData data;
   final bool isLast;
@@ -1783,9 +1834,7 @@ class _DailyLogListState extends ConsumerState<_DailyLogList>
         final bath = entry.bath;
         if (bath != null) {
           navigator.push(
-            MaterialPageRoute(
-              builder: (_) => BathLogPage(existingEntry: bath),
-            ),
+            MaterialPageRoute(builder: (_) => BathLogPage(existingEntry: bath)),
           );
         }
         break;
@@ -1794,9 +1843,7 @@ class _DailyLogListState extends ConsumerState<_DailyLogList>
         if (temperature != null) {
           navigator.push(
             MaterialPageRoute(
-              builder: (_) => TemperatureLogPage(
-                existingEntry: temperature,
-              ),
+              builder: (_) => TemperatureLogPage(existingEntry: temperature),
             ),
           );
         }
@@ -1852,9 +1899,9 @@ class _DailyLogListState extends ConsumerState<_DailyLogList>
       if (!mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.homeLogDeleteSuccess)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.homeLogDeleteSuccess)));
     } catch (error) {
       if (!mounted) {
         return;
@@ -1898,10 +1945,7 @@ class _DailyLogListState extends ConsumerState<_DailyLogList>
     }
   }
 
-  void _handleLogAction(
-    _DailyLogEntry entry,
-    _LogActionMenuOption option,
-  ) {
+  void _handleLogAction(_DailyLogEntry entry, _LogActionMenuOption option) {
     switch (option) {
       case _LogActionMenuOption.edit:
         _openEntryForEdit(entry);

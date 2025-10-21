@@ -419,7 +419,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardMedicalAgendaLabel.
   ///
   /// In es, this message translates to:
-  /// **'AGENDA'**
+  /// **'CITAS'**
   String get dashboardMedicalAgendaLabel;
 
   /// No description provided for @agendaTitle.
@@ -642,13 +642,13 @@ abstract class AppLocalizations {
   ///
   /// In es, this message translates to:
   /// **'+{count} días'**
-  String dashboardAppointmentsChipLabelInDays(int count);
+  String dashboardAppointmentsChipLabelInDays(Object count);
 
   /// No description provided for @dashboardAppointmentsCount.
   ///
   /// In es, this message translates to:
   /// **'{count, plural, =0 {Sin citas} =1 {1 cita} other {{count} citas}}'**
-  String dashboardAppointmentsCount(int count);
+  String dashboardAppointmentsCount(num count);
 
   /// No description provided for @dashboardAppointmentsNoTime.
   ///
