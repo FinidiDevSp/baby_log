@@ -178,7 +178,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardFoodLabel => 'Feeding';
 
   @override
-  String get dashboardMedicalAgendaLabel => 'AGENDA';
+  String get dashboardMedicalAgendaLabel => 'APPOINTMENTS';
 
   @override
   String get agendaTitle => 'Medical agenda';
@@ -290,6 +290,32 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get dashboardAppointmentsChipLabelToday => 'Today';
+
+  @override
+  String get dashboardAppointmentsChipLabelTomorrow => 'Tomorrow';
+
+  @override
+  String dashboardAppointmentsChipLabelInDays(int count) {
+    return '+$count days';
+  }
+
+  @override
+  String dashboardAppointmentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count appointments',
+      one: '1 appointment',
+      zero: 'No appointments',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dashboardAppointmentsNoTime => '—';
 
   @override
   String dashboardQuestionsPending(int count) {
