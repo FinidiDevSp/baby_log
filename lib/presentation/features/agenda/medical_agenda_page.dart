@@ -75,13 +75,6 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
     final todayItems = sortedAppointments
         .where((item) => _isSameDay(item.scheduledAt, todayDate))
         .toList();
-    final upcomingItems = sortedAppointments
-        .where(
-          (item) =>
-              !_isSameDay(item.scheduledAt, todayDate) &&
-              item.scheduledAt.isAfter(todayDate),
-        )
-        .toList();
     final pastItems = sortedAppointments
         .where((item) => item.scheduledAt.isBefore(todayDate))
         .toList()
@@ -164,13 +157,6 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
                 onEdit: _startEditFlow,
                 onDelete: _deleteAppointment,
                 showPastIndicator: true,
-              ),
-            if (todayItems.isEmpty &&
-                upcomingItems.isEmpty &&
-                pastItems.isEmpty)
-              _AgendaEmptyState(
-                iconColor: theme.colorScheme.primary,
-                description: l10n.agendaEmptyDescription,
               ),
           ],
         ),
@@ -280,17 +266,16 @@ class _MedicalAgendaPageState extends ConsumerState<MedicalAgendaPage> {
       controller.addAppointment(appointment);
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _isEditing
-              ? l10n.agendaUpdateSuccess
-              : l10n.agendaCreateSuccess,
-        ),
-      ),
-    );
+    final successMessage =
+        _isEditing ? l10n.agendaUpdateSuccess : l10n.agendaCreateSuccess;
 
     FocusScope.of(context).unfocus();
+
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop(successMessage);
+      return;
+    }
+
     setState(() {
       _applyDefaultValues(l10n);
     });
@@ -645,48 +630,6 @@ class _AgendaSection extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _AgendaEmptyState extends StatelessWidget {
-  const _AgendaEmptyState({
-    required this.iconColor,
-    required this.description,
-  });
-
-  final Color iconColor;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            LucideIcons.calendarClock,
-            size: 52,
-            color: iconColor.withValues(alpha: 0.8),
-          ),
-          const SizedBox(height: 18),
-          Text(
-            description,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: Colors.white70,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
