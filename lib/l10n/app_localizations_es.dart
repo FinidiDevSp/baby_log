@@ -176,6 +176,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dashboardTemperatureLabel => 'Temperatura';
 
   @override
+  String get dashboardPreviousDayTooltip => 'Día anterior';
+
+  @override
+  String get dashboardNextDayTooltip => 'Día siguiente';
+
+  @override
   String get dashboardFoodLabel => 'Comida';
 
   @override
@@ -270,6 +276,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get agendaTabAppointments => 'Citas';
+
+  @override
+  String get timelineTitle => 'Línea temporal';
+
+  @override
+  String get timelineHourColumn => 'Hora';
+
+  @override
+  String get timelineEmptyDescription => 'No hay registros en este día.';
+
+  @override
+  String get timelineLoadError => 'No se pudo cargar la línea temporal.';
+
+  @override
+  String timelineNotesPrefix(String notes) => 'Notas: $notes';
 
   @override
   String get agendaTypeRevision => 'Revisión';

@@ -21,6 +21,7 @@ import 'package:baby_log/presentation/features/agenda/medical_agenda_page.dart';
 import 'package:baby_log/presentation/features/account/account_settings_view.dart';
 import 'package:baby_log/presentation/features/questions/pediatrician_questions_page.dart';
 import 'package:baby_log/presentation/widgets/baby_avatar.dart';
+import 'package:baby_log/presentation/shared/daily_date_selector.dart';
 import 'package:baby_log/presentation/shared/medical_appointment_style.dart';
 
 import 'state/bath_entries_provider.dart';
@@ -33,6 +34,7 @@ import '../baths/bath_log_page.dart';
 import '../diapers/stool_log_page.dart';
 import '../feedings/bottle_feeding_page.dart';
 import '../stats/baby_stats_page.dart';
+import '../timeline/timeline_page.dart';
 import '../questions/state/pediatrician_questions_provider.dart';
 import '../temperatures/temperature_log_page.dart';
 import '../vomits/vomit_log_page.dart';
@@ -79,10 +81,7 @@ class _BabyDashboardPageState extends ConsumerState<BabyDashboardPage> {
     final pages = <Widget>[
       _BabyHomeView(accentColor: accentColor),
       BabyStatsPage(accentColor: accentColor),
-      const _PlaceholderView(
-        icon: LucideIcons.history,
-        labelKey: 'dashboardNavTimeline',
-      ),
+      TimelinePage(accentColor: accentColor),
       const _PlaceholderView(
         icon: LucideIcons.ruler,
         labelKey: 'dashboardNavDevelopment',
@@ -1873,95 +1872,11 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header con navegador de días integrado
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant.withValues(alpha: 0.5),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(4),
-              ),
-            ),
-            child: Row(
-              children: [
-                // Botón día anterior
-                IconButton(
-                  onPressed: widget.onPreviousDay,
-                  icon: const Icon(LucideIcons.chevronLeft, size: 18),
-                  color: Colors.white.withValues(alpha: 0.8),
-                  tooltip: 'Día anterior',
-                  style: IconButton.styleFrom(
-                    minimumSize: const Size(36, 36),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
-                const SizedBox(width: 8),
-
-                // Fecha central (clickable)
-                Expanded(
-                  child: InkWell(
-                    onTap: widget.onSelectDate,
-                    borderRadius: BorderRadius.circular(4),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            LucideIcons.calendar,
-                            size: 16,
-                            color: Colors.white.withValues(alpha: 0.7),
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              () {
-                                final now = DateTime.now();
-                                final isToday = _isSameDay(
-                                  now,
-                                  widget.selectedDate,
-                                );
-                                final dateLabel = DateFormat(
-                                  'EEEE, d \'de\' MMMM',
-                                  l10n.localeName,
-                                ).format(widget.selectedDate);
-                                return isToday
-                                    ? '${l10n.dashboardTodayLabel}, ${DateFormat('d \'de\' MMMM', l10n.localeName).format(widget.selectedDate)}'
-                                    : dateLabel;
-                              }(),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white.withValues(alpha: 0.95),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-
-                // Botón día siguiente
-                IconButton(
-                  onPressed: widget.onNextDay,
-                  icon: const Icon(LucideIcons.chevronRight, size: 18),
-                  color: Colors.white.withValues(alpha: 0.8),
-                  tooltip: 'Día siguiente',
-                  style: IconButton.styleFrom(
-                    minimumSize: const Size(36, 36),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
-              ],
-            ),
+          DailyDateSelector(
+            selectedDate: widget.selectedDate,
+            onPreviousDay: widget.onPreviousDay,
+            onNextDay: widget.onNextDay,
+            onSelectDate: widget.onSelectDate,
           ),
           const SizedBox(height: 12),
 

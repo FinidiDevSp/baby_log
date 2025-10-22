@@ -410,6 +410,18 @@ abstract class AppLocalizations {
   /// **'Temperatura'**
   String get dashboardTemperatureLabel;
 
+  /// No description provided for @dashboardPreviousDayTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Día anterior'**
+  String get dashboardPreviousDayTooltip;
+
+  /// No description provided for @dashboardNextDayTooltip.
+  ///
+  /// In es, this message translates to:
+  /// **'Día siguiente'**
+  String get dashboardNextDayTooltip;
+
   /// No description provided for @dashboardFoodLabel.
   ///
   /// In es, this message translates to:
@@ -601,6 +613,36 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Citas'**
   String get agendaTabAppointments;
+
+  /// No description provided for @timelineTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Línea temporal'**
+  String get timelineTitle;
+
+  /// No description provided for @timelineHourColumn.
+  ///
+  /// In es, this message translates to:
+  /// **'Hora'**
+  String get timelineHourColumn;
+
+  /// No description provided for @timelineEmptyDescription.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay registros en este día.'**
+  String get timelineEmptyDescription;
+
+  /// No description provided for @timelineLoadError.
+  ///
+  /// In es, this message translates to:
+  /// **'No se pudo cargar la línea temporal.'**
+  String get timelineLoadError;
+
+  /// No description provided for @timelineNotesPrefix.
+  ///
+  /// In es, this message translates to:
+  /// **'Notas: {notes}'**
+  String timelineNotesPrefix(String notes);
 
   /// No description provided for @agendaTypeRevision.
   ///

@@ -99,6 +99,8 @@
   "dashboardVomitLabel": "Vomit",
   "dashboardBathLabel": "Bath",
   "dashboardTemperatureLabel": "Temperature",
+  "dashboardPreviousDayTooltip": "Previous day",
+  "dashboardNextDayTooltip": "Next day",
   "dashboardFoodLabel": "Feeding",
   "dashboardMedicalAgendaLabel": "Appointments",
   "agendaTitle": "Medical agenda",
@@ -130,6 +132,19 @@
   "agendaDeleteSuccess": "Appointment deleted.",
   "agendaTabTimeline": "Timeline",
   "agendaTabAppointments": "Appointments",
+  "timelineTitle": "Timeline",
+  "timelineHourColumn": "Hour",
+  "timelineEmptyDescription": "No entries recorded on this day.",
+  "timelineLoadError": "We couldn't load the timeline.",
+  "timelineNotesPrefix": "Notes: {notes}",
+  "@timelineNotesPrefix": {
+    "description": "Prefix used to display notes inside the timeline tooltips",
+    "placeholders": {
+      "notes": {
+        "example": "Fell asleep right away"
+      }
+    }
+  },
   "agendaTypeRevision": "Check-up",
   "agendaTypePediatrics": "Pediatrics",
   "agendaTypeVaccines": "Vaccines",
