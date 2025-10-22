@@ -2009,7 +2009,8 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
                       label: l10n.dashboardDiaperLabel,
                       value: '${widget.stools.length}',
                       subtitle: widget.stools.length == 1 ? 'vez' : 'veces',
-                      difference: widget.stools.length - widget.previousStools.length,
+                      difference:
+                          widget.stools.length - widget.previousStools.length,
                       isSelected: _selectedFilter == _EventFilter.stool,
                       onTap: () => setState(() {
                         _selectedFilter = _selectedFilter == _EventFilter.stool
@@ -2027,7 +2028,8 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
                       label: l10n.dashboardVomitLabel,
                       value: '${widget.vomits.length}',
                       subtitle: widget.vomits.length == 1 ? 'vez' : 'veces',
-                      difference: widget.vomits.length - widget.previousVomits.length,
+                      difference:
+                          widget.vomits.length - widget.previousVomits.length,
                       isSelected: _selectedFilter == _EventFilter.vomit,
                       onTap: () => setState(() {
                         _selectedFilter = _selectedFilter == _EventFilter.vomit
@@ -2045,7 +2047,8 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
                       label: l10n.dashboardBathLabel,
                       value: '${widget.baths.length}',
                       subtitle: widget.baths.length == 1 ? 'vez' : 'veces',
-                      difference: widget.baths.length - widget.previousBaths.length,
+                      difference:
+                          widget.baths.length - widget.previousBaths.length,
                       isSelected: _selectedFilter == _EventFilter.bath,
                       onTap: () => setState(() {
                         _selectedFilter = _selectedFilter == _EventFilter.bath
@@ -2065,10 +2068,13 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
                       subtitle: widget.temperatures.length == 1
                           ? 'lectura'
                           : 'lecturas',
-                      difference: widget.temperatures.length - widget.previousTemperatures.length,
+                      difference:
+                          widget.temperatures.length -
+                          widget.previousTemperatures.length,
                       isSelected: _selectedFilter == _EventFilter.temperature,
                       onTap: () => setState(() {
-                        _selectedFilter = _selectedFilter == _EventFilter.temperature
+                        _selectedFilter =
+                            _selectedFilter == _EventFilter.temperature
                             ? _EventFilter.all
                             : _EventFilter.temperature;
                       }),
@@ -2363,9 +2369,11 @@ class _TotalCard extends StatelessWidget {
           onTap();
         },
         borderRadius: BorderRadius.circular(4),
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
           width: 100,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
           decoration: BoxDecoration(
             color: isSelected
                 ? color.withValues(alpha: 0.20)
@@ -2380,43 +2388,51 @@ class _TotalCard extends StatelessWidget {
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 22, color: color),
-              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 20, color: color),
+                  if (difference != 0) ...[
+                    const SizedBox(width: 4),
+                    Text(
+                      difference > 0 ? '+$difference' : '$difference',
+                      style: TextStyle(
+                        color: difference > 0
+                            ? Colors.green.withValues(alpha: 0.9)
+                            : Colors.red.withValues(alpha: 0.9),
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 3),
               Text(
                 value,
                 style: TextStyle(
                   color: color,
                   fontWeight: FontWeight.w700,
-                  fontSize: 18,
+                  fontSize: 16,
+                  height: 1,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 1),
+              const SizedBox(height: 2),
               Text(
                 subtitle,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: 10,
+                  fontSize: 9,
+                  height: 1,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
               ),
-              if (difference != 0) ...[
-                const SizedBox(height: 2),
-                Text(
-                  difference > 0 ? '+$difference' : '$difference',
-                  style: TextStyle(
-                    color: difference > 0
-                        ? Colors.green.withValues(alpha: 0.8)
-                        : Colors.red.withValues(alpha: 0.8),
-                    fontSize: 9,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
             ],
           ),
         ),
