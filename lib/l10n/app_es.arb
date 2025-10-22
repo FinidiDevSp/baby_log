@@ -99,6 +99,8 @@
   "dashboardVomitLabel": "Vómito",
   "dashboardBathLabel": "Baño",
   "dashboardTemperatureLabel": "Temperatura",
+  "dashboardPreviousDayTooltip": "Día anterior",
+  "dashboardNextDayTooltip": "Día siguiente",
   "dashboardFoodLabel": "Comida",
   "dashboardMedicalAgendaLabel": "Citas",
   "dashboardEventsTitle": "Eventos del día",
@@ -131,6 +133,19 @@
   "agendaDeleteSuccess": "Cita eliminada.",
   "agendaTabTimeline": "Línea de tiempo",
   "agendaTabAppointments": "Citas",
+  "timelineTitle": "Línea temporal",
+  "timelineHourColumn": "Hora",
+  "timelineEmptyDescription": "No hay registros en este día.",
+  "timelineLoadError": "No se pudo cargar la línea temporal.",
+  "timelineNotesPrefix": "Notas: {notes}",
+  "@timelineNotesPrefix": {
+    "description": "Prefijo para mostrar notas dentro de los tooltips de la línea temporal",
+    "placeholders": {
+      "notes": {
+        "example": "Durmió enseguida"
+      }
+    }
+  },
   "agendaTypeRevision": "Revisión",
   "agendaTypePediatrics": "Pediatría",
   "agendaTypeVaccines": "Vacunas",

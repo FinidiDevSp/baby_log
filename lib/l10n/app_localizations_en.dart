@@ -175,6 +175,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dashboardTemperatureLabel => 'Temperature';
 
   @override
+  String get dashboardPreviousDayTooltip => 'Previous day';
+
+  @override
+  String get dashboardNextDayTooltip => 'Next day';
+
+  @override
   String get dashboardFoodLabel => 'Feeding';
 
   @override
@@ -270,6 +276,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agendaTabAppointments => 'Appointments';
+
+  @override
+  String get timelineTitle => 'Timeline';
+
+  @override
+  String get timelineHourColumn => 'Hour';
+
+  @override
+  String get timelineEmptyDescription =>
+      'No entries recorded on this day.';
+
+  @override
+  String get timelineLoadError => "We couldn't load the timeline.";
+
+  @override
+  String timelineNotesPrefix(String notes) => 'Notes: $notes';
 
   @override
   String get agendaTypeRevision => 'Check-up';
