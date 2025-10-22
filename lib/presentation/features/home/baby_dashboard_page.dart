@@ -519,6 +519,24 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
         .where((entry) => _isSameCalendarDay(entry.timestamp, _selectedDate))
         .toList();
 
+    // Datos del día anterior para comparación
+    final previousDate = _selectedDate.subtract(const Duration(days: 1));
+    final previousFeedings = feedings
+        .where((entry) => _isSameCalendarDay(entry.timestamp, previousDate))
+        .toList();
+    final previousStools = stools
+        .where((entry) => _isSameCalendarDay(entry.timestamp, previousDate))
+        .toList();
+    final previousVomits = vomits
+        .where((entry) => _isSameCalendarDay(entry.timestamp, previousDate))
+        .toList();
+    final previousBaths = baths
+        .where((entry) => _isSameCalendarDay(entry.timestamp, previousDate))
+        .toList();
+    final previousTemperatures = temperatures
+        .where((entry) => _isSameCalendarDay(entry.timestamp, previousDate))
+        .toList();
+
     void openBottleForm() {
       Navigator.of(
         context,
@@ -702,6 +720,11 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
           vomits: selectedVomits,
           baths: selectedBaths,
           temperatures: selectedTemperatures,
+          previousFeedings: previousFeedings,
+          previousStools: previousStools,
+          previousVomits: previousVomits,
+          previousBaths: previousBaths,
+          previousTemperatures: previousTemperatures,
           selectedDate: _selectedDate,
           onPreviousDay: () => _changeDay(-1),
           onNextDay: () => _changeDay(1),
@@ -1552,6 +1575,11 @@ class _UnifiedEventsCard extends ConsumerStatefulWidget {
     required this.vomits,
     required this.baths,
     required this.temperatures,
+    required this.previousFeedings,
+    required this.previousStools,
+    required this.previousVomits,
+    required this.previousBaths,
+    required this.previousTemperatures,
     required this.accentColor,
     required this.selectedDate,
     required this.onPreviousDay,
@@ -1565,6 +1593,11 @@ class _UnifiedEventsCard extends ConsumerStatefulWidget {
   final List<VomitEntry> vomits;
   final List<BathEntry> baths;
   final List<TemperatureEntry> temperatures;
+  final List<FeedingEntry> previousFeedings;
+  final List<StoolEntry> previousStools;
+  final List<VomitEntry> previousVomits;
+  final List<BathEntry> previousBaths;
+  final List<TemperatureEntry> previousTemperatures;
   final Color accentColor;
   final DateTime selectedDate;
   final VoidCallback onPreviousDay;
@@ -1912,78 +1945,12 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
               ],
             ),
           ),
-
-          // Filtros compactos
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _FilterChip(
-                    label: 'Todos',
-                    icon: LucideIcons.layoutGrid,
-                    isSelected: _selectedFilter == _EventFilter.all,
-                    color: widget.accentColor,
-                    onTap: () =>
-                        setState(() => _selectedFilter = _EventFilter.all),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: l10n.dashboardBottleLabel,
-                    icon: LucideIcons.milk,
-                    isSelected: _selectedFilter == _EventFilter.feeding,
-                    color: widget.accentColor,
-                    onTap: () =>
-                        setState(() => _selectedFilter = _EventFilter.feeding),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: l10n.dashboardDiaperLabel,
-                    icon: LucideIcons.toilet,
-                    isSelected: _selectedFilter == _EventFilter.stool,
-                    color: _stoolAccentColor,
-                    onTap: () =>
-                        setState(() => _selectedFilter = _EventFilter.stool),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: l10n.dashboardVomitLabel,
-                    icon: LucideIcons.triangleAlert,
-                    isSelected: _selectedFilter == _EventFilter.vomit,
-                    color: _vomitAccentColor,
-                    onTap: () =>
-                        setState(() => _selectedFilter = _EventFilter.vomit),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: l10n.dashboardBathLabel,
-                    icon: LucideIcons.bath,
-                    isSelected: _selectedFilter == _EventFilter.bath,
-                    color: _bathAccentColor,
-                    onTap: () =>
-                        setState(() => _selectedFilter = _EventFilter.bath),
-                  ),
-                  const SizedBox(width: 8),
-                  _FilterChip(
-                    label: l10n.dashboardTemperatureLabel,
-                    icon: LucideIcons.thermometer,
-                    isSelected: _selectedFilter == _EventFilter.temperature,
-                    color: _temperatureAccentColor,
-                    onTap: () => setState(
-                      () => _selectedFilter = _EventFilter.temperature,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
           const SizedBox(height: 12),
 
-          // Cards de totales del día
+          // Cards de totales del día (con tap para filtrar)
           if (widget.hasEntries)
             SizedBox(
-              height: 90,
+              height: 80,
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1996,6 +1963,16 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
                       label: l10n.dashboardBottleLabel,
                       value: '${widget.feedings.length}',
                       subtitle: 'tomas',
+                      difference:
+                          widget.feedings.length -
+                          widget.previousFeedings.length,
+                      isSelected: _selectedFilter == _EventFilter.feeding,
+                      onTap: () => setState(() {
+                        _selectedFilter =
+                            _selectedFilter == _EventFilter.feeding
+                            ? _EventFilter.all
+                            : _EventFilter.feeding;
+                      }),
                     ),
                     const SizedBox(width: 8),
                     _TotalCard(
@@ -2005,6 +1982,22 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
                       value:
                           '${widget.feedings.fold<int>(0, (sum, e) => sum + e.amountMl)}',
                       subtitle: 'ml',
+                      difference:
+                          widget.feedings.fold<int>(
+                            0,
+                            (sum, e) => sum + e.amountMl,
+                          ) -
+                          widget.previousFeedings.fold<int>(
+                            0,
+                            (sum, e) => sum + e.amountMl,
+                          ),
+                      isSelected: _selectedFilter == _EventFilter.feeding,
+                      onTap: () => setState(() {
+                        _selectedFilter =
+                            _selectedFilter == _EventFilter.feeding
+                            ? _EventFilter.all
+                            : _EventFilter.feeding;
+                      }),
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -2016,6 +2009,13 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
                       label: l10n.dashboardDiaperLabel,
                       value: '${widget.stools.length}',
                       subtitle: widget.stools.length == 1 ? 'vez' : 'veces',
+                      difference: widget.stools.length - widget.previousStools.length,
+                      isSelected: _selectedFilter == _EventFilter.stool,
+                      onTap: () => setState(() {
+                        _selectedFilter = _selectedFilter == _EventFilter.stool
+                            ? _EventFilter.all
+                            : _EventFilter.stool;
+                      }),
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -2027,6 +2027,13 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
                       label: l10n.dashboardVomitLabel,
                       value: '${widget.vomits.length}',
                       subtitle: widget.vomits.length == 1 ? 'vez' : 'veces',
+                      difference: widget.vomits.length - widget.previousVomits.length,
+                      isSelected: _selectedFilter == _EventFilter.vomit,
+                      onTap: () => setState(() {
+                        _selectedFilter = _selectedFilter == _EventFilter.vomit
+                            ? _EventFilter.all
+                            : _EventFilter.vomit;
+                      }),
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -2038,6 +2045,13 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
                       label: l10n.dashboardBathLabel,
                       value: '${widget.baths.length}',
                       subtitle: widget.baths.length == 1 ? 'vez' : 'veces',
+                      difference: widget.baths.length - widget.previousBaths.length,
+                      isSelected: _selectedFilter == _EventFilter.bath,
+                      onTap: () => setState(() {
+                        _selectedFilter = _selectedFilter == _EventFilter.bath
+                            ? _EventFilter.all
+                            : _EventFilter.bath;
+                      }),
                     ),
                     const SizedBox(width: 8),
                   ],
@@ -2051,6 +2065,13 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
                       subtitle: widget.temperatures.length == 1
                           ? 'lectura'
                           : 'lecturas',
+                      difference: widget.temperatures.length - widget.previousTemperatures.length,
+                      isSelected: _selectedFilter == _EventFilter.temperature,
+                      onTap: () => setState(() {
+                        _selectedFilter = _selectedFilter == _EventFilter.temperature
+                            ? _EventFilter.all
+                            : _EventFilter.temperature;
+                      }),
                     ),
                 ],
               ),
@@ -2307,60 +2328,6 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
   }
 }
 
-/// Chip de filtro compacto
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.color,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final bool isSelected;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: isSelected
-          ? color.withValues(alpha: 0.2)
-          : AppColors.surfaceVariant.withValues(alpha: 0.5),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 14,
-                color: isSelected ? color : Colors.white.withValues(alpha: 0.6),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected
-                      ? color
-                      : Colors.white.withValues(alpha: 0.7),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// Card de totales para mostrar resumen del día
 class _TotalCard extends StatelessWidget {
   const _TotalCard({
@@ -2369,6 +2336,9 @@ class _TotalCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.subtitle,
+    required this.difference,
+    required this.isSelected,
+    required this.onTap,
   });
 
   final IconData icon;
@@ -2376,48 +2346,79 @@ class _TotalCard extends StatelessWidget {
   final String label;
   final String value;
   final String subtitle;
+  final int difference;
+  final bool isSelected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       container: true,
+      button: true,
       label: '$label: $value $subtitle',
       excludeSemantics: true,
-      child: Container(
-        width: 100,
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: color.withValues(alpha: 0.25), width: 1),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 28, color: color),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(4),
+        child: Container(
+          width: 100,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? color.withValues(alpha: 0.20)
+                : color.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(
+              color: isSelected
+                  ? color.withValues(alpha: 0.50)
+                  : color.withValues(alpha: 0.25),
+              width: isSelected ? 2 : 1,
             ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6),
-                fontSize: 11,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 22, color: color),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(height: 1),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 10,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+              if (difference != 0) ...[
+                const SizedBox(height: 2),
+                Text(
+                  difference > 0 ? '+$difference' : '$difference',
+                  style: TextStyle(
+                    color: difference > 0
+                        ? Colors.green.withValues(alpha: 0.8)
+                        : Colors.red.withValues(alpha: 0.8),
+                    fontSize: 9,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
