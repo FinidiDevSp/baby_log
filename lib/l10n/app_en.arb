@@ -645,6 +645,10 @@
   "@statsChartLegendTrend": {
     "description": "Legend label for the trend line"
   },
+  "statsChartScrollHint": "Swipe to see more",
+  "@statsChartScrollHint": {
+    "description": "Hint that the chart is horizontally scrollable"
+  },
   "statsEmptyState": "No records for this week yet.",
   "@statsEmptyState": {
     "description": "Message displayed when the week has no entries"

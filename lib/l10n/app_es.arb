@@ -101,6 +101,7 @@
   "dashboardTemperatureLabel": "Temperatura",
   "dashboardFoodLabel": "Comida",
   "dashboardMedicalAgendaLabel": "Citas",
+  "dashboardEventsTitle": "Eventos del día",
   "agendaTitle": "Agenda médica",
   "agendaNewAppointmentTooltip": "Agregar cita",
   "agendaCreateTitle": "Nueva cita",
@@ -312,7 +313,6 @@
     }
   },
   "dashboardPediatricQuestionsLabel": "Preguntas",
-  "dashboardTemperatureLabel": "Temperatura",
   "bottleLogTitle": "Toma de biberón",
   "bottleLogDateTimeLabel": "Día y hora",
   "bottleLogAmountLabel": "Cantidad",
@@ -644,6 +644,10 @@
   "statsChartLegendTrend": "Línea de tendencia",
   "@statsChartLegendTrend": {
     "description": "Texto de la leyenda para la línea de tendencia"
+  },
+  "statsChartScrollHint": "Desliza para ver más",
+  "@statsChartScrollHint": {
+    "description": "Sugerencia de que la gráfica es scrollable horizontalmente"
   },
   "statsEmptyState": "Aún no hay registros en esta semana.",
   "@statsEmptyState": {

@@ -28,11 +28,21 @@ class WeeklyBarChart extends StatelessWidget {
         .map((point) => _formatDayLabel(point.date, locale))
         .toList(growable: false);
 
-    final maxValue = maxValueOverride ??
+    final maxValue =
+        maxValueOverride ??
         points
             .where((point) => point.hasValue)
-            .fold<double>(0, (previousValue, element) =>
-                math.max(previousValue, element.value.abs()));
+            .fold<double>(
+              0,
+              (previousValue, element) =>
+                  math.max(previousValue, element.value.abs()),
+            );
+
+    // Determinar si necesitamos scroll horizontal
+    // Usamos 50dp por día como mínimo para buena legibilidad
+    const minWidthPerDay = 50.0;
+    final idealWidth = points.length * minWidthPerDay;
+    final needsScroll = points.length > 7; // Más de 7 días necesita scroll
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,27 +53,74 @@ class WeeklyBarChart extends StatelessWidget {
             style: theme.textTheme.bodySmall?.copyWith(color: Colors.white60),
           ),
         const SizedBox(height: 12),
-        AspectRatio(
-          aspectRatio: 1.6,
-          child: CustomPaint(
-            painter: _WeeklyBarChartPainter(
-              points: points,
-              labels: labels,
-              barColor: accentColor,
-              numberFormat: numberFormat,
-              maxValue: maxValue <= 0 ? 1 : maxValue,
-              unitSuffix: unitSuffix,
-              valueLabelBuilder: valueLabelBuilder,
+        SizedBox(
+          height: 240, // Altura fija para la gráfica
+          child: needsScroll
+              ? SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: idealWidth,
+                    height: 240,
+                    child: CustomPaint(
+                      painter: _WeeklyBarChartPainter(
+                        points: points,
+                        labels: labels,
+                        barColor: accentColor,
+                        numberFormat: numberFormat,
+                        maxValue: maxValue <= 0 ? 1 : maxValue,
+                        unitSuffix: unitSuffix,
+                        valueLabelBuilder: valueLabelBuilder,
+                      ),
+                    ),
+                  ),
+                )
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    return CustomPaint(
+                      size: Size(constraints.maxWidth, 240),
+                      painter: _WeeklyBarChartPainter(
+                        points: points,
+                        labels: labels,
+                        barColor: accentColor,
+                        numberFormat: numberFormat,
+                        maxValue: maxValue <= 0 ? 1 : maxValue,
+                        unitSuffix: unitSuffix,
+                        valueLabelBuilder: valueLabelBuilder,
+                      ),
+                    );
+                  },
+                ),
+        ),
+        if (needsScroll)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  LucideIcons.chevronsRight,
+                  size: 14,
+                  color: Colors.white.withValues(alpha: 0.4),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  l10n.statsChartScrollHint,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
       ],
     );
   }
 
   String _formatDayLabel(DateTime date, String locale) {
     final dayName = DateFormat('EEE', locale).format(date);
-    final capitalized = dayName.substring(0, 1).toUpperCase() +
+    final capitalized =
+        dayName.substring(0, 1).toUpperCase() +
         (dayName.length > 1 ? dayName.substring(1) : '');
     return '$capitalized\n${date.day.toString().padLeft(2, '0')}';
   }
@@ -139,12 +196,7 @@ class _WeeklyBarChartPainter extends CustomPainter {
 
       if (point.hasValue && barHeight > 0) {
         final rect = RRect.fromRectAndRadius(
-          Rect.fromLTWH(
-            xCenter - (barWidth / 2),
-            barTop,
-            barWidth,
-            barHeight,
-          ),
+          Rect.fromLTWH(xCenter - (barWidth / 2), barTop, barWidth, barHeight),
           const Radius.circular(_barRadius),
         );
         canvas.drawRRect(rect, barPaint);
@@ -172,7 +224,8 @@ class _WeeklyBarChartPainter extends CustomPainter {
         yValues.add(point.value);
       }
 
-      final label = valueLabelBuilder?.call(point) ??
+      final label =
+          valueLabelBuilder?.call(point) ??
           '${numberFormat.format(point.value)}$unitSuffix';
       if (label.trim().isNotEmpty && point.hasValue) {
         final textSpan = TextSpan(
@@ -186,8 +239,7 @@ class _WeeklyBarChartPainter extends CustomPainter {
         final painter = TextPainter(
           text: textSpan,
           textDirection: ui.TextDirection.ltr,
-        )
-          ..layout(maxWidth: step);
+        )..layout(maxWidth: step);
         final labelOffset = Offset(
           xCenter - (painter.width / 2),
           math.min(barTop - painter.height - 4, offsetY - painter.height - 4),
@@ -205,8 +257,7 @@ class _WeeklyBarChartPainter extends CustomPainter {
         final painter = TextPainter(
           text: textSpan,
           textDirection: ui.TextDirection.ltr,
-        )
-          ..layout();
+        )..layout();
         painter.paint(
           canvas,
           Offset(xCenter - (painter.width / 2), offsetY - painter.height - 4),
@@ -256,13 +307,9 @@ class _WeeklyBarChartPainter extends CustomPainter {
         ),
         textAlign: TextAlign.center,
         textDirection: ui.TextDirection.ltr,
-      )
-        ..layout(maxWidth: step);
+      )..layout(maxWidth: step);
       final xCenter = _horizontalPadding + (step * index) + (step / 2);
-      final labelOffset = Offset(
-        xCenter - (painter.width / 2),
-        offsetY + 8,
-      );
+      final labelOffset = Offset(xCenter - (painter.width / 2), offsetY + 8);
       painter.paint(canvas, labelOffset);
     }
   }

@@ -115,10 +115,8 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
     final today = _normalizedDate(DateTime.now());
     final start = _startOfWeek(today);
     final end = _endOfWeek(today);
-    _selectedRange = DateTimeRange(
-      start: start,
-      end: end.isAfter(today) ? today : end,
-    );
+    // Siempre usar la semana completa, sin limitar al día de hoy
+    _selectedRange = DateTimeRange(start: start, end: end);
   }
 
   DateTime get _today => _normalizedDate(DateTime.now());
@@ -154,23 +152,27 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
     final today = _today;
     final proposedStart = _selectedRange.start.add(Duration(days: length));
     final proposedEnd = _selectedRange.end.add(Duration(days: length));
+
+    // No permitir avanzar si el inicio propuesto está después de hoy
     if (proposedStart.isAfter(today)) {
       return;
     }
-    final clampedEnd = proposedEnd.isAfter(today) ? today : proposedEnd;
-    final clampedStart = proposedEnd.isAfter(today)
-        ? today.subtract(Duration(days: length - 1))
-        : proposedStart;
+
+    // Siempre mantener el rango completo (no truncar al día de hoy)
     setState(() {
       _selectedRange = DateTimeRange(
-        start: _normalizedDate(clampedStart),
-        end: _normalizedDate(clampedEnd),
+        start: _normalizedDate(proposedStart),
+        end: _normalizedDate(proposedEnd),
       );
     });
   }
 
   bool get _canGoForward {
-    return _selectedRange.end.isBefore(_today);
+    final length = _rangeLengthInDays;
+    final today = _today;
+    final proposedStart = _selectedRange.start.add(Duration(days: length));
+    // Solo permitir avanzar si el inicio del siguiente rango no supera hoy
+    return !proposedStart.isAfter(today);
   }
 
   Future<void> _pickDateRange() async {
@@ -243,6 +245,11 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
       onRangeTap: _pickDateRange,
     );
 
+    // Key única para forzar animación cuando cambie el rango
+    final contentKey = ValueKey(
+      '${rangeStart.toIso8601String()}_${rangeEnd.toIso8601String()}_${_selectedCategory.name}',
+    );
+
     return Scaffold(
       backgroundColor: AppColors.scaffold,
       body: SafeArea(
@@ -251,14 +258,32 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
             header,
             const SizedBox(height: 8),
             Expanded(
-              child: _CategoryContent(
-                category: _selectedCategory,
-                accentColor: widget.accentColor,
-                selectedMetricId: _selectedMetricId,
-                onMetricSelected: _selectMetric,
-                days: rangeDays,
-                rangeStart: rangeStart,
-                rangeEnd: rangeEnd,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0.02, 0),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  );
+                },
+                child: _CategoryContent(
+                  key: contentKey,
+                  category: _selectedCategory,
+                  accentColor: widget.accentColor,
+                  selectedMetricId: _selectedMetricId,
+                  onMetricSelected: _selectMetric,
+                  days: rangeDays,
+                  rangeStart: rangeStart,
+                  rangeEnd: rangeEnd,
+                ),
               ),
             ),
           ],
@@ -361,33 +386,56 @@ class _StatsHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: Material(
-                  color: Colors.transparent,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                // Botón rango anterior
+                IconButton(
+                  onPressed: onPreviousRange,
+                  icon: const Icon(LucideIcons.chevronLeft, size: 18),
+                  color: Colors.white.withValues(alpha: 0.8),
+                  tooltip: l10n.statsWeekPreviousTooltip,
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(36, 36),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Rango central (clickable)
+                Expanded(
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
                     onTap: onRangeTap,
+                    borderRadius: BorderRadius.circular(4),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        vertical: 6,
-                        horizontal: 4,
+                        horizontal: 12,
+                        vertical: 8,
                       ),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            LucideIcons.calendarRange,
-                            size: 18,
-                            color: accentColor,
+                            LucideIcons.calendar,
+                            size: 16,
+                            color: Colors.white.withValues(alpha: 0.7),
                           ),
                           const SizedBox(width: 8),
                           Flexible(
                             child: Text(
-                              l10n.statsWeekLabel(rangeText),
-                              style: theme.textTheme.titleMedium?.copyWith(
+                              rangeText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.w600,
+                                color: Colors.white.withValues(alpha: 0.95),
                               ),
                             ),
                           ),
@@ -396,22 +444,23 @@ class _StatsHeader extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    tooltip: l10n.statsWeekPreviousTooltip,
-                    onPressed: onPreviousRange,
-                    icon: const Icon(LucideIcons.chevronLeft),
+                const SizedBox(width: 8),
+
+                // Botón rango siguiente
+                IconButton(
+                  onPressed: canGoForward ? onNextRange : null,
+                  icon: const Icon(LucideIcons.chevronRight, size: 18),
+                  color: canGoForward
+                      ? Colors.white.withValues(alpha: 0.8)
+                      : Colors.white.withValues(alpha: 0.3),
+                  tooltip: l10n.statsWeekNextTooltip,
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(36, 36),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  IconButton(
-                    tooltip: l10n.statsWeekNextTooltip,
-                    onPressed: canGoForward ? onNextRange : null,
-                    icon: const Icon(LucideIcons.chevronRight),
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -421,6 +470,7 @@ class _StatsHeader extends StatelessWidget {
 
 class _CategoryContent extends ConsumerWidget {
   const _CategoryContent({
+    super.key,
     required this.category,
     required this.accentColor,
     required this.selectedMetricId,
@@ -1127,11 +1177,14 @@ class _MetricCard extends StatelessWidget {
         ? accentColor
         : AppColors.surface.withValues(alpha: 0.25);
 
+    // Solo mostrar los primeros 2 summaries para mantener compacto
+    final displaySummaries = metric.summaries.take(2).toList();
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
@@ -1141,47 +1194,50 @@ class _MetricCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Header con icono y título
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  height: 32,
-                  width: 32,
+                  height: 28,
+                  width: 28,
                   decoration: BoxDecoration(
                     color: isSelected
                         ? accentColor.withValues(alpha: 0.18)
                         : AppColors.surface.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   alignment: Alignment.center,
                   child: Icon(
                     metric.icon,
                     color: isSelected ? accentColor : Colors.white70,
-                    size: 18,
+                    size: 16,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     metric.title,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
+                      fontSize: 13,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Icon(
-                  isSelected ? LucideIcons.check : LucideIcons.plus,
-                  size: 18,
-                  color: isSelected ? accentColor : Colors.white38,
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            ...metric.summaries.map((summary) {
+            const SizedBox(height: 10),
+
+            // Valores principales (solo 2)
+            ...displaySummaries.map((summary) {
               return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.only(bottom: 6),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
                   children: [
                     Expanded(
                       child: Text(
@@ -1189,20 +1245,58 @@ class _MetricCard extends StatelessWidget {
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: Colors.white54,
                           fontWeight: FontWeight.w500,
+                          fontSize: 11,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       summary.value,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
                       ),
                     ),
                   ],
                 ),
               );
             }),
+
+            // Footer con indicador de selección
+            if (displaySummaries.isNotEmpty) const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (isSelected) ...[
+                  Icon(LucideIcons.check, size: 14, color: accentColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Seleccionado',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: accentColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 10,
+                    ),
+                  ),
+                ] else ...[
+                  Text(
+                    'Ver detalle',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.white38,
+                      fontSize: 10,
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  Icon(
+                    LucideIcons.chevronRight,
+                    size: 12,
+                    color: Colors.white38,
+                  ),
+                ],
+              ],
+            ),
           ],
         ),
       ),

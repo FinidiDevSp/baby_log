@@ -1729,11 +1729,11 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
     }
   }
 
-  Future<void> _confirmDeleteEntry(_DailyLogEntry entry) async {
+  Future<bool?> _confirmDeleteEntry(_DailyLogEntry entry) async {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
-    final shouldDelete = await showDialog<bool>(
+    return await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
@@ -1756,21 +1756,6 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
         );
       },
     );
-
-    if (shouldDelete == true) {
-      unawaited(_deleteEntry(entry));
-    }
-  }
-
-  void _handleLogAction(_DailyLogEntry entry, _LogActionMenuOption option) {
-    switch (option) {
-      case _LogActionMenuOption.edit:
-        _openEntryForEdit(entry);
-        break;
-      case _LogActionMenuOption.delete:
-        unawaited(_confirmDeleteEntry(entry));
-        break;
-    }
   }
 
   @override
@@ -1815,35 +1800,68 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
       required List<Widget> content,
       required _DailyLogEntry entry,
     }) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.18),
-              shape: BoxShape.circle,
+      return Dismissible(
+        key: ValueKey(entry.timestamp.millisecondsSinceEpoch),
+        confirmDismiss: (direction) async {
+          if (direction == DismissDirection.endToStart) {
+            // Deslizar izquierda → Eliminar (requiere confirmación)
+            return await _confirmDeleteEntry(entry);
+          } else if (direction == DismissDirection.startToEnd) {
+            // Deslizar derecha → Editar (no requiere confirmación)
+            _openEntryForEdit(entry);
+            return false; // No eliminar el item
+          }
+          return false;
+        },
+        background: Container(
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.only(left: 20),
+          decoration: BoxDecoration(
+            color: widget.accentColor.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Icon(LucideIcons.pencil, color: widget.accentColor, size: 24),
+        ),
+        secondaryBackground: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.error.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Icon(
+            LucideIcons.trash2,
+            color: theme.colorScheme.error,
+            size: 24,
+          ),
+        ),
+        onDismissed: (direction) async {
+          if (direction == DismissDirection.endToStart) {
+            // Ya confirmado, eliminar
+            await _deleteEntry(entry);
+          }
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.18),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 18, color: color),
             ),
-            child: Icon(icon, size: 18, color: color),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: content,
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: content,
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          _LogActionsMenu(
-            editColor: widget.accentColor,
-            deleteColor: theme.colorScheme.error,
-            editLabel: l10n.homeLogEditAction,
-            deleteLabel: l10n.homeLogDeleteAction,
-            tooltip: l10n.homeLogActionsTooltip,
-            onSelected: (option) => _handleLogAction(entry, option),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
@@ -2531,73 +2549,6 @@ class _DailyLogEntry {
   final TemperatureEntry? temperature;
   final _DailyLogType type;
   final DateTime timestamp;
-}
-
-enum _LogActionMenuOption { edit, delete }
-
-class _LogActionsMenu extends StatelessWidget {
-  const _LogActionsMenu({
-    required this.editColor,
-    required this.deleteColor,
-    required this.editLabel,
-    required this.deleteLabel,
-    required this.tooltip,
-    required this.onSelected,
-  });
-
-  final Color editColor;
-  final Color deleteColor;
-  final String editLabel;
-  final String deleteLabel;
-  final String tooltip;
-  final ValueChanged<_LogActionMenuOption> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return PopupMenuButton<_LogActionMenuOption>(
-      tooltip: tooltip,
-      offset: const Offset(0, 4),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      onSelected: onSelected,
-      itemBuilder: (context) => [
-        PopupMenuItem<_LogActionMenuOption>(
-          value: _LogActionMenuOption.edit,
-          child: Row(
-            children: [
-              Icon(LucideIcons.pencil, size: 16, color: editColor),
-              const SizedBox(width: 12),
-              Text(editLabel),
-            ],
-          ),
-        ),
-        PopupMenuItem<_LogActionMenuOption>(
-          value: _LogActionMenuOption.delete,
-          child: Row(
-            children: [
-              Icon(LucideIcons.trash2, size: 16, color: deleteColor),
-              const SizedBox(width: 12),
-              Text(deleteLabel),
-            ],
-          ),
-        ),
-      ],
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-        ),
-        alignment: Alignment.center,
-        child: Icon(
-          LucideIcons.flipHorizontal,
-          size: 18,
-          color: Colors.white.withValues(alpha: 0.7),
-        ),
-      ),
-    );
-  }
 }
 
 class _PlaceholderView extends StatelessWidget {

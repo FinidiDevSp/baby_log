@@ -182,6 +182,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dashboardMedicalAgendaLabel => 'Citas';
 
   @override
+  String get dashboardEventsTitle => 'Eventos del día';
+
+  @override
   String get agendaTitle => 'Agenda médica';
 
   @override
@@ -981,6 +984,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get statsChartLegendTrend => 'Línea de tendencia';
+
+  @override
+  String get statsChartScrollHint => 'Desliza para ver más';
 
   @override
   String get statsEmptyState => 'Aún no hay registros en esta semana.';

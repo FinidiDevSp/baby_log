@@ -422,6 +422,12 @@ abstract class AppLocalizations {
   /// **'Citas'**
   String get dashboardMedicalAgendaLabel;
 
+  /// No description provided for @dashboardEventsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Eventos del día'**
+  String get dashboardEventsTitle;
+
   /// No description provided for @agendaTitle.
   ///
   /// In es, this message translates to:
@@ -1705,6 +1711,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Línea de tendencia'**
   String get statsChartLegendTrend;
+
+  /// Sugerencia de que la gráfica es scrollable horizontalmente
+  ///
+  /// In es, this message translates to:
+  /// **'Desliza para ver más'**
+  String get statsChartScrollHint;
 
   /// Mensaje cuando no existen datos en la semana seleccionada
   ///
