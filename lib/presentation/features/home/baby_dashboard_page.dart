@@ -1,16 +1,13 @@
 import 'dart:async';
-import 'dart:math' as math;
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
-import 'package:share_plus/share_plus.dart';
 
 import 'package:baby_log/core/providers.dart';
 import 'package:baby_log/core/theme/app_colors.dart';
 import 'package:baby_log/domain/entities/baby_profile.dart';
-import 'package:baby_log/data/services/csv_import_service.dart';
 import 'package:baby_log/domain/entities/bath_entry.dart';
 import 'package:baby_log/domain/entities/feeding_entry.dart';
 import 'package:baby_log/domain/entities/medical_appointment.dart';
@@ -45,10 +42,6 @@ const _bathAccentColor = Color(0xFF2D81FF);
 const _vomitAccentColor = Color(0xFF1ABC9C);
 const _temperatureAccentColor = Color(0xFFFFA726);
 const _appointmentAccentColor = Color(0xFFAF52DE);
-const double _timelineTileBaseHeight = 70.0;
-const double _timelineMarkerSize = 18.0;
-const double _timelineMarkerTop = 38.0;
-const double _timelineMarkerSpacing = 20.0;
 const _appointmentsExpandedPrefKey = 'dashboard.lastExpandedAppointmentId';
 
 bool _isSameDay(DateTime a, DateTime b) {
@@ -194,115 +187,8 @@ class _BabyHomeView extends ConsumerStatefulWidget {
 
 class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
   late DateTime _selectedDate;
-  double _dayDragDelta = 0;
-  bool _isDraggingDay = false;
   int _lastDayAnimationDirection = 0;
   String? _lastExpandedAppointmentId;
-
-  Future<void> _handleImport() async {
-    final l10n = AppLocalizations.of(context);
-
-    try {
-      final selection = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: const ['csv'],
-        withData: true,
-      );
-
-      if (selection == null || selection.files.isEmpty) {
-        return;
-      }
-
-      final pickedFile = selection.files.first;
-      final bytes = pickedFile.bytes;
-
-      if (bytes == null) {
-        throw StateError(l10n.dashboardImportReadError);
-      }
-
-      final importer = ref.read(csvImportServiceProvider);
-      final preview = await importer.previewCsv(bytes);
-
-      if (!mounted) {
-        return;
-      }
-
-      if (!preview.hasData) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.dashboardImportNoData)));
-        return;
-      }
-
-      final mode = await _askImportMode(preview);
-      if (!mounted || mode == null) {
-        return;
-      }
-
-      final result = await importer.importPreview(preview, mode: mode);
-
-      if (!mounted) {
-        return;
-      }
-
-      final summary = l10n.dashboardImportSummary(result.total);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(summary)));
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-      final errorMessage = error is StateError
-          ? error.message
-          : error.toString();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.dashboardImportError(errorMessage))),
-      );
-    }
-  }
-
-  Future<void> _handleExport() async {
-    final l10n = AppLocalizations.of(context);
-
-    try {
-      final exporter = ref.read(csvExportServiceProvider);
-      final result = await exporter.exportAll();
-
-      if (!mounted) {
-        return;
-      }
-
-      if (result.totalRows == 0) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.dashboardExportEmpty)));
-        return;
-      }
-
-      final attachment = XFile.fromData(
-        result.bytes,
-        name: result.fileName,
-        mimeType: 'text/csv',
-      );
-
-      await Share.shareXFiles(
-        [attachment],
-        subject: l10n.dashboardExportShareSubject(result.fileName),
-        text: l10n.dashboardExportShareBody(result.totalRows),
-      );
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-      final errorMessage = error is StateError
-          ? error.message
-          : error.toString();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.dashboardExportError(errorMessage))),
-      );
-    }
-  }
 
   Future<void> _openAgenda({MedicalAppointment? appointment}) async {
     final page = appointment != null
@@ -480,73 +366,6 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     );
   }
 
-  Future<CsvImportMode?> _askImportMode(CsvImportPreview preview) {
-    final l10n = AppLocalizations.of(context);
-    final lines = <String>[
-      l10n.dashboardImportPreviewTotal(preview.totalIncoming),
-      if (preview.totalNew > 0)
-        l10n.dashboardImportPreviewNew(preview.totalNew),
-      if (preview.totalToOverwrite > 0)
-        l10n.dashboardImportPreviewDuplicates(preview.totalToOverwrite),
-      if (preview.issues.isNotEmpty)
-        l10n.dashboardImportPreviewIssues(preview.issues.length),
-    ];
-
-    return showDialog<CsvImportMode>(
-      context: context,
-      builder: (dialogContext) {
-        final theme = Theme.of(dialogContext);
-        final actions = <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).maybePop(),
-            child: Text(l10n.dashboardImportCancelAction),
-          ),
-        ];
-
-        if (preview.hasDuplicates) {
-          actions.addAll([
-            TextButton(
-              onPressed: () =>
-                  Navigator.of(dialogContext).pop(CsvImportMode.skipDuplicates),
-              child: Text(l10n.dashboardImportSkipAction),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(
-                dialogContext,
-              ).pop(CsvImportMode.overwriteDuplicates),
-              child: Text(l10n.dashboardImportOverwriteAction),
-            ),
-          ]);
-        } else {
-          actions.add(
-            FilledButton(
-              onPressed: () => Navigator.of(
-                dialogContext,
-              ).pop(CsvImportMode.overwriteDuplicates),
-              child: Text(l10n.dashboardImportConfirmAction),
-            ),
-          );
-        }
-
-        return AlertDialog(
-          title: Text(l10n.dashboardImportDialogTitle),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (final line in lines)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Text(line, style: theme.textTheme.bodyMedium),
-                ),
-            ],
-          ),
-          actions: actions,
-        );
-      },
-    );
-  }
-
   String _appointmentTypeLabel(
     AppLocalizations l10n,
     MedicalAppointmentType type,
@@ -627,35 +446,6 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
       _selectedDate = _selectedDate.add(Duration(days: delta));
       _lastDayAnimationDirection = delta;
     });
-  }
-
-  void _handleDayDragStart(DragStartDetails details) {
-    _isDraggingDay = true;
-    _dayDragDelta = 0;
-  }
-
-  void _handleDayDragUpdate(DragUpdateDetails details) {
-    if (!_isDraggingDay) {
-      return;
-    }
-    _dayDragDelta += details.primaryDelta ?? 0;
-  }
-
-  void _handleDayDragEnd(DragEndDetails details) {
-    if (!_isDraggingDay) {
-      return;
-    }
-    final threshold = 60.0;
-    if (_dayDragDelta.abs() > threshold) {
-      _changeDay(_dayDragDelta < 0 ? 1 : -1);
-    }
-    _isDraggingDay = false;
-    _dayDragDelta = 0;
-  }
-
-  void _handleDayDragCancel() {
-    _isDraggingDay = false;
-    _dayDragDelta = 0;
   }
 
   Widget _buildDayTransition(
@@ -905,7 +695,7 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
     final dayContent = Column(
       key: daySectionKey,
       children: [
-        _TimelineCard(
+        _UnifiedEventsCard(
           accentColor: widget.accentColor,
           feedings: selectedFeedings,
           stools: selectedStools,
@@ -913,19 +703,11 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
           baths: selectedBaths,
           temperatures: selectedTemperatures,
           selectedDate: _selectedDate,
+          onPreviousDay: () => _changeDay(-1),
+          onNextDay: () => _changeDay(1),
+          onSelectDate: _openDayPicker,
+          hasEntries: hasEntries,
         ),
-        const SizedBox(height: 16),
-        if (!hasEntries)
-          _EventsPlaceholder(description: l10n.homeEmptyDescription)
-        else
-          _DailyLogList(
-            accentColor: widget.accentColor,
-            feedings: selectedFeedings,
-            stools: selectedStools,
-            vomits: selectedVomits,
-            baths: selectedBaths,
-            temperatures: selectedTemperatures,
-          ),
       ],
     );
 
@@ -963,36 +745,22 @@ class _BabyHomeViewState extends ConsumerState<_BabyHomeView> {
             ),
           ],
           const SizedBox(height: 12),
-          _TimelineHeader(
-            selectedDate: _selectedDate,
-            onSelectDate: _openDayPicker,
-            onImport: _handleImport,
-            onExport: _handleExport,
-          ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onHorizontalDragStart: _handleDayDragStart,
-            onHorizontalDragUpdate: _handleDayDragUpdate,
-            onHorizontalDragEnd: _handleDayDragEnd,
-            onHorizontalDragCancel: _handleDayDragCancel,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 280),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              transitionBuilder: (child, animation) =>
-                  _buildDayTransition(child, animation, daySectionKey),
-              layoutBuilder: (currentChild, previousChildren) {
-                return Stack(
-                  alignment: Alignment.topLeft,
-                  children: <Widget>[
-                    for (final child in previousChildren) child,
-                    if (currentChild != null) currentChild,
-                  ],
-                );
-              },
-              child: dayContent,
-            ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 280),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) =>
+                _buildDayTransition(child, animation, daySectionKey),
+            layoutBuilder: (currentChild, previousChildren) {
+              return Stack(
+                alignment: Alignment.topLeft,
+                children: <Widget>[
+                  for (final child in previousChildren) child,
+                  if (currentChild != null) currentChild,
+                ],
+              );
+            },
+            child: dayContent,
           ),
         ],
       ),
@@ -1776,8 +1544,9 @@ class _TicketAccentStrip extends StatelessWidget {
   }
 }
 
-class _TimelineCard extends StatelessWidget {
-  const _TimelineCard({
+/// Widget unificado que combina carrusel de eventos y lista detallada.
+class _UnifiedEventsCard extends ConsumerStatefulWidget {
+  const _UnifiedEventsCard({
     required this.feedings,
     required this.stools,
     required this.vomits,
@@ -1785,608 +1554,10 @@ class _TimelineCard extends StatelessWidget {
     required this.temperatures,
     required this.accentColor,
     required this.selectedDate,
-  });
-
-  final List<FeedingEntry> feedings;
-  final List<StoolEntry> stools;
-  final List<VomitEntry> vomits;
-  final List<BathEntry> baths;
-  final List<TemperatureEntry> temperatures;
-  final Color accentColor;
-  final DateTime selectedDate;
-  @override
-  Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final isToday = _isSameDay(now, selectedDate);
-    final feedingsByHour = _groupFeedings(feedings);
-    final stoolsByHour = _groupStools(stools);
-    final vomitsByHour = _groupVomits(vomits);
-    final bathsByHour = _groupBaths(baths);
-    final temperaturesByHour = _groupTemperatures(temperatures);
-    final tiles = List<_TimelineTileData>.generate(24, (index) {
-      final hour = index;
-      final feedingsForHour = feedingsByHour[hour] ?? const <FeedingEntry>[];
-      final stoolsForHour = stoolsByHour[hour] ?? const <StoolEntry>[];
-      final vomitsForHour = vomitsByHour[hour] ?? const <VomitEntry>[];
-      final bathsForHour = bathsByHour[hour] ?? const <BathEntry>[];
-      final temperaturesForHour =
-          temperaturesByHour[hour] ?? const <TemperatureEntry>[];
-      final markers = _buildMarkersForHour(
-        hour: hour,
-        feedings: feedingsForHour,
-        stools: stoolsForHour,
-        vomits: vomitsForHour,
-        baths: bathsForHour,
-        temperatures: temperaturesForHour,
-      );
-      return _TimelineTileData(
-        hour: hour,
-        background: _backgroundForHour(hour),
-        icon: _iconForHour(hour),
-        markers: markers,
-        stackDepth: _calculateStackDepth(markers),
-      );
-    });
-
-    final maxStackDepth = tiles.fold<int>(1, (value, tile) {
-      final depth = math.max(tile.stackDepth, 1);
-      return math.max(value, depth);
-    });
-    final timelineHeight =
-        _timelineTileBaseHeight + (maxStackDepth - 1) * _timelineMarkerSpacing;
-    final showCurrentIndicator = isToday;
-    final currentPositionRatio = (now.hour * 60 + now.minute) / (24 * 60);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-            ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final totalWidth = constraints.maxWidth;
-                final tileWidth = totalWidth / tiles.length;
-                final indicatorLeft = (totalWidth * currentPositionRatio)
-                    .clamp(0.0, math.max(totalWidth - 2, 0.0))
-                    .toDouble();
-
-                return SizedBox(
-                  height: timelineHeight,
-                  child: Stack(
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          for (var i = 0; i < tiles.length; i++)
-                            SizedBox(
-                              width: tileWidth,
-                              child: _TimelineTile(
-                                data: tiles[i],
-                                isLast: i == tiles.length - 1,
-                              ),
-                            ),
-                        ],
-                      ),
-                      if (showCurrentIndicator)
-                        Positioned(
-                          left: indicatorLeft,
-                          top: 0,
-                          bottom: 0,
-                          child: Container(width: 2, color: accentColor),
-                        ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  List<_TimelineEventMarker> _buildMarkersForHour({
-    required int hour,
-    required List<FeedingEntry> feedings,
-    required List<StoolEntry> stools,
-    required List<VomitEntry> vomits,
-    required List<BathEntry> baths,
-    required List<TemperatureEntry> temperatures,
-  }) {
-    final markers = <_TimelineEventMarker>[];
-
-    void addMarker(DateTime timestamp, IconData icon, Color color) {
-      final minutes = ((timestamp.hour - hour) * 60 + timestamp.minute).clamp(
-        0,
-        59,
-      );
-      final position = minutes / 60;
-      markers.add(
-        _TimelineEventMarker(icon: icon, color: color, position: position),
-      );
-    }
-
-    for (final entry in feedings) {
-      addMarker(entry.timestamp, LucideIcons.milk, accentColor);
-    }
-    for (final entry in stools) {
-      addMarker(entry.timestamp, LucideIcons.toilet, _stoolAccentColor);
-    }
-    for (final entry in vomits) {
-      addMarker(entry.timestamp, LucideIcons.triangleAlert, _vomitAccentColor);
-    }
-    for (final entry in baths) {
-      addMarker(entry.timestamp, LucideIcons.bath, _bathAccentColor);
-    }
-    for (final entry in temperatures) {
-      addMarker(
-        entry.timestamp,
-        LucideIcons.thermometer,
-        _temperatureAccentColor,
-      );
-    }
-    markers.sort((a, b) => a.position.compareTo(b.position));
-    return markers;
-  }
-}
-
-class _TimelineHeader extends StatelessWidget {
-  const _TimelineHeader({
-    required this.selectedDate,
+    required this.onPreviousDay,
+    required this.onNextDay,
     required this.onSelectDate,
-    this.onImport,
-    this.onExport,
-  });
-
-  final DateTime selectedDate;
-  final VoidCallback onSelectDate;
-  final VoidCallback? onImport;
-  final VoidCallback? onExport;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-    final localeName = l10n.localeName;
-    final now = DateTime.now();
-    final isToday = _isSameDay(now, selectedDate);
-    final dateLabel = DateFormat('EEE, d MMM', localeName).format(selectedDate);
-    final headerText = isToday
-        ? '${l10n.dashboardTodayLabel}, $dateLabel'
-        : dateLabel;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          Expanded(
-            child: Tooltip(
-              message: l10n.dashboardChangeDayTooltip,
-              child: TextButton(
-                onPressed: onSelectDate,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  backgroundColor: AppColors.surfaceVariant,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      LucideIcons.calendar,
-                      size: 18,
-                      color: Colors.white.withValues(alpha: 0.75),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        headerText,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      LucideIcons.chevronDown,
-                      size: 16,
-                      color: Colors.white.withValues(alpha: 0.6),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          _TimelineActionButton(
-            icon: LucideIcons.import,
-            tooltip: l10n.dashboardImportTooltip,
-            onPressed: onImport,
-          ),
-          const SizedBox(width: 4),
-          _TimelineActionButton(
-            icon: LucideIcons.upload,
-            tooltip: l10n.dashboardExportTooltip,
-            onPressed: onExport,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TimelineActionButton extends StatelessWidget {
-  const _TimelineActionButton({
-    required this.icon,
-    required this.tooltip,
-    this.onPressed,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onPressed ?? () {},
-      tooltip: tooltip,
-      style: IconButton.styleFrom(
-        padding: const EdgeInsets.all(8),
-        backgroundColor: AppColors.surfaceVariant,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      ),
-      icon: Icon(icon, size: 18, color: Colors.white.withValues(alpha: 0.8)),
-    );
-  }
-}
-
-class _TimelineTileData {
-  const _TimelineTileData({
-    required this.hour,
-    required this.background,
-    this.icon,
-    this.markers = const [],
-    this.stackDepth = 1,
-  });
-
-  final int hour;
-  final Color background;
-  final IconData? icon;
-  final List<_TimelineEventMarker> markers;
-  final int stackDepth;
-
-  String get label => hour.toString().padLeft(2, '0');
-  bool get hasLabel => hour.isEven;
-}
-
-class _TimelineTile extends StatelessWidget {
-  const _TimelineTile({required this.data, required this.isLast});
-
-  final _TimelineTileData data;
-  final bool isLast;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double horizontalPosition(double position) {
-          final raw = position * constraints.maxWidth - _timelineMarkerSize / 2;
-          const min = 2.0;
-          final max = (constraints.maxWidth - _timelineMarkerSize - 2.0);
-          final clampedMax = max < min ? min : max;
-          final clamped = raw.clamp(min, clampedMax);
-          return clamped.toDouble();
-        }
-
-        final placements = _assignMarkerLevels(data.markers);
-        final iconTop = data.hasLabel ? 26.0 : 10.0;
-
-        return Container(
-          color: data.background,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              if (!isLast)
-                Positioned(
-                  top: 0,
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 1,
-                    color: Colors.white.withValues(alpha: 0.06),
-                  ),
-                ),
-              if (data.hasLabel)
-                Positioned(
-                  top: 6,
-                  left: 0,
-                  right: 0,
-                  child: Text(
-                    data.label,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: Colors.white70,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ),
-              if (data.icon != null)
-                Positioned(
-                  top: iconTop,
-                  left: 0,
-                  right: 0,
-                  child: Icon(
-                    data.icon,
-                    size: 14,
-                    color: Colors.white.withValues(alpha: 0.75),
-                  ),
-                ),
-              for (final placement in placements)
-                Positioned(
-                  top:
-                      _timelineMarkerTop +
-                      placement.level * _timelineMarkerSpacing,
-                  left: horizontalPosition(placement.marker.position),
-                  child: _TimelineMarker(
-                    icon: placement.marker.icon,
-                    color: placement.marker.color,
-                    size: _timelineMarkerSize,
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _MarkerLayoutEntry {
-  const _MarkerLayoutEntry({required this.marker, required this.level});
-
-  final _TimelineEventMarker marker;
-  final int level;
-}
-
-class _TimelineEventMarker {
-  const _TimelineEventMarker({
-    required this.icon,
-    required this.color,
-    required this.position,
-  });
-
-  final IconData icon;
-  final Color color;
-  final double position;
-}
-
-class _TimelineMarker extends StatelessWidget {
-  const _TimelineMarker({
-    required this.icon,
-    required this.color,
-    required this.size,
-  });
-
-  final IconData icon;
-  final Color color;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.16),
-        shape: BoxShape.circle,
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Icon(icon, size: size * 0.55, color: color),
-    );
-  }
-}
-
-int _calculateStackDepth(List<_TimelineEventMarker> markers) {
-  if (markers.isEmpty) {
-    return 1;
-  }
-  final grouped = <int, int>{};
-  for (final marker in markers) {
-    final key = (marker.position * 1000).round();
-    final current = grouped[key] ?? 0;
-    grouped[key] = current + 1;
-  }
-  return grouped.values.fold<int>(1, math.max);
-}
-
-List<_MarkerLayoutEntry> _assignMarkerLevels(
-  List<_TimelineEventMarker> markers,
-) {
-  const precision = 1000;
-  final counters = <int, int>{};
-  final placements = <_MarkerLayoutEntry>[];
-  for (final marker in markers) {
-    final key = (marker.position * precision).round();
-    final level = counters[key] ?? 0;
-    placements.add(_MarkerLayoutEntry(marker: marker, level: level));
-    counters[key] = level + 1;
-  }
-  return placements;
-}
-
-bool _isSameCalendarDay(DateTime a, DateTime b) {
-  return a.year == b.year && a.month == b.month && a.day == b.day;
-}
-
-Map<int, List<FeedingEntry>> _groupFeedings(List<FeedingEntry> feedings) {
-  final map = <int, List<FeedingEntry>>{};
-  for (final entry in feedings) {
-    final tileHour = entry.timestamp.hour;
-    map.putIfAbsent(tileHour, () => []).add(entry);
-  }
-  return map;
-}
-
-Map<int, List<StoolEntry>> _groupStools(List<StoolEntry> stools) {
-  final map = <int, List<StoolEntry>>{};
-  for (final entry in stools) {
-    final tileHour = entry.timestamp.hour;
-    map.putIfAbsent(tileHour, () => []).add(entry);
-  }
-  return map;
-}
-
-Map<int, List<VomitEntry>> _groupVomits(List<VomitEntry> vomits) {
-  final map = <int, List<VomitEntry>>{};
-  for (final entry in vomits) {
-    final tileHour = entry.timestamp.hour;
-    map.putIfAbsent(tileHour, () => []).add(entry);
-  }
-  return map;
-}
-
-Map<int, List<BathEntry>> _groupBaths(List<BathEntry> baths) {
-  final map = <int, List<BathEntry>>{};
-  for (final entry in baths) {
-    final tileHour = entry.timestamp.hour;
-    map.putIfAbsent(tileHour, () => []).add(entry);
-  }
-  return map;
-}
-
-Map<int, List<TemperatureEntry>> _groupTemperatures(
-  List<TemperatureEntry> temperatures,
-) {
-  final map = <int, List<TemperatureEntry>>{};
-  for (final entry in temperatures) {
-    final tileHour = entry.timestamp.hour;
-    map.putIfAbsent(tileHour, () => []).add(entry);
-  }
-  return map;
-}
-
-String _stoolDescription(AppLocalizations l10n, StoolConsistency consistency) {
-  switch (consistency) {
-    case StoolConsistency.liquid:
-      return l10n.stoolLogConsistencyLiquidDescription;
-    case StoolConsistency.soft:
-      return l10n.stoolLogConsistencySoftDescription;
-    case StoolConsistency.firm:
-      return l10n.stoolLogConsistencyFirmDescription;
-  }
-}
-
-String _vomitDescription(AppLocalizations l10n, VomitAmount amount) {
-  switch (amount) {
-    case VomitAmount.low:
-      return l10n.vomitLogAmountLowDescription;
-    case VomitAmount.medium:
-      return l10n.vomitLogAmountMediumDescription;
-    case VomitAmount.high:
-      return l10n.vomitLogAmountHighDescription;
-  }
-}
-
-String _bathDescription(AppLocalizations l10n, BathType type) {
-  switch (type) {
-    case BathType.full:
-      return l10n.bathLogTypeFullDescription;
-    case BathType.quick:
-      return l10n.bathLogTypeQuickDescription;
-  }
-}
-
-Color _backgroundForHour(int hour) {
-  if (hour < 6 || hour >= 22) {
-    return const Color(0xFF13141D);
-  }
-  if ((hour >= 6 && hour < 8) || (hour >= 20 && hour < 22)) {
-    return const Color(0xFF191B24);
-  }
-  if (hour >= 8 && hour < 18) {
-    return const Color(0xFF20232C);
-  }
-  return const Color(0xFF181A23);
-}
-
-IconData? _iconForHour(int hour) {
-  if (hour == 0 || hour == 22) {
-    return LucideIcons.moonStar;
-  }
-  if (hour == 6) {
-    return LucideIcons.sunrise;
-  }
-  if (hour == 12) {
-    return LucideIcons.sunMedium;
-  }
-  if (hour == 20) {
-    return LucideIcons.sunset;
-  }
-  return null;
-}
-
-class _EventsPlaceholder extends StatelessWidget {
-  const _EventsPlaceholder({required this.description});
-
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            LucideIcons.rockingChair,
-            size: 44,
-            color: Colors.white.withValues(alpha: 0.3),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            description,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DailyLogList extends ConsumerStatefulWidget {
-  const _DailyLogList({
-    required this.feedings,
-    required this.stools,
-    required this.vomits,
-    required this.baths,
-    required this.temperatures,
-    required this.accentColor,
+    required this.hasEntries,
   });
 
   final List<FeedingEntry> feedings;
@@ -2395,14 +1566,20 @@ class _DailyLogList extends ConsumerStatefulWidget {
   final List<BathEntry> baths;
   final List<TemperatureEntry> temperatures;
   final Color accentColor;
+  final DateTime selectedDate;
+  final VoidCallback onPreviousDay;
+  final VoidCallback onNextDay;
+  final VoidCallback onSelectDate;
+  final bool hasEntries;
 
   @override
-  ConsumerState<_DailyLogList> createState() => _DailyLogListState();
+  ConsumerState<_UnifiedEventsCard> createState() => _UnifiedEventsCardState();
 }
 
-class _DailyLogListState extends ConsumerState<_DailyLogList>
-    with SingleTickerProviderStateMixin {
-  bool _isExpanded = true;
+enum _EventFilter { all, feeding, stool, vomit, bath, temperature }
+
+class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
+  _EventFilter _selectedFilter = _EventFilter.all;
 
   void _openEntryForEdit(_DailyLogEntry entry) {
     final navigator = Navigator.of(context);
@@ -2563,24 +1740,44 @@ class _DailyLogListState extends ConsumerState<_DailyLogList>
     }
   }
 
-  void _toggleExpanded() {
-    setState(() {
-      _isExpanded = !_isExpanded;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+
+    // Convertir todos los eventos a una lista unificada
+    final allEvents = <_EventCardData>[
+      ...widget.feedings.map(
+        (e) => _EventCardData.feeding(e, widget.accentColor, l10n),
+      ),
+      ...widget.stools.map((e) => _EventCardData.stool(e, l10n)),
+      ...widget.vomits.map((e) => _EventCardData.vomit(e, l10n)),
+      ...widget.baths.map((e) => _EventCardData.bath(e, l10n)),
+      ...widget.temperatures.map((e) => _EventCardData.temperature(e, l10n)),
+    ]..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    // Filtrar eventos según selección
+    final filteredEvents = _selectedFilter == _EventFilter.all
+        ? allEvents
+        : allEvents.where((e) {
+            switch (_selectedFilter) {
+              case _EventFilter.feeding:
+                return e.type == _EventType.feeding;
+              case _EventFilter.stool:
+                return e.type == _EventType.stool;
+              case _EventFilter.vomit:
+                return e.type == _EventType.vomit;
+              case _EventFilter.bath:
+                return e.type == _EventType.bath;
+              case _EventFilter.temperature:
+                return e.type == _EventType.temperature;
+              case _EventFilter.all:
+                return true;
+            }
+          }).toList();
+
+    // Preparar datos para la lista expandible
     final dateFormat = DateFormat.Hm(l10n.localeName);
-    final totalMl = widget.feedings.fold<int>(
-      0,
-      (sum, entry) => sum + entry.amountMl,
-    );
-    final stoolCount = widget.stools.length;
-    final vomitCount = widget.vomits.length;
-    final bathCount = widget.baths.length;
     final entries = [
       ...widget.feedings.map(_DailyLogEntry.feeding),
       ...widget.stools.map(_DailyLogEntry.stool),
@@ -2588,29 +1785,28 @@ class _DailyLogListState extends ConsumerState<_DailyLogList>
       ...widget.baths.map(_DailyLogEntry.bath),
       ...widget.temperatures.map(_DailyLogEntry.temperature),
     ]..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    final summaryItems = [
-      _SummaryData(
-        icon: LucideIcons.milk,
-        label: l10n.dashboardBottleLabel,
-        value: '$totalMl',
-      ),
-      _SummaryData(
-        icon: LucideIcons.toilet,
-        label: l10n.dashboardDiaperLabel,
-        value: stoolCount.toString(),
-      ),
-      _SummaryData(
-        icon: LucideIcons.bath,
-        label: l10n.dashboardBathLabel,
-        value: bathCount.toString(),
-      ),
-      _SummaryData(
-        icon: LucideIcons.triangleAlert,
-        label: l10n.dashboardVomitLabel,
-        value: vomitCount.toString(),
-      ),
-    ];
 
+    // Filtrar entries según el filtro seleccionado
+    final filteredEntries = _selectedFilter == _EventFilter.all
+        ? entries
+        : entries.where((e) {
+            switch (_selectedFilter) {
+              case _EventFilter.feeding:
+                return e.type == _DailyLogType.feeding;
+              case _EventFilter.stool:
+                return e.type == _DailyLogType.stool;
+              case _EventFilter.vomit:
+                return e.type == _DailyLogType.vomit;
+              case _EventFilter.bath:
+                return e.type == _DailyLogType.bath;
+              case _EventFilter.temperature:
+                return e.type == _DailyLogType.temperature;
+              case _EventFilter.all:
+                return true;
+            }
+          }).toList();
+
+    // Resumen
     Widget buildEntryRow({
       required IconData icon,
       required Color color,
@@ -2650,7 +1846,6 @@ class _DailyLogListState extends ConsumerState<_DailyLogList>
     }
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(4),
@@ -2658,229 +1853,666 @@ class _DailyLogListState extends ConsumerState<_DailyLogList>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
-            onTap: _toggleExpanded,
-            borderRadius: BorderRadius.circular(4),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.homeLogListTitle,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+          // Header con navegador de días integrado
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant.withValues(alpha: 0.5),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(4),
+              ),
+            ),
+            child: Row(
+              children: [
+                // Botón día anterior
+                IconButton(
+                  onPressed: widget.onPreviousDay,
+                  icon: const Icon(LucideIcons.chevronLeft, size: 18),
+                  color: Colors.white.withValues(alpha: 0.8),
+                  tooltip: 'Día anterior',
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(36, 36),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Fecha central (clickable)
+                Expanded(
+                  child: InkWell(
+                    onTap: widget.onSelectDate,
+                    borderRadius: BorderRadius.circular(4),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            LucideIcons.calendar,
+                            size: 16,
+                            color: Colors.white.withValues(alpha: 0.7),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              () {
+                                final now = DateTime.now();
+                                final isToday = _isSameDay(
+                                  now,
+                                  widget.selectedDate,
+                                );
+                                final dateLabel = DateFormat(
+                                  'EEEE, d \'de\' MMMM',
+                                  l10n.localeName,
+                                ).format(widget.selectedDate);
+                                return isToday
+                                    ? '${l10n.dashboardTodayLabel}, ${DateFormat('d \'de\' MMMM', l10n.localeName).format(widget.selectedDate)}'
+                                    : dateLabel;
+                              }(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white.withValues(alpha: 0.95),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  Icon(
-                    _isExpanded
-                        ? LucideIcons.chevronUp
-                        : LucideIcons.chevronDown,
-                    size: 18,
-                    color: Colors.white.withValues(alpha: 0.7),
+                ),
+                const SizedBox(width: 8),
+
+                // Botón día siguiente
+                IconButton(
+                  onPressed: widget.onNextDay,
+                  icon: const Icon(LucideIcons.chevronRight, size: 18),
+                  color: Colors.white.withValues(alpha: 0.8),
+                  tooltip: 'Día siguiente',
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(36, 36),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Filtros compactos
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _FilterChip(
+                    label: 'Todos',
+                    icon: LucideIcons.layoutGrid,
+                    isSelected: _selectedFilter == _EventFilter.all,
+                    color: widget.accentColor,
+                    onTap: () =>
+                        setState(() => _selectedFilter = _EventFilter.all),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: l10n.dashboardBottleLabel,
+                    icon: LucideIcons.milk,
+                    isSelected: _selectedFilter == _EventFilter.feeding,
+                    color: widget.accentColor,
+                    onTap: () =>
+                        setState(() => _selectedFilter = _EventFilter.feeding),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: l10n.dashboardDiaperLabel,
+                    icon: LucideIcons.toilet,
+                    isSelected: _selectedFilter == _EventFilter.stool,
+                    color: _stoolAccentColor,
+                    onTap: () =>
+                        setState(() => _selectedFilter = _EventFilter.stool),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: l10n.dashboardVomitLabel,
+                    icon: LucideIcons.triangleAlert,
+                    isSelected: _selectedFilter == _EventFilter.vomit,
+                    color: _vomitAccentColor,
+                    onTap: () =>
+                        setState(() => _selectedFilter = _EventFilter.vomit),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: l10n.dashboardBathLabel,
+                    icon: LucideIcons.bath,
+                    isSelected: _selectedFilter == _EventFilter.bath,
+                    color: _bathAccentColor,
+                    onTap: () =>
+                        setState(() => _selectedFilter = _EventFilter.bath),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: l10n.dashboardTemperatureLabel,
+                    icon: LucideIcons.thermometer,
+                    isSelected: _selectedFilter == _EventFilter.temperature,
+                    color: _temperatureAccentColor,
+                    onTap: () => setState(
+                      () => _selectedFilter = _EventFilter.temperature,
+                    ),
                   ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              for (var i = 0; i < summaryItems.length; i++) ...[
-                Expanded(child: _SummaryBadge(data: summaryItems[i])),
-                if (i != summaryItems.length - 1) const SizedBox(width: 6),
-              ],
-            ],
-          ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-            child: _isExpanded
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: ListView.separated(
-                      itemCount: entries.length,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      separatorBuilder: (_, __) => Divider(
-                        height: 14,
-                        thickness: 1,
-                        color: Colors.white.withValues(alpha: 0.06),
-                      ),
-                      itemBuilder: (context, index) {
-                        final entry = entries[index];
-                        final timeLabel = dateFormat.format(entry.timestamp);
 
-                        switch (entry.type) {
-                          case _DailyLogType.feeding:
-                            final feeding = entry.feeding!;
-                            return buildEntryRow(
-                              icon: LucideIcons.milk,
-                              color: widget.accentColor,
-                              entry: entry,
-                              content: [
-                                Text(
-                                  timeLabel,
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${feeding.amountMl} ${l10n.bottleLogAmountUnit}',
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                if ((feeding.notes ?? '').isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    feeding.notes!,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            );
-                          case _DailyLogType.stool:
-                            final stool = entry.stool!;
-                            final description = _stoolDescription(
-                              l10n,
-                              stool.consistency,
-                            );
-                            return buildEntryRow(
-                              icon: LucideIcons.toilet,
-                              color: _stoolAccentColor,
-                              entry: entry,
-                              content: [
-                                Text(
-                                  timeLabel,
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  description,
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                if ((stool.notes ?? '').isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    stool.notes!,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            );
-                          case _DailyLogType.vomit:
-                            final vomit = entry.vomit!;
-                            final description = _vomitDescription(
-                              l10n,
-                              vomit.amount,
-                            );
-                            return buildEntryRow(
-                              icon: LucideIcons.triangleAlert,
-                              color: _vomitAccentColor,
-                              entry: entry,
-                              content: [
-                                Text(
-                                  timeLabel,
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  description,
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                if ((vomit.notes ?? '').isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    vomit.notes!,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            );
-                          case _DailyLogType.bath:
-                            final bath = entry.bath!;
-                            final description = _bathDescription(
-                              l10n,
-                              bath.type,
-                            );
-                            return buildEntryRow(
-                              icon: LucideIcons.bath,
-                              color: _bathAccentColor,
-                              entry: entry,
-                              content: [
-                                Text(
-                                  timeLabel,
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  description,
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                if ((bath.notes ?? '').isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    bath.notes!,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            );
-                          case _DailyLogType.temperature:
-                            final temperature = entry.temperature!;
-                            final valueLabel =
-                                '${temperature.celsius.toStringAsFixed(1)} ${l10n.temperatureLogValueUnit}';
-                            return buildEntryRow(
-                              icon: LucideIcons.thermometer,
-                              color: _temperatureAccentColor,
-                              entry: entry,
-                              content: [
-                                Text(
-                                  timeLabel,
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  valueLabel,
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                if ((temperature.notes ?? '').isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    temperature.notes!,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            );
-                        }
-                      },
+          // Carrusel de mini-cards
+          if (filteredEvents.isNotEmpty)
+            SizedBox(
+              height: 90,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: filteredEvents.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      left: index == 0 ? 0 : 0,
+                      right: 8,
                     ),
+                    child: _EventMiniCard(data: filteredEvents[index]),
+                  );
+                },
+              ),
+            ),
+          const SizedBox(height: 16),
+
+          // Lista de eventos o mensaje de vacío
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+            child: widget.hasEntries
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < filteredEntries.length; i++) ...[
+                        () {
+                          final entry = filteredEntries[i];
+                          final timestamp = dateFormat.format(entry.timestamp);
+
+                          switch (entry.type) {
+                            case _DailyLogType.feeding:
+                              final feeding = entry.feeding!;
+                              return buildEntryRow(
+                                icon: LucideIcons.milk,
+                                color: widget.accentColor,
+                                content: [
+                                  Text(
+                                    l10n.dashboardBottleLabel,
+                                    style: theme.textTheme.labelMedium
+                                        ?.copyWith(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${feeding.amountMl} ml',
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: widget.accentColor,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    timestamp,
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                entry: entry,
+                              );
+                            case _DailyLogType.stool:
+                              final stool = entry.stool!;
+                              final description = _stoolDescription(
+                                l10n,
+                                stool.consistency,
+                              );
+                              return buildEntryRow(
+                                icon: LucideIcons.toilet,
+                                color: _stoolAccentColor,
+                                content: [
+                                  Text(
+                                    l10n.dashboardDiaperLabel,
+                                    style: theme.textTheme.labelMedium
+                                        ?.copyWith(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    description,
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: _stoolAccentColor,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    timestamp,
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                entry: entry,
+                              );
+                            case _DailyLogType.vomit:
+                              final vomit = entry.vomit!;
+                              final description = _vomitDescription(
+                                l10n,
+                                vomit.amount,
+                              );
+                              return buildEntryRow(
+                                icon: LucideIcons.triangleAlert,
+                                color: _vomitAccentColor,
+                                content: [
+                                  Text(
+                                    l10n.dashboardVomitLabel,
+                                    style: theme.textTheme.labelMedium
+                                        ?.copyWith(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    description,
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: _vomitAccentColor,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    timestamp,
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                entry: entry,
+                              );
+                            case _DailyLogType.bath:
+                              final bath = entry.bath!;
+                              final description = _bathDescription(
+                                l10n,
+                                bath.type,
+                              );
+                              return buildEntryRow(
+                                icon: LucideIcons.bath,
+                                color: _bathAccentColor,
+                                content: [
+                                  Text(
+                                    l10n.dashboardBathLabel,
+                                    style: theme.textTheme.labelMedium
+                                        ?.copyWith(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    description,
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: _bathAccentColor,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    timestamp,
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                entry: entry,
+                              );
+                            case _DailyLogType.temperature:
+                              final temperature = entry.temperature!;
+                              return buildEntryRow(
+                                icon: LucideIcons.thermometer,
+                                color: _temperatureAccentColor,
+                                content: [
+                                  Text(
+                                    l10n.dashboardTemperatureLabel,
+                                    style: theme.textTheme.labelMedium
+                                        ?.copyWith(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.7,
+                                          ),
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${temperature.celsius.toStringAsFixed(1)}°C',
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: _temperatureAccentColor,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    timestamp,
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                entry: entry,
+                              );
+                          }
+                        }(),
+                        if (i < filteredEntries.length - 1)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            child: Divider(
+                              height: 1,
+                              color: Colors.white.withValues(alpha: 0.06),
+                            ),
+                          ),
+                      ],
+                    ],
                   )
-                : const SizedBox.shrink(),
+                : Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 32),
+                      child: Text(
+                        'No hay registros para este día',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                  ),
           ),
         ],
       ),
     );
+  }
+}
+
+/// Chip de filtro compacto
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: isSelected
+          ? color.withValues(alpha: 0.2)
+          : AppColors.surfaceVariant.withValues(alpha: 0.5),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: isSelected ? color : Colors.white.withValues(alpha: 0.6),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected
+                      ? color
+                      : Colors.white.withValues(alpha: 0.7),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum _EventType { feeding, stool, vomit, bath, temperature }
+
+/// Datos para renderizar una mini-card de evento.
+class _EventCardData {
+  const _EventCardData({
+    required this.timestamp,
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.value,
+    required this.type,
+  });
+
+  final DateTime timestamp;
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String value;
+  final _EventType type;
+
+  factory _EventCardData.feeding(
+    FeedingEntry entry,
+    Color accentColor,
+    AppLocalizations l10n,
+  ) {
+    return _EventCardData(
+      timestamp: entry.timestamp,
+      icon: LucideIcons.milk,
+      color: accentColor,
+      label: l10n.dashboardBottleLabel,
+      value: '${entry.amountMl}ml',
+      type: _EventType.feeding,
+    );
+  }
+
+  factory _EventCardData.stool(StoolEntry entry, AppLocalizations l10n) {
+    final consistencyLabel = switch (entry.consistency) {
+      StoolConsistency.liquid => 'Líquida',
+      StoolConsistency.soft => 'Blanda',
+      StoolConsistency.firm => 'Firme',
+    };
+
+    return _EventCardData(
+      timestamp: entry.timestamp,
+      icon: LucideIcons.toilet,
+      color: _stoolAccentColor,
+      label: l10n.dashboardDiaperLabel,
+      value: consistencyLabel,
+      type: _EventType.stool,
+    );
+  }
+
+  factory _EventCardData.vomit(VomitEntry entry, AppLocalizations l10n) {
+    final amountLabel = switch (entry.amount) {
+      VomitAmount.low => 'Poco',
+      VomitAmount.medium => 'Medio',
+      VomitAmount.high => 'Mucho',
+    };
+
+    return _EventCardData(
+      timestamp: entry.timestamp,
+      icon: LucideIcons.triangleAlert,
+      color: _vomitAccentColor,
+      label: l10n.dashboardVomitLabel,
+      value: amountLabel,
+      type: _EventType.vomit,
+    );
+  }
+
+  factory _EventCardData.bath(BathEntry entry, AppLocalizations l10n) {
+    final typeLabel = switch (entry.type) {
+      BathType.full => 'Completo',
+      BathType.quick => 'Rápido',
+    };
+
+    return _EventCardData(
+      timestamp: entry.timestamp,
+      icon: LucideIcons.bath,
+      color: _bathAccentColor,
+      label: l10n.dashboardBathLabel,
+      value: typeLabel,
+      type: _EventType.bath,
+    );
+  }
+
+  factory _EventCardData.temperature(
+    TemperatureEntry entry,
+    AppLocalizations l10n,
+  ) {
+    return _EventCardData(
+      timestamp: entry.timestamp,
+      icon: LucideIcons.thermometer,
+      color: _temperatureAccentColor,
+      label: l10n.dashboardTemperatureLabel,
+      value: '${entry.celsius.toStringAsFixed(1)}°C',
+      type: _EventType.temperature,
+    );
+  }
+}
+
+/// Mini-card individual para un evento en el carrusel.
+class _EventMiniCard extends StatelessWidget {
+  const _EventMiniCard({required this.data});
+
+  final _EventCardData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final timeFormat = DateFormat.Hm(l10n.localeName);
+    final timeText = timeFormat.format(data.timestamp);
+
+    return Container(
+      width: 100,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: data.color.withValues(alpha: 0.3), width: 1),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: data.color.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(data.icon, size: 16, color: data.color),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            timeText,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            data.value,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: data.color,
+              fontWeight: FontWeight.w700,
+              fontSize: 12,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+bool _isSameCalendarDay(DateTime a, DateTime b) {
+  return a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
+String _stoolDescription(AppLocalizations l10n, StoolConsistency consistency) {
+  switch (consistency) {
+    case StoolConsistency.liquid:
+      return l10n.stoolLogConsistencyLiquidDescription;
+    case StoolConsistency.soft:
+      return l10n.stoolLogConsistencySoftDescription;
+    case StoolConsistency.firm:
+      return l10n.stoolLogConsistencyFirmDescription;
+  }
+}
+
+String _vomitDescription(AppLocalizations l10n, VomitAmount amount) {
+  switch (amount) {
+    case VomitAmount.low:
+      return l10n.vomitLogAmountLowDescription;
+    case VomitAmount.medium:
+      return l10n.vomitLogAmountMediumDescription;
+    case VomitAmount.high:
+      return l10n.vomitLogAmountHighDescription;
+  }
+}
+
+String _bathDescription(AppLocalizations l10n, BathType type) {
+  switch (type) {
+    case BathType.full:
+      return l10n.bathLogTypeFullDescription;
+    case BathType.quick:
+      return l10n.bathLogTypeQuickDescription;
   }
 }
 
@@ -3008,65 +2640,6 @@ class _LogActionsMenu extends StatelessWidget {
   }
 }
 
-class _SummaryData {
-  const _SummaryData({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-}
-
-class _SummaryBadge extends StatelessWidget {
-  const _SummaryBadge({required this.data});
-
-  final _SummaryData data;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Semantics(
-      container: true,
-      label: data.label,
-      value: data.value,
-      excludeSemantics: true,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        alignment: Alignment.center,
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                data.icon,
-                size: 18,
-                color: Colors.white.withValues(alpha: 0.85),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                data.value,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _PlaceholderView extends StatelessWidget {
   const _PlaceholderView({required this.icon, required this.labelKey});
 
@@ -3136,24 +2709,74 @@ class _DashboardFooter extends StatelessWidget {
       top: false,
       child: Container(
         color: AppColors.surface,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        child: Row(
-          children: destinations.asMap().entries.map((entry) {
-            final index = entry.key;
-            final destination = entry.value;
-            final isSelected = index == currentIndex;
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Barra indicadora animada
+            SizedBox(
+              height: 3,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final itemWidth = constraints.maxWidth / destinations.length;
+                  final indicatorWidth = itemWidth * 0.5;
+                  // Calculamos el centro exacto del tab actual
+                  final tabCenter =
+                      (currentIndex * itemWidth) + (itemWidth / 2);
+                  // Posicionamos la barra centrada en ese punto
+                  final leftOffset = tabCenter - (indicatorWidth / 2);
 
-            return Expanded(
-              child: _DashboardFooterItem(
-                icon: destination.icon,
-                label: destination.label,
-                isSelected: isSelected,
-                accentColor: accentColor,
-                inactiveColor: colorScheme.onSurfaceVariant,
-                onTap: () => onIndexSelected(index),
+                  return Stack(
+                    children: [
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutCubic,
+                        left: leftOffset,
+                        top: 0,
+                        child: Container(
+                          width: indicatorWidth,
+                          height: 3,
+                          decoration: BoxDecoration(
+                            color: accentColor,
+                            borderRadius: const BorderRadius.vertical(
+                              bottom: Radius.circular(3),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: accentColor.withValues(alpha: 0.4),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
-            );
-          }).toList(),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Row(
+                children: destinations.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final destination = entry.value;
+                  final isSelected = index == currentIndex;
+
+                  return Expanded(
+                    child: _DashboardFooterItem(
+                      icon: destination.icon,
+                      label: destination.label,
+                      isSelected: isSelected,
+                      accentColor: accentColor,
+                      inactiveColor: colorScheme.onSurfaceVariant,
+                      onTap: () => onIndexSelected(index),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -3187,14 +2810,18 @@ class _DashboardFooterItem extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: SizedBox(
               height: 32,
               child: AnimatedAlign(
-                alignment:
-                    isSelected ? const Alignment(0, -0.4) : Alignment.center,
+                alignment: isSelected
+                    ? const Alignment(0, -0.4)
+                    : Alignment.center,
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOut,
                 child: Icon(
