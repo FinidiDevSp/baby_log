@@ -1745,37 +1745,6 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
-    // Convertir todos los eventos a una lista unificada
-    final allEvents = <_EventCardData>[
-      ...widget.feedings.map(
-        (e) => _EventCardData.feeding(e, widget.accentColor, l10n),
-      ),
-      ...widget.stools.map((e) => _EventCardData.stool(e, l10n)),
-      ...widget.vomits.map((e) => _EventCardData.vomit(e, l10n)),
-      ...widget.baths.map((e) => _EventCardData.bath(e, l10n)),
-      ...widget.temperatures.map((e) => _EventCardData.temperature(e, l10n)),
-    ]..sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
-    // Filtrar eventos según selección
-    final filteredEvents = _selectedFilter == _EventFilter.all
-        ? allEvents
-        : allEvents.where((e) {
-            switch (_selectedFilter) {
-              case _EventFilter.feeding:
-                return e.type == _EventType.feeding;
-              case _EventFilter.stool:
-                return e.type == _EventType.stool;
-              case _EventFilter.vomit:
-                return e.type == _EventType.vomit;
-              case _EventFilter.bath:
-                return e.type == _EventType.bath;
-              case _EventFilter.temperature:
-                return e.type == _EventType.temperature;
-              case _EventFilter.all:
-                return true;
-            }
-          }).toList();
-
     // Preparar datos para la lista expandible
     final dateFormat = DateFormat.Hm(l10n.localeName);
     final entries = [
@@ -2011,23 +1980,79 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
           ),
           const SizedBox(height: 12),
 
-          // Carrusel de mini-cards
-          if (filteredEvents.isNotEmpty)
+          // Cards de totales del día
+          if (widget.hasEntries)
             SizedBox(
               height: 90,
-              child: ListView.builder(
+              child: ListView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: filteredEvents.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      left: index == 0 ? 0 : 0,
-                      right: 8,
+                children: [
+                  // Biberones: mostrar tomas y ml por separado
+                  if (widget.feedings.isNotEmpty) ...[
+                    _TotalCard(
+                      icon: LucideIcons.milk,
+                      color: widget.accentColor,
+                      label: l10n.dashboardBottleLabel,
+                      value: '${widget.feedings.length}',
+                      subtitle: 'tomas',
                     ),
-                    child: _EventMiniCard(data: filteredEvents[index]),
-                  );
-                },
+                    const SizedBox(width: 8),
+                    _TotalCard(
+                      icon: LucideIcons.milk,
+                      color: widget.accentColor,
+                      label: l10n.dashboardBottleLabel,
+                      value:
+                          '${widget.feedings.fold<int>(0, (sum, e) => sum + e.amountMl)}',
+                      subtitle: 'ml',
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  // Pañales
+                  if (widget.stools.isNotEmpty) ...[
+                    _TotalCard(
+                      icon: LucideIcons.toilet,
+                      color: _stoolAccentColor,
+                      label: l10n.dashboardDiaperLabel,
+                      value: '${widget.stools.length}',
+                      subtitle: widget.stools.length == 1 ? 'vez' : 'veces',
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  // Vómitos
+                  if (widget.vomits.isNotEmpty) ...[
+                    _TotalCard(
+                      icon: LucideIcons.triangleAlert,
+                      color: _vomitAccentColor,
+                      label: l10n.dashboardVomitLabel,
+                      value: '${widget.vomits.length}',
+                      subtitle: widget.vomits.length == 1 ? 'vez' : 'veces',
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  // Baños
+                  if (widget.baths.isNotEmpty) ...[
+                    _TotalCard(
+                      icon: LucideIcons.bath,
+                      color: _bathAccentColor,
+                      label: l10n.dashboardBathLabel,
+                      value: '${widget.baths.length}',
+                      subtitle: widget.baths.length == 1 ? 'vez' : 'veces',
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  // Temperaturas
+                  if (widget.temperatures.isNotEmpty)
+                    _TotalCard(
+                      icon: LucideIcons.thermometer,
+                      color: _temperatureAccentColor,
+                      label: l10n.dashboardTemperatureLabel,
+                      value: '${widget.temperatures.length}',
+                      subtitle: widget.temperatures.length == 1
+                          ? 'lectura'
+                          : 'lecturas',
+                    ),
+                ],
               ),
             ),
           const SizedBox(height: 16),
@@ -2251,12 +2276,26 @@ class _UnifiedEventsCardState extends ConsumerState<_UnifiedEventsCard> {
                     ],
                   )
                 : Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 32),
-                      child: Text(
-                        'No hay registros para este día',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.5),
+                    child: TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeOutCubic,
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      builder: (context, value, child) {
+                        return Opacity(
+                          opacity: value,
+                          child: Transform.scale(
+                            scale: 0.8 + (0.2 * value),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32),
+                        child: Text(
+                          'No hay registros para este día',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.5),
+                          ),
                         ),
                       ),
                     ),
@@ -2322,160 +2361,64 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-enum _EventType { feeding, stool, vomit, bath, temperature }
-
-/// Datos para renderizar una mini-card de evento.
-class _EventCardData {
-  const _EventCardData({
-    required this.timestamp,
+/// Card de totales para mostrar resumen del día
+class _TotalCard extends StatelessWidget {
+  const _TotalCard({
     required this.icon,
     required this.color,
     required this.label,
     required this.value,
-    required this.type,
+    required this.subtitle,
   });
 
-  final DateTime timestamp;
   final IconData icon;
   final Color color;
   final String label;
   final String value;
-  final _EventType type;
-
-  factory _EventCardData.feeding(
-    FeedingEntry entry,
-    Color accentColor,
-    AppLocalizations l10n,
-  ) {
-    return _EventCardData(
-      timestamp: entry.timestamp,
-      icon: LucideIcons.milk,
-      color: accentColor,
-      label: l10n.dashboardBottleLabel,
-      value: '${entry.amountMl}ml',
-      type: _EventType.feeding,
-    );
-  }
-
-  factory _EventCardData.stool(StoolEntry entry, AppLocalizations l10n) {
-    final consistencyLabel = switch (entry.consistency) {
-      StoolConsistency.liquid => 'Líquida',
-      StoolConsistency.soft => 'Blanda',
-      StoolConsistency.firm => 'Firme',
-    };
-
-    return _EventCardData(
-      timestamp: entry.timestamp,
-      icon: LucideIcons.toilet,
-      color: _stoolAccentColor,
-      label: l10n.dashboardDiaperLabel,
-      value: consistencyLabel,
-      type: _EventType.stool,
-    );
-  }
-
-  factory _EventCardData.vomit(VomitEntry entry, AppLocalizations l10n) {
-    final amountLabel = switch (entry.amount) {
-      VomitAmount.low => 'Poco',
-      VomitAmount.medium => 'Medio',
-      VomitAmount.high => 'Mucho',
-    };
-
-    return _EventCardData(
-      timestamp: entry.timestamp,
-      icon: LucideIcons.triangleAlert,
-      color: _vomitAccentColor,
-      label: l10n.dashboardVomitLabel,
-      value: amountLabel,
-      type: _EventType.vomit,
-    );
-  }
-
-  factory _EventCardData.bath(BathEntry entry, AppLocalizations l10n) {
-    final typeLabel = switch (entry.type) {
-      BathType.full => 'Completo',
-      BathType.quick => 'Rápido',
-    };
-
-    return _EventCardData(
-      timestamp: entry.timestamp,
-      icon: LucideIcons.bath,
-      color: _bathAccentColor,
-      label: l10n.dashboardBathLabel,
-      value: typeLabel,
-      type: _EventType.bath,
-    );
-  }
-
-  factory _EventCardData.temperature(
-    TemperatureEntry entry,
-    AppLocalizations l10n,
-  ) {
-    return _EventCardData(
-      timestamp: entry.timestamp,
-      icon: LucideIcons.thermometer,
-      color: _temperatureAccentColor,
-      label: l10n.dashboardTemperatureLabel,
-      value: '${entry.celsius.toStringAsFixed(1)}°C',
-      type: _EventType.temperature,
-    );
-  }
-}
-
-/// Mini-card individual para un evento en el carrusel.
-class _EventMiniCard extends StatelessWidget {
-  const _EventMiniCard({required this.data});
-
-  final _EventCardData data;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final timeFormat = DateFormat.Hm(l10n.localeName);
-    final timeText = timeFormat.format(data.timestamp);
-
-    return Container(
-      width: 100,
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: data.color.withValues(alpha: 0.3), width: 1),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: data.color.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
+    return Semantics(
+      container: true,
+      label: '$label: $value $subtitle',
+      excludeSemantics: true,
+      child: Container(
+        width: 100,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: color.withValues(alpha: 0.25), width: 1),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 28, color: color),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w700,
+                fontSize: 20,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            child: Icon(data.icon, size: 16, color: data.color),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            timeText,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontWeight: FontWeight.w600,
-              fontSize: 11,
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: 11,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            data.value,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: data.color,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
