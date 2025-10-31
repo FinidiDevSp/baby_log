@@ -327,7 +327,6 @@
     }
   },
   "dashboardPediatricQuestionsLabel": "Questions",
-  "dashboardTemperatureLabel": "Temperature",
   "bottleLogTitle": "Bottle feeding",
   "bottleLogDateTimeLabel": "Date & time",
   "bottleLogAmountLabel": "Amount",

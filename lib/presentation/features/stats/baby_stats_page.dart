@@ -35,6 +35,8 @@ DateTime _endOfWeek(DateTime reference) {
   return start.add(const Duration(days: 6));
 }
 
+enum StatsMode { period, history }
+
 enum StatsCategory { feeding, diapers, bath, vomit }
 
 extension StatsCategoryX on StatsCategory {
@@ -105,6 +107,7 @@ class BabyStatsPage extends ConsumerStatefulWidget {
 }
 
 class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
+  StatsMode _mode = StatsMode.period;
   StatsCategory _selectedCategory = StatsCategory.feeding;
   late DateTimeRange _selectedRange;
   String? _selectedMetricId;
@@ -228,7 +231,6 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
 
   @override
   Widget build(BuildContext context) {
-    AppLocalizations.of(context);
     final rangeStart = _selectedRange.start;
     final rangeEnd = _selectedRange.end;
     final rangeDays = _rangeDays;
@@ -243,11 +245,17 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
       onPreviousRange: _goToPreviousRange,
       onNextRange: _goToNextRange,
       onRangeTap: _pickDateRange,
+      mode: _mode,
+      onModeChanged: (StatsMode newMode) {
+        setState(() {
+          _mode = newMode;
+        });
+      },
     );
 
-    // Key única para forzar animación cuando cambie el rango
+    // Key única para forzar animación cuando cambie el rango o modo
     final contentKey = ValueKey(
-      '${rangeStart.toIso8601String()}_${rangeEnd.toIso8601String()}_${_selectedCategory.name}',
+      '${_mode.name}_${rangeStart.toIso8601String()}_${rangeEnd.toIso8601String()}_${_selectedCategory.name}',
     );
 
     return Scaffold(
@@ -274,16 +282,22 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
                     ),
                   );
                 },
-                child: _CategoryContent(
-                  key: contentKey,
-                  category: _selectedCategory,
-                  accentColor: widget.accentColor,
-                  selectedMetricId: _selectedMetricId,
-                  onMetricSelected: _selectMetric,
-                  days: rangeDays,
-                  rangeStart: rangeStart,
-                  rangeEnd: rangeEnd,
-                ),
+                child: _mode == StatsMode.period
+                    ? _CategoryContent(
+                        key: contentKey,
+                        category: _selectedCategory,
+                        accentColor: widget.accentColor,
+                        selectedMetricId: _selectedMetricId,
+                        onMetricSelected: _selectMetric,
+                        days: rangeDays,
+                        rangeStart: rangeStart,
+                        rangeEnd: rangeEnd,
+                      )
+                    : _HistoryStatsView(
+                        key: contentKey,
+                        category: _selectedCategory,
+                        accentColor: widget.accentColor,
+                      ),
               ),
             ),
           ],
@@ -296,6 +310,8 @@ class _BabyStatsPageState extends ConsumerState<BabyStatsPage> {
 class _StatsHeader extends StatelessWidget {
   const _StatsHeader({
     required this.accentColor,
+    required this.mode,
+    required this.onModeChanged,
     required this.category,
     required this.onCategoryChanged,
     required this.rangeStart,
@@ -307,6 +323,8 @@ class _StatsHeader extends StatelessWidget {
   });
 
   final Color accentColor;
+  final StatsMode mode;
+  final ValueChanged<StatsMode> onModeChanged;
   final StatsCategory category;
   final ValueChanged<StatsCategory> onCategoryChanged;
   final DateTime rangeStart;
@@ -337,6 +355,41 @@ class _StatsHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Segmented Button para cambiar entre Período e Historial
+          SegmentedButton<StatsMode>(
+            segments: const [
+              ButtonSegment<StatsMode>(
+                value: StatsMode.period,
+                label: Text('Período'),
+                icon: Icon(Icons.calendar_month, size: 18),
+              ),
+              ButtonSegment<StatsMode>(
+                value: StatsMode.history,
+                label: Text('Historial'),
+                icon: Icon(Icons.insights, size: 18),
+              ),
+            ],
+            selected: {mode},
+            onSelectionChanged: (Set<StatsMode> newSelection) {
+              onModeChanged(newSelection.first);
+            },
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return accentColor.withValues(alpha: 0.2);
+                }
+                return AppColors.surface;
+              }),
+              foregroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return accentColor;
+                }
+                return Colors.white70;
+              }),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Categorías (siempre visibles)
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -386,82 +439,84 @@ class _StatsHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                // Botón rango anterior
-                IconButton(
-                  onPressed: onPreviousRange,
-                  icon: const Icon(LucideIcons.chevronLeft, size: 18),
-                  color: Colors.white.withValues(alpha: 0.8),
-                  tooltip: l10n.statsWeekPreviousTooltip,
-                  style: IconButton.styleFrom(
-                    minimumSize: const Size(36, 36),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          // Selector de rango (solo visible en modo Período)
+          if (mode == StatsMode.period)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  // Botón rango anterior
+                  IconButton(
+                    onPressed: onPreviousRange,
+                    icon: const Icon(LucideIcons.chevronLeft, size: 18),
+                    color: Colors.white.withValues(alpha: 0.8),
+                    tooltip: l10n.statsWeekPreviousTooltip,
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(36, 36),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
+                  const SizedBox(width: 8),
 
-                // Rango central (clickable)
-                Expanded(
-                  child: InkWell(
-                    onTap: onRangeTap,
-                    borderRadius: BorderRadius.circular(4),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            LucideIcons.calendar,
-                            size: 16,
-                            color: Colors.white.withValues(alpha: 0.7),
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              rangeText,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white.withValues(alpha: 0.95),
+                  // Rango central (clickable)
+                  Expanded(
+                    child: InkWell(
+                      onTap: onRangeTap,
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              LucideIcons.calendar,
+                              size: 16,
+                              color: Colors.white.withValues(alpha: 0.7),
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                rangeText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withValues(alpha: 0.95),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
+                  const SizedBox(width: 8),
 
-                // Botón rango siguiente
-                IconButton(
-                  onPressed: canGoForward ? onNextRange : null,
-                  icon: const Icon(LucideIcons.chevronRight, size: 18),
-                  color: canGoForward
-                      ? Colors.white.withValues(alpha: 0.8)
-                      : Colors.white.withValues(alpha: 0.3),
-                  tooltip: l10n.statsWeekNextTooltip,
-                  style: IconButton.styleFrom(
-                    minimumSize: const Size(36, 36),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  // Botón rango siguiente
+                  IconButton(
+                    onPressed: canGoForward ? onNextRange : null,
+                    icon: const Icon(LucideIcons.chevronRight, size: 18),
+                    color: canGoForward
+                        ? Colors.white.withValues(alpha: 0.8)
+                        : Colors.white.withValues(alpha: 0.3),
+                    tooltip: l10n.statsWeekNextTooltip,
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(36, 36),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -1373,6 +1428,731 @@ class _MetricDetail extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// Widget para la vista de Historial General
+class _HistoryStatsView extends ConsumerWidget {
+  const _HistoryStatsView({
+    super.key,
+    required this.accentColor,
+    required this.category,
+  });
+
+  final Color accentColor;
+  final StatsCategory category;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Card de Mapa de Calor
+          _HeatMapCard(accentColor: accentColor, category: category),
+          const SizedBox(height: 16),
+
+          // Card de Tendencias
+          _TrendsCard(accentColor: accentColor),
+          const SizedBox(height: 16),
+
+          // Card de Resumen Total
+          _TotalSummaryCard(accentColor: accentColor),
+        ],
+      ),
+    );
+  }
+}
+
+// Mapa de Calor con datos reales
+class _HeatMapCard extends ConsumerWidget {
+  const _HeatMapCard({required this.accentColor, required this.category});
+
+  final Color accentColor;
+  final StatsCategory category;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    // Obtener datos según la categoría
+    final heatMapData = _calculateHeatMapData(ref, category);
+    final maxCount = heatMapData.values.isEmpty
+        ? 0
+        : heatMapData.values.reduce((a, b) => a > b ? a : b);
+    final peakHour = maxCount > 0
+        ? heatMapData.entries.reduce((a, b) => a.value > b.value ? a : b).key
+        : -1;
+
+    final categoryLabel = switch (category) {
+      StatsCategory.feeding => l10n.statsCategoryFeeding,
+      StatsCategory.diapers => l10n.statsCategoryDiapers,
+      StatsCategory.bath => l10n.statsCategoryBath,
+      StatsCategory.vomit => l10n.statsCategoryVomit,
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.flame, size: 20, color: accentColor),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Mapa de calor - $categoryLabel',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          // Mapa de calor visual
+          _HeatMapGrid(
+            data: heatMapData,
+            maxCount: maxCount,
+            accentColor: accentColor,
+          ),
+          const SizedBox(height: 16),
+          // Información del pico
+          if (peakHour >= 0)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(LucideIcons.trendingUp, size: 16, color: accentColor),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Pico de actividad: ${peakHour.toString().padLeft(2, '0')}:00h ($maxCount eventos)',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: accentColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Map<int, int> _calculateHeatMapData(WidgetRef ref, StatsCategory category) {
+    final Map<int, int> hourCounts = {};
+
+    // Inicializar todas las horas en 0
+    for (int i = 0; i < 24; i++) {
+      hourCounts[i] = 0;
+    }
+
+    switch (category) {
+      case StatsCategory.feeding:
+        final entries = ref.watch(feedingEntriesProvider).value ?? [];
+        for (final entry in entries) {
+          final hour = entry.timestamp.hour;
+          hourCounts[hour] = (hourCounts[hour] ?? 0) + 1;
+        }
+        break;
+      case StatsCategory.diapers:
+        final entries = ref.watch(stoolEntriesProvider).value ?? [];
+        for (final entry in entries) {
+          final hour = entry.timestamp.hour;
+          hourCounts[hour] = (hourCounts[hour] ?? 0) + 1;
+        }
+        break;
+      case StatsCategory.bath:
+        final entries = ref.watch(bathEntriesProvider).value ?? [];
+        for (final entry in entries) {
+          final hour = entry.timestamp.hour;
+          hourCounts[hour] = (hourCounts[hour] ?? 0) + 1;
+        }
+        break;
+      case StatsCategory.vomit:
+        final entries = ref.watch(vomitEntriesProvider).value ?? [];
+        for (final entry in entries) {
+          final hour = entry.timestamp.hour;
+          hourCounts[hour] = (hourCounts[hour] ?? 0) + 1;
+        }
+        break;
+    }
+
+    return hourCounts;
+  }
+}
+
+// Widget para visualizar el grid del mapa de calor
+class _HeatMapGrid extends StatelessWidget {
+  const _HeatMapGrid({
+    required this.data,
+    required this.maxCount,
+    required this.accentColor,
+  });
+
+  final Map<int, int> data;
+  final int maxCount;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (int hour = 0; hour < 24; hour++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: _HeatMapRow(
+              hour: hour,
+              count: data[hour] ?? 0,
+              maxCount: maxCount,
+              accentColor: accentColor,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// Fila individual del mapa de calor
+class _HeatMapRow extends StatelessWidget {
+  const _HeatMapRow({
+    required this.hour,
+    required this.count,
+    required this.maxCount,
+    required this.accentColor,
+  });
+
+  final int hour;
+  final int count;
+  final int maxCount;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final intensity = maxCount > 0 ? count / maxCount : 0.0;
+    final barColor = count == 0
+        ? AppColors.scaffold
+        : accentColor.withValues(alpha: 0.2 + (intensity * 0.8));
+
+    return Row(
+      children: [
+        // Hora
+        SizedBox(
+          width: 40,
+          child: Text(
+            '${hour.toString().padLeft(2, '0')}h',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 11,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Barra de calor
+        Expanded(
+          child: Stack(
+            children: [
+              Container(
+                height: 20,
+                decoration: BoxDecoration(
+                  color: barColor,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              if (count > 0)
+                Positioned.fill(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Text(
+                        count.toString(),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: intensity > 0.5 ? Colors.white : accentColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// Card de Tendencias
+class _TrendsCard extends ConsumerWidget {
+  const _TrendsCard({required this.accentColor});
+
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final now = DateTime.now();
+    final last30Days = now.subtract(const Duration(days: 30));
+    final previous30Days = now.subtract(const Duration(days: 60));
+
+    // Cargar datos
+    final feedingsAsync = ref.watch(feedingEntriesProvider);
+    final stoolsAsync = ref.watch(stoolEntriesProvider);
+    final bathsAsync = ref.watch(bathEntriesProvider);
+    final vomitsAsync = ref.watch(vomitEntriesProvider);
+
+    if (feedingsAsync.isLoading ||
+        stoolsAsync.isLoading ||
+        bathsAsync.isLoading ||
+        vomitsAsync.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final feedings = feedingsAsync.value ?? [];
+    final stools = stoolsAsync.value ?? [];
+    final baths = bathsAsync.value ?? [];
+    final vomits = vomitsAsync.value ?? [];
+
+    // Calcular métricas
+    final trends = _calculateTrends(
+      feedings: feedings,
+      stools: stools,
+      baths: baths,
+      vomits: vomits,
+      last30Days: last30Days,
+      previous30Days: previous30Days,
+      now: now,
+    );
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.trendingUp, size: 20, color: accentColor),
+              const SizedBox(width: 8),
+              Text(
+                'Tendencias últimos 30 días',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          for (final trend in trends) ...[
+            _TrendRow(trend: trend, accentColor: accentColor),
+            if (trend != trends.last) const SizedBox(height: 12),
+          ],
+        ],
+      ),
+    );
+  }
+
+  List<_TrendData> _calculateTrends({
+    required List<FeedingEntry> feedings,
+    required List<StoolEntry> stools,
+    required List<BathEntry> baths,
+    required List<VomitEntry> vomits,
+    required DateTime last30Days,
+    required DateTime previous30Days,
+    required DateTime now,
+  }) {
+    // Biberones
+    final feedingsLast30 = feedings
+        .where(
+          (e) => e.timestamp.isAfter(last30Days) && e.timestamp.isBefore(now),
+        )
+        .length;
+    final feedingsPrevious30 = feedings
+        .where(
+          (e) =>
+              e.timestamp.isAfter(previous30Days) &&
+              e.timestamp.isBefore(last30Days),
+        )
+        .length;
+    final feedingsAvg = feedingsLast30 / 30;
+    final feedingsTrend = _calculateTrendPercentage(
+      feedingsLast30,
+      feedingsPrevious30,
+    );
+
+    // Pañales
+    final stoolsLast30 = stools
+        .where(
+          (e) => e.timestamp.isAfter(last30Days) && e.timestamp.isBefore(now),
+        )
+        .length;
+    final stoolsPrevious30 = stools
+        .where(
+          (e) =>
+              e.timestamp.isAfter(previous30Days) &&
+              e.timestamp.isBefore(last30Days),
+        )
+        .length;
+    final stoolsAvg = stoolsLast30 / 30;
+    final stoolsTrend = _calculateTrendPercentage(
+      stoolsLast30,
+      stoolsPrevious30,
+    );
+
+    // Baños
+    final bathsLast30 = baths
+        .where(
+          (e) => e.timestamp.isAfter(last30Days) && e.timestamp.isBefore(now),
+        )
+        .length;
+    final bathsPrevious30 = baths
+        .where(
+          (e) =>
+              e.timestamp.isAfter(previous30Days) &&
+              e.timestamp.isBefore(last30Days),
+        )
+        .length;
+    final bathsAvg = bathsLast30 / 30;
+    final bathsTrend = _calculateTrendPercentage(bathsLast30, bathsPrevious30);
+
+    // Vómitos
+    final vomitsLast30 = vomits
+        .where(
+          (e) => e.timestamp.isAfter(last30Days) && e.timestamp.isBefore(now),
+        )
+        .length;
+    final vomitsPrevious30 = vomits
+        .where(
+          (e) =>
+              e.timestamp.isAfter(previous30Days) &&
+              e.timestamp.isBefore(last30Days),
+        )
+        .length;
+    final vomitsAvg = vomitsLast30 / 30;
+    final vomitsTrend = _calculateTrendPercentage(
+      vomitsLast30,
+      vomitsPrevious30,
+    );
+
+    return [
+      _TrendData(
+        icon: LucideIcons.milk,
+        label: 'Biberones',
+        average: feedingsAvg,
+        trend: feedingsTrend,
+      ),
+      _TrendData(
+        icon: LucideIcons.baby,
+        label: 'Cambios de pañal',
+        average: stoolsAvg,
+        trend: stoolsTrend,
+      ),
+      _TrendData(
+        icon: LucideIcons.bath,
+        label: 'Baños',
+        average: bathsAvg,
+        trend: bathsTrend,
+      ),
+      _TrendData(
+        icon: LucideIcons.triangleAlert,
+        label: 'Vómitos',
+        average: vomitsAvg,
+        trend: vomitsTrend,
+      ),
+    ];
+  }
+
+  double _calculateTrendPercentage(int current, int previous) {
+    if (previous == 0) return current > 0 ? 100.0 : 0.0;
+    return ((current - previous) / previous) * 100;
+  }
+}
+
+class _TrendData {
+  const _TrendData({
+    required this.icon,
+    required this.label,
+    required this.average,
+    required this.trend,
+  });
+
+  final IconData icon;
+  final String label;
+  final double average;
+  final double trend;
+}
+
+class _TrendRow extends StatelessWidget {
+  const _TrendRow({required this.trend, required this.accentColor});
+
+  final _TrendData trend;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isPositive = trend.trend > 0;
+    final isNeutral = trend.trend.abs() < 5;
+    final trendColor = isNeutral
+        ? Colors.white.withValues(alpha: 0.6)
+        : isPositive
+        ? Colors.green
+        : Colors.red;
+    final trendIcon = isNeutral
+        ? Icons.trending_flat
+        : isPositive
+        ? Icons.trending_up
+        : Icons.trending_down;
+
+    return Row(
+      children: [
+        Icon(trend.icon, size: 18, color: accentColor.withValues(alpha: 0.8)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                trend.label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                '${trend.average.toStringAsFixed(1)}/día promedio',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(trendIcon, size: 16, color: trendColor),
+            const SizedBox(width: 4),
+            Text(
+              isNeutral
+                  ? 'Estable'
+                  : '${trend.trend.abs().toStringAsFixed(0)}%',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: trendColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// Card de Resumen Total
+class _TotalSummaryCard extends ConsumerWidget {
+  const _TotalSummaryCard({required this.accentColor});
+
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+
+    // Cargar todos los datos
+    final feedingsAsync = ref.watch(feedingEntriesProvider);
+    final stoolsAsync = ref.watch(stoolEntriesProvider);
+    final bathsAsync = ref.watch(bathEntriesProvider);
+    final vomitsAsync = ref.watch(vomitEntriesProvider);
+
+    if (feedingsAsync.isLoading ||
+        stoolsAsync.isLoading ||
+        bathsAsync.isLoading ||
+        vomitsAsync.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final feedings = feedingsAsync.value ?? [];
+    final stools = stoolsAsync.value ?? [];
+    final baths = bathsAsync.value ?? [];
+    final vomits = vomitsAsync.value ?? [];
+
+    // Calcular totales
+    final totalFeedings = feedings.length;
+    final totalStools = stools.length;
+    final totalBaths = baths.length;
+    final totalVomits = vomits.length;
+
+    // Calcular días registrados
+    final allTimestamps = [
+      ...feedings.map((e) => e.timestamp),
+      ...stools.map((e) => e.timestamp),
+      ...baths.map((e) => e.timestamp),
+      ...vomits.map((e) => e.timestamp),
+    ];
+
+    final daysWithRecords = allTimestamps.isEmpty
+        ? 0
+        : _calculateUniqueDays(allTimestamps);
+
+    final firstRecord = allTimestamps.isEmpty
+        ? null
+        : allTimestamps.reduce((a, b) => a.isBefore(b) ? a : b);
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.calendar, size: 20, color: accentColor),
+              const SizedBox(width: 8),
+              Text(
+                'Resumen total',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Días registrados
+          _SummaryItem(
+            icon: Icons.calendar_today,
+            label: 'Días registrados',
+            value: daysWithRecords.toString(),
+            accentColor: accentColor,
+          ),
+          if (firstRecord != null) ...[
+            const SizedBox(height: 12),
+            _SummaryItem(
+              icon: Icons.history,
+              label: 'Primer registro',
+              value: _formatDate(firstRecord),
+              accentColor: accentColor,
+            ),
+          ],
+          const Divider(height: 24),
+          // Totales por categoría
+          _SummaryItem(
+            icon: LucideIcons.milk,
+            label: 'Total biberones',
+            value: totalFeedings.toString(),
+            accentColor: accentColor,
+          ),
+          const SizedBox(height: 12),
+          _SummaryItem(
+            icon: LucideIcons.baby,
+            label: 'Total cambios',
+            value: totalStools.toString(),
+            accentColor: accentColor,
+          ),
+          const SizedBox(height: 12),
+          _SummaryItem(
+            icon: LucideIcons.bath,
+            label: 'Total baños',
+            value: totalBaths.toString(),
+            accentColor: accentColor,
+          ),
+          const SizedBox(height: 12),
+          _SummaryItem(
+            icon: LucideIcons.triangleAlert,
+            label: 'Total vómitos',
+            value: totalVomits.toString(),
+            accentColor: accentColor,
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _calculateUniqueDays(List<DateTime> timestamps) {
+    final uniqueDates = <String>{};
+    for (final timestamp in timestamps) {
+      final date =
+          '${timestamp.year}-${timestamp.month.toString().padLeft(2, '0')}-${timestamp.day.toString().padLeft(2, '0')}';
+      uniqueDates.add(date);
+    }
+    return uniqueDates.length;
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date).inDays;
+    if (difference == 0) return 'Hoy';
+    if (difference == 1) return 'Ayer';
+    if (difference < 7) return 'Hace $difference días';
+    if (difference < 30) return 'Hace ${(difference / 7).floor()} semanas';
+    if (difference < 365) {
+      return 'Hace ${(difference / 30).floor()} meses';
+    }
+    return 'Hace ${(difference / 365).floor()} años';
+  }
+}
+
+class _SummaryItem extends StatelessWidget {
+  const _SummaryItem({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.accentColor,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: accentColor.withValues(alpha: 0.8)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: accentColor,
+          ),
+        ),
+      ],
     );
   }
 }

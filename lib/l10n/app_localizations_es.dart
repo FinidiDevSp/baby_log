@@ -290,7 +290,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get timelineLoadError => 'No se pudo cargar la línea temporal.';
 
   @override
-  String timelineNotesPrefix(String notes) => 'Notas: $notes';
+  String timelineNotesPrefix(Object notes) {
+    return 'Notas: $notes';
+  }
 
   @override
   String get agendaTypeRevision => 'Revisión';
@@ -925,6 +927,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get statsCategoryVomit => 'Vómito';
+
+  @override
+  String get statsModePeriod => 'Período';
+
+  @override
+  String get statsModeHistory => 'Historial';
 
   @override
   String statsWeekLabel(Object range) {

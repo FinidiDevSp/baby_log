@@ -1,6 +1,3 @@
-import 'dart:math' as math;
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -64,7 +61,6 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
 
     final feedingsAsync = ref.watch(feedingEntriesProvider);
     final stoolsAsync = ref.watch(stoolEntriesProvider);
@@ -92,10 +88,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
         return Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              l10n.timelineLoadError,
-              textAlign: TextAlign.center,
-            ),
+            child: Text(l10n.timelineLoadError, textAlign: TextAlign.center),
           ),
         );
       }
@@ -116,37 +109,15 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
         _buildTemperatureCategory(l10n, temperatures, hourFormat),
       ];
 
-      final hasEntries =
-          categories.any((category) => category.eventsByHour.isNotEmpty);
-
-      if (!hasEntries) {
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              l10n.timelineEmptyDescription,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.white.withValues(alpha: 0.7),
-              ),
-            ),
-          ),
-        );
-      }
-
       return LayoutBuilder(
         builder: (context, constraints) {
-          final minWidth = math.max(constraints.maxWidth, 560.0);
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(bottom: 24),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minWidth: minWidth),
-              child: _TimelineTable(
-                categories: categories,
-                accentColor: widget.accentColor,
-                hourFormat: hourFormat,
-              ),
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: _TimelineTable(
+              categories: categories,
+              accentColor: widget.accentColor,
+              hourFormat: hourFormat,
+              selectedDate: _selectedDate,
             ),
           );
         },
@@ -159,24 +130,12 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.timelineTitle,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  DailyDateSelector(
-                    selectedDate: _selectedDate,
-                    onPreviousDay: () => _changeDay(-1),
-                    onNextDay: () => _changeDay(1),
-                    onSelectDate: _pickDate,
-                  ),
-                ],
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: DailyDateSelector(
+                selectedDate: _selectedDate,
+                onPreviousDay: () => _changeDay(-1),
+                onNextDay: () => _changeDay(1),
+                onSelectDate: _pickDate,
               ),
             ),
             Expanded(
@@ -332,150 +291,145 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
   }
 }
 
-class _TimelineTable extends StatelessWidget {
+class _TimelineTable extends StatefulWidget {
   const _TimelineTable({
     required this.categories,
     required this.accentColor,
     required this.hourFormat,
+    required this.selectedDate,
   });
 
   final List<_TimelineCategoryData> categories;
   final Color accentColor;
   final DateFormat hourFormat;
+  final DateTime selectedDate;
+
+  @override
+  State<_TimelineTable> createState() => _TimelineTableState();
+}
+
+class _TimelineTableState extends State<_TimelineTable> {
+  final ScrollController _scrollController = ScrollController();
+  double? _rowHeight;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToCurrentHour();
+    });
+  }
+
+  @override
+  void didUpdateWidget(_TimelineTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_isSameCalendarDay(oldWidget.selectedDate, widget.selectedDate)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToCurrentHour();
+      });
+    }
+  }
+
+  void _scrollToCurrentHour() {
+    if (!mounted || _rowHeight == null) return;
+
+    final now = DateTime.now();
+    final isToday = _isSameCalendarDay(now, widget.selectedDate);
+
+    if (isToday && _scrollController.hasClients) {
+      final currentHour = now.hour;
+      final targetPosition = (currentHour * _rowHeight!) - 100;
+
+      final clampedPosition = targetPosition.clamp(
+        0.0,
+        _scrollController.position.maxScrollExtent,
+      );
+
+      _scrollController.animateTo(
+        clampedPosition,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final borderColor = AppColors.outline.withValues(alpha: 0.35);
+    final now = DateTime.now();
+    final isToday = _isSameCalendarDay(now, widget.selectedDate);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _TimelineHeader(categories: categories),
-          for (var hour = 0; hour < 24; hour++)
-            _TimelineRow(
-              hour: hour,
-              categories: categories,
-              accentColor: accentColor,
-              borderColor: borderColor,
-              hourLabel: hourFormat.format(DateTime(0, 1, 1, hour)),
-              isLast: hour == 23,
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TimelineHeader extends StatelessWidget {
-  const _TimelineHeader({required this.categories});
-
-  final List<_TimelineCategoryData> categories;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final borderColor = AppColors.outline.withValues(alpha: 0.35);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant.withValues(alpha: 0.5),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-        border: Border(bottom: BorderSide(color: borderColor)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 72,
-            child: Text(
-              l10n.timelineHourColumn,
-              style: theme.textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          for (final category in categories)
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(category.icon, size: 20, color: Colors.white),
-                  const SizedBox(height: 6),
-                  Text(
-                    category.label,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      letterSpacing: 0.1,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TimelineRow extends StatelessWidget {
-  const _TimelineRow({
-    required this.hour,
-    required this.categories,
-    required this.accentColor,
-    required this.borderColor,
-    required this.hourLabel,
-    required this.isLast,
-  });
-
-  final int hour;
-  final List<_TimelineCategoryData> categories;
-  final Color accentColor;
-  final Color borderColor;
-  final String hourLabel;
-  final bool isLast;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: isLast
-              ? BorderSide.none
-              : BorderSide(color: borderColor.withValues(alpha: 0.7)),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border.all(color: borderColor, width: 1),
+          borderRadius: BorderRadius.circular(12),
         ),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 72,
-            child: Text(
-              hourLabel,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.7),
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ),
-          for (final category in categories)
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header
+            _TimelineHeaderRow(categories: widget.categories),
+            // Body con scroll unificado
             Expanded(
-              child: _TimelineCell(
-                events: category.eventsByHour[hour] ?? const [],
-                accentColor: accentColor,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final availableHeight = constraints.maxHeight;
+                  final rowHeight = availableHeight / 24;
+
+                  // Guardar rowHeight para scroll
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted && _rowHeight != rowHeight) {
+                      setState(() {
+                        _rowHeight = rowHeight;
+                      });
+                    }
+                  });
+
+                  return Stack(
+                    children: [
+                      ListView.builder(
+                        controller: _scrollController,
+                        itemCount: 24,
+                        physics: const ClampingScrollPhysics(),
+                        itemBuilder: (context, hour) {
+                          return _TimelineRow(
+                            hour: hour,
+                            hourLabel: widget.hourFormat.format(
+                              DateTime(0, 1, 1, hour),
+                            ),
+                            categories: widget.categories,
+                            accentColor: widget.accentColor,
+                            borderColor: borderColor,
+                            isLast: hour == 23,
+                            rowHeight: rowHeight,
+                          );
+                        },
+                      ),
+                      // Indicador de hora actual
+                      if (isToday)
+                        _CurrentTimeIndicatorOverlay(
+                          scrollController: _scrollController,
+                          currentHour: now.hour,
+                          currentMinute: now.minute,
+                          accentColor: widget.accentColor,
+                          rowHeight: rowHeight,
+                        ),
+                    ],
+                  );
+                },
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -490,17 +444,19 @@ class _TimelineCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (events.isEmpty) {
-      return const SizedBox(height: 24);
+      return const SizedBox.shrink();
     }
 
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 6,
-      runSpacing: 6,
-      children: [
-        for (final event in events)
-          _TimelineDot(tooltip: event.tooltip, color: accentColor),
-      ],
+    return Center(
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 3,
+        runSpacing: 3,
+        children: [
+          for (final event in events)
+            _TimelineDot(tooltip: event.tooltip, color: accentColor),
+        ],
+      ),
     );
   }
 }
@@ -525,16 +481,220 @@ class _TimelineDot extends StatelessWidget {
         button: true,
         label: tooltip,
         child: Container(
-          width: 12,
-          height: 12,
+          width: 8,
+          height: 8,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 3,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Fila de encabezados de categorías
+class _TimelineHeaderRow extends StatelessWidget {
+  const _TimelineHeaderRow({required this.categories});
+
+  final List<_TimelineCategoryData> categories;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = AppColors.outline.withValues(alpha: 0.35);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant.withValues(alpha: 0.5),
+        border: Border(bottom: BorderSide(color: borderColor)),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          // Celda de encabezado de hora
+          Container(
+            width: 44,
+            decoration: BoxDecoration(
+              border: Border(right: BorderSide(color: borderColor)),
+            ),
+            child: Icon(
+              Icons.schedule,
+              size: 18,
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
+          ),
+          // Categorías - solo iconos
+          for (final category in categories)
+            Expanded(child: Icon(category.icon, size: 18, color: Colors.white)),
+        ],
+      ),
+    );
+  }
+}
+
+// Fila completa del timeline (hora + datos)
+class _TimelineRow extends StatelessWidget {
+  const _TimelineRow({
+    required this.hour,
+    required this.hourLabel,
+    required this.categories,
+    required this.accentColor,
+    required this.borderColor,
+    required this.isLast,
+    required this.rowHeight,
+  });
+
+  final int hour;
+  final String hourLabel;
+  final List<_TimelineCategoryData> categories;
+  final Color accentColor;
+  final Color borderColor;
+  final bool isLast;
+  final double rowHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final fontSize = (rowHeight * 0.4).clamp(7.0, 10.0);
+
+    return Container(
+      height: rowHeight,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: isLast
+              ? BorderSide.none
+              : BorderSide(color: borderColor.withValues(alpha: 0.7)),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Celda de hora
+          Container(
+            width: 44,
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border(right: BorderSide(color: borderColor)),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+            child: Center(
+              child: Text(
+                hourLabel,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: fontSize,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          // Celdas de datos
+          for (final category in categories)
+            Expanded(
+              child: _TimelineCell(
+                events: category.eventsByHour[hour] ?? const [],
+                accentColor: accentColor,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CurrentTimeIndicatorOverlay extends StatefulWidget {
+  const _CurrentTimeIndicatorOverlay({
+    required this.scrollController,
+    required this.currentHour,
+    required this.currentMinute,
+    required this.accentColor,
+    required this.rowHeight,
+  });
+
+  final ScrollController scrollController;
+  final int currentHour;
+  final int currentMinute;
+  final Color accentColor;
+  final double rowHeight;
+
+  @override
+  State<_CurrentTimeIndicatorOverlay> createState() =>
+      _CurrentTimeIndicatorOverlayState();
+}
+
+class _CurrentTimeIndicatorOverlayState
+    extends State<_CurrentTimeIndicatorOverlay> {
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  void _onScroll() {
+    setState(() {}); // Rebuild para actualizar la posición
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final topPosition =
+        (widget.currentHour * widget.rowHeight) +
+        (widget.currentMinute / 60 * widget.rowHeight);
+
+    return Positioned(
+      top: topPosition,
+      left: 0,
+      right: 0,
+      child: IgnorePointer(
+        child: Container(
+          height: 2,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                widget.accentColor,
+                widget.accentColor.withValues(alpha: 0),
+              ],
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: widget.accentColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                decoration: BoxDecoration(
+                  color: widget.accentColor.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                child: Text(
+                  ':${widget.currentMinute.toString().padLeft(2, '0')}',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: Colors.white,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w600,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
               ),
             ],
           ),
@@ -557,10 +717,7 @@ class _TimelineCategoryData {
 }
 
 class _TimelineEvent {
-  const _TimelineEvent({
-    required this.timestamp,
-    required this.tooltip,
-  });
+  const _TimelineEvent({required this.timestamp, required this.tooltip});
 
   final DateTime timestamp;
   final String tooltip;

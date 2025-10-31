@@ -638,11 +638,11 @@ abstract class AppLocalizations {
   /// **'No se pudo cargar la línea temporal.'**
   String get timelineLoadError;
 
-  /// No description provided for @timelineNotesPrefix.
+  /// Prefijo para mostrar notas dentro de los tooltips de la línea temporal
   ///
   /// In es, this message translates to:
   /// **'Notas: {notes}'**
-  String timelineNotesPrefix(String notes);
+  String timelineNotesPrefix(Object notes);
 
   /// No description provided for @agendaTypeRevision.
   ///
@@ -1597,6 +1597,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Vómito'**
   String get statsCategoryVomit;
+
+  /// Etiqueta para el modo de estadísticas por período
+  ///
+  /// In es, this message translates to:
+  /// **'Período'**
+  String get statsModePeriod;
+
+  /// Etiqueta para el modo de estadísticas históricas
+  ///
+  /// In es, this message translates to:
+  /// **'Historial'**
+  String get statsModeHistory;
 
   /// Etiqueta que muestra el rango semanal
   ///

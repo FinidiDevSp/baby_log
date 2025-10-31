@@ -551,6 +551,14 @@
   "@statsCategoryVomit": {
     "description": "Etiqueta para la categoría de estadísticas de vómito"
   },
+  "statsModePeriod": "Período",
+  "@statsModePeriod": {
+    "description": "Etiqueta para el modo de estadísticas por período"
+  },
+  "statsModeHistory": "Historial",
+  "@statsModeHistory": {
+    "description": "Etiqueta para el modo de estadísticas históricas"
+  },
   "statsWeekLabel": "{range}",
   "@statsWeekLabel": {
     "description": "Etiqueta que muestra el rango semanal",

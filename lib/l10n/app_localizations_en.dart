@@ -284,14 +284,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timelineHourColumn => 'Hour';
 
   @override
-  String get timelineEmptyDescription =>
-      'No entries recorded on this day.';
+  String get timelineEmptyDescription => 'No entries recorded on this day.';
 
   @override
-  String get timelineLoadError => "We couldn't load the timeline.";
+  String get timelineLoadError => 'We couldn\'t load the timeline.';
 
   @override
-  String timelineNotesPrefix(String notes) => 'Notes: $notes';
+  String timelineNotesPrefix(Object notes) {
+    return 'Notes: $notes';
+  }
 
   @override
   String get agendaTypeRevision => 'Check-up';
@@ -925,6 +926,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statsCategoryVomit => 'Vomit';
+
+  @override
+  String get statsModePeriod => 'Período';
+
+  @override
+  String get statsModeHistory => 'Historial';
 
   @override
   String statsWeekLabel(Object range) {
